@@ -4,6 +4,8 @@ import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -13,14 +15,19 @@ public class Principal extends Application {
     @Override
     public void start(Stage primaryStage) {
         // --- 1. Crear el layout principal (Toolbox) ---
-        VBox root = new VBox(20); // VBox con 20px de espacio entre elementos
+        HBox root = new HBox(10);
         root.setAlignment(Pos.CENTER);
         primaryStage.setMaximized(true);
         root.setStyle("-fx-background-color: #252233;");
 
         // --- 2. Crear el botón para el Sintetizador ---
         Button openSynthButton = new Button("Abrir Sintetizador");
-        openSynthButton.setStyle("-fx-background-color: #5d0f0f;-fx-text-fill: white;");
+        openSynthButton.setStyle("-fx-background-color: #3f3f3f;-fx-text-fill: white;");
+
+        Button salirButton = new Button("Salir");
+        salirButton.setStyle("-fx-background-color: #3f3f3f;-fx-text-fill: white;");
+
+
 
         // Asignar la acción
         openSynthButton.setOnAction(e -> {
@@ -29,6 +36,12 @@ public class Principal extends Application {
         });
 
         root.getChildren().add(openSynthButton);
+
+        salirButton.setOnAction(e -> {
+            System.exit(0);
+        });
+
+        root.getChildren().add(salirButton);
 
         // --- 3. Configurar el Stage (Ventana de la Caja de Herramientas) ---
         primaryStage.setTitle("TunesFX");
@@ -83,7 +96,7 @@ public class Principal extends Application {
                         keyString = e.getCode().toString().toLowerCase();
                     }
                 }
-                if (!keyString.isEmpty() && keyString.length() == 1) {
+                if (keyString.length() == 1) {
                     sintetizadorLogic.onKeyPressed(keyString.charAt(0));
                 }
                 e.consume();
