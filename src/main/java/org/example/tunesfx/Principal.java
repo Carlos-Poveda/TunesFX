@@ -20,6 +20,7 @@ public class Principal extends Application {
 
         // --- 2. Crear el botón para el Sintetizador ---
         Button openSynthButton = new Button("Abrir Sintetizador");
+        openSynthButton.setStyle("-fx-background-color: #5d0f0f;-fx-text-fill: white;");
 
         // Asignar la acción
         openSynthButton.setOnAction(e -> {
