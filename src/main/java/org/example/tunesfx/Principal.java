@@ -15,7 +15,8 @@ public class Principal extends Application {
         // --- 1. Crear el layout principal (Toolbox) ---
         VBox root = new VBox(20); // VBox con 20px de espacio entre elementos
         root.setAlignment(Pos.CENTER);
-        root.setPrefSize(300, 200);
+        primaryStage.setMaximized(true);
+        root.setStyle("-fx-background-color: #252233;");
 
         // --- 2. Crear el botón para el Sintetizador ---
         Button openSynthButton = new Button("Abrir Sintetizador");
@@ -29,7 +30,7 @@ public class Principal extends Application {
         root.getChildren().add(openSynthButton);
 
         // --- 3. Configurar el Stage (Ventana de la Caja de Herramientas) ---
-        primaryStage.setTitle("Caja de Herramientas");
+        primaryStage.setTitle("TunesFX");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
