@@ -3,12 +3,6 @@ package org.example.tunesfx;
 import org.example.tunesfx.utils.Utils;
 import java.util.HashMap;
 
-/**
- * Clase Sintetizador refactorizada para JavaFX.
- * Esta clase ya NO es un componente de UI (no extiende JFrame).
- * Actúa como un controlador que gestiona la lógica de audio
- * y los componentes de UI (que serán de JavaFX).
- */
 public class Sintetizador {
 
     // --- Lógica de audio y estado (sin cambios) ---

@@ -12,7 +12,7 @@ public class WaveViewer extends Canvas {
     WaveViewer() {
         // El tamaño se define en el layout (Pane) o con setWidth/setHeight
         super(320, 320); // Ancho y alto
-        // setStyle("-fx-border-color: white;"); // El borde se puede poner aquí o en el Pane
+//         setStyle("-fx-border-color: white;"); // El borde se puede poner aquí o en el Pane
     }
 
     public void setOscillators(Oscilator[] oscillators) {
