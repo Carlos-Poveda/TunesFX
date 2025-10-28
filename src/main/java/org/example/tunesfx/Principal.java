@@ -1,11 +1,13 @@
 package org.example.tunesfx;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Principal extends Application {
@@ -13,60 +15,68 @@ public class Principal extends Application {
     @Override
     public void start(Stage primaryStage) {
         // --- 1. Crear el layout principal (Toolbox) ---
-        HBox root = new HBox(10);
-        root.setAlignment(Pos.CENTER);
+        // Usamos Pane o StackPane como root si queremos posicionar hijos libremente
+        Pane root = new Pane();
         primaryStage.setMaximized(true);
-        root.setStyle("-fx-background-color: #141814;");
+        root.setStyle("-fx-background-color: #252525;");
 
-        // --- 2. Crear el botón para el Sintetizador ---
+        // El Pane no gestiona el tamaño de sus hijos automáticamente,
+        // así que el VBox de control solo ocupará el tamaño que le demos.
+
+        // Panel de control (VBox para apilar los botones verticalmente)
+        VBox panelDeControl = new VBox(10);
+        panelDeControl.setAlignment(Pos.TOP_LEFT); // Alineación del contenido interno
+        panelDeControl.setPadding(new Insets(15)); // Margen interno
+
+        // Establecer el tamaño exacto del panel de control
+        panelDeControl.setPrefWidth(320);
+        panelDeControl.setPrefHeight(200); // Altura más razonable
+
+        // Posicionamiento en la esquina superior izquierda (Layout X e Y)
+        panelDeControl.setLayoutX(50); // 50px de margen desde la izquierda
+        panelDeControl.setLayoutY(50); // 50px de margen desde arriba
+
+        panelDeControl.setStyle("-fx-background-color: #1f2025; -fx-border-color: #ffffff; -fx-border-width: 1;");
+
+        // --- 2. Crear y configurar botones ---
         Button openSynthButton = new Button("Abrir Sintetizador");
-        openSynthButton.setStyle("-fx-background-color: #3f3f3f;-fx-text-fill: white;");
+        openSynthButton.setStyle("-fx-background-color: #3d3d3d; -fx-text-fill: white;");
+        openSynthButton.setMaxWidth(Double.MAX_VALUE); // Para que ocupe todo el ancho del VBox
 
         Button salirButton = new Button("Salir");
-        salirButton.setStyle("-fx-background-color: #3f3f3f;-fx-text-fill: white;");
+        salirButton.setStyle("-fx-background-color: #3d3d3d; -fx-text-fill: white;");
+        salirButton.setMaxWidth(Double.MAX_VALUE); // Para que ocupe todo el ancho del VBox
 
+        // Asignar las acciones
+        openSynthButton.setOnAction(e -> openSynthesizerWindow());
+        salirButton.setOnAction(e -> System.exit(0));
 
+        // Añadir los botones al panel de control
+        panelDeControl.getChildren().addAll(openSynthButton, salirButton);
 
-        // Asignar la acción
-        openSynthButton.setOnAction(e -> {
-            // Llama al método que abre la ventana del sintetizador
-            openSynthesizerWindow();
-        });
+        // Añadir el panel de control al root
+        root.getChildren().add(panelDeControl);
 
-        root.getChildren().add(openSynthButton);
-
-        salirButton.setOnAction(e -> {
-            System.exit(0);
-        });
-
-        root.getChildren().add(salirButton);
-
-        // --- 3. Configurar el Stage (Ventana de la Caja de Herramientas) ---
+        // --- 3. Configurar el Stage ---
         primaryStage.setTitle("TunesFX");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 
-    // El Main ahora apunta a esta nueva clase
+    // El Main y openSynthesizerWindow() permanecen igual...
     public static void main(String[] args) {
         launch(args);
     }
 
-    /**
-     * Lógica para abrir la ventana del sintetizador.
-     * Esta lógica estaba originalmente en el método start() de tu antiguo Launcher.
-     */
     private void openSynthesizerWindow() {
         try {
-            // Un SintetizadorLogic solo necesita ser creado una vez por ventana
             Sintetizador sintetizadorLogic = new Sintetizador();
 
-            // --- 1. Configurar el layout del Sintetizador ---
             Pane synthRoot = new Pane();
             synthRoot.setPrefSize(800, 350);
             synthRoot.setStyle("-fx-background-color: black;");
 
-            // --- 2. Añadir los componentes (Oscillators y WaveViewer) ---
+            // Componentes
             Oscilator[] oscillatorsFX = sintetizadorLogic.getOscillatorsFX();
             for (int i = 0; i < oscillatorsFX.length; i++) {
                 Oscilator oscilatorFX = oscillatorsFX[i];
@@ -116,7 +126,7 @@ public class Principal extends Application {
             synthStage.show();
 
             // Enlaza la función de actualización
-            sintetizadorLogic.setUpdateCallback(() -> waveViewerFX.draw());
+            sintetizadorLogic.setUpdateCallback(waveViewerFX::draw);
 
         } catch (Exception e) {
             e.printStackTrace();
