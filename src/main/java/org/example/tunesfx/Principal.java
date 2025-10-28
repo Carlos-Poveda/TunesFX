@@ -29,8 +29,8 @@ public class Principal extends Application {
         panelDeControl.setPadding(new Insets(15)); // Margen interno
 
         // Establecer el tamaño exacto del panel de control
-        panelDeControl.setPrefWidth(320);
-        panelDeControl.setPrefHeight(200); // Altura más razonable
+        panelDeControl.setPrefWidth(400);
+        panelDeControl.setPrefHeight(300); // Altura más razonable
 
         // Posicionamiento en la esquina superior izquierda (Layout X e Y)
         panelDeControl.setLayoutX(50); // 50px de margen desde la izquierda
