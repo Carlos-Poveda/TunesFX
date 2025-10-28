@@ -16,7 +16,7 @@ public class Principal extends Application {
         HBox root = new HBox(10);
         root.setAlignment(Pos.CENTER);
         primaryStage.setMaximized(true);
-        root.setStyle("-fx-background-color: #252233;");
+        root.setStyle("-fx-background-color: #141814;");
 
         // --- 2. Crear el botón para el Sintetizador ---
         Button openSynthButton = new Button("Abrir Sintetizador");
