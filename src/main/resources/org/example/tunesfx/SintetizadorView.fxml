@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.example.tunesfx.Oscilator?>
+<?import org.example.tunesfx.WaveViewer?>
+
+<?import javafx.scene.layout.Pane?>
+
+<Pane prefHeight="350.0" prefWidth="800.0" style="-fx-background-color: black;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.tunesfx.SintetizadorController">
+    <children>
+        <Oscilator fx:id="oscilador1" layoutX="15.0" layoutY="10.0" />
+        <Oscilator fx:id="oscilador2" layoutX="15.0" layoutY="75.0" />
+        <Oscilator fx:id="oscilador3" layoutX="15.0" layoutY="140.0" />
+        <Oscilator fx:id="oscilador4" layoutX="15.0" layoutY="205.0" />
+        <Oscilator fx:id="oscilador5" layoutX="15.0" layoutY="270.0" />
+        <WaveViewer fx:id="waveViewer" layoutX="440.0" layoutY="10.0" />
+    </children>
+</Pane>

@@ -31,54 +31,30 @@ public class Sintetizador {
         }
     }
 
-    // --- Referencias a los componentes de UI de JavaFX ---
-
-    // Estas clases (Oscilator y WaveViewer) deben ser refactorizadas
-    // para ser componentes de JavaFX (ej. extends Pane, extends Canvas).
     private Oscilator[] oscillators;
     private WaveViewer waveViewer;
 
-    // Callback para actualizar la UI desde la lógica
     private Runnable updateCallback;
 
-    /**
-     * Constructor refactorizado.
-     * Ya no crea la ventana (JFrame), solo inicializa la lógica
-     * y los componentes.
-     */
-    public Sintetizador() {
-        // Inicializa los osciladores (versión JavaFX)
-        oscillators = new Oscilator[NUM_OSCILLATORS];
-        for (int i = 0; i < NUM_OSCILLATORS; i++) {
-            // Pasamos un "callback" para que el oscilador pueda
-            // notificar al sintetizador que debe actualizar el WaveViewer.
-            oscillators[i] = new Oscilator(this::updateWaveviewer);
-        }
+    public Sintetizador(Oscilator[] oscillators, WaveViewer waveViewer) {
+        this.oscillators = oscillators;
+        this.waveViewer = waveViewer;
 
-        // Inicializa el WaveViewer (versión JavaFX)
-        waveViewer = new WaveViewer();
-        waveViewer.setOscillators(oscillators);
+        // Configura los osciladores en el waveViewer
+        this.waveViewer.setOscillators(this.oscillators);
     }
 
-    /**
-     * Llama al callback de actualización de UI (que será implementado
-     * en la clase Main de JavaFX para llamar a waveViewer.draw()).
-     */
     public void updateWaveviewer() {
         if (updateCallback != null) {
             updateCallback.run();
         }
     }
 
-    /**
-     * Método para que la clase Main (JavaFX Application)
-     * establezca el callback de actualización.
-     */
     public void setUpdateCallback(Runnable callback) {
         this.updateCallback = callback;
     }
 
-    // --- Métodos de lógica de audio (sin cambios) ---
+    // --- Métodos de lógica de audio ---
 
     public void setFrequency(double frequency) {
         for (Oscilator osc : oscillators) {
@@ -94,13 +70,6 @@ public class Sintetizador {
         return totalSample / NUM_OSCILLATORS;
     }
 
-    // --- Métodos de control (reemplazan KeyAdapter y WindowListener) ---
-
-    /**
-     * Reemplaza la lógica de KeyAdapter.keyPressed.
-     * Será llamado desde el listener setOnKeyPressed de la Scene de JavaFX.
-     * @param keyChar El carácter presionado.
-     */
     public void onKeyPressed(char keyChar) {
         if (!KEY_FREQUENCIES.containsKey(keyChar)) {
             return;
@@ -112,31 +81,23 @@ public class Sintetizador {
         }
     }
 
-    /**
-     * Reemplaza la lógica de KeyAdapter.keyReleased.
-     * Será llamado desde el listener setOnKeyReleased de la Scene de JavaFX.
-     */
     public void onKeyReleased() {
         shouldGenerate = false;
     }
 
-    /**
-     * Reemplaza la lógica de WindowAdapter.windowClosing.
-     * Será llamado desde el listener setOnCloseRequest del Stage de JavaFX.
-     */
     public void shutdownAudio() {
         hiloAudio.close();
     }
 
     // --- Getters para que la clase Main obtenga los nodos de UI ---
 
-    public Oscilator[] getOscillatorsFX() {
-        return oscillators;
-    }
-
-    public WaveViewer getWaveViewerFX() {
-        return waveViewer;
-    }
+//    public Oscilator[] getOscillatorsFX() {
+//        return oscillators;
+//    }
+//
+//    public WaveViewer getWaveViewerFX() {
+//        return waveViewer;
+//    }
 
     // --- Clase interna de info (sin cambios) ---
     public static class AudioInfo {

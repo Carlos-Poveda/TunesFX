@@ -1,31 +1,40 @@
 package org.example.tunesfx;
 
+import javafx.fxml.FXML; // Importar
+import javafx.fxml.FXMLLoader; // Importar
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.StackPane; // Usamos StackPane como contenedor
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+
+import java.io.IOException; // Importar
 import java.util.function.Function;
 
 public class WaveViewer extends StackPane { // Ahora extiende StackPane
 
-    private final Canvas canvas;
+    @FXML
+    private Canvas canvas;
     private Oscilator[] oscillators;
 
-    WaveViewer() {
-        // 1. Inicializar el Canvas
-        this.canvas = new Canvas(320, 320);
+    public WaveViewer() {
+        // Cargar el FXML
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("waveViewer.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
 
-        // 2. Establecer el estilo de BORDE en el contenedor (StackPane)
-        // Aplicamos el borde aquí, que sí se renderiza correctamente.
-        this.setStyle("-fx-border-color: white; -fx-border-width: 1;");
-
-        // 3. Añadir el Canvas al contenedor
-        this.getChildren().add(canvas);
-
-        // Opcional: Si el WaveViewer es redimensionable, enlazar el tamaño del Canvas al contenedor
-        // canvas.widthProperty().bind(this.widthProperty());
-        // canvas.heightProperty().bind(this.heightProperty());
+        try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
     }
+
+//    @FXML
+//    private void initialize() {
+//
+//    }
+
+
 
     public void setOscillators(Oscilator[] oscillators) {
         this.oscillators = oscillators;

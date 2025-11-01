@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+
+<fx:root type="javafx.scene.layout.HBox" spacing="5"
+         style="-fx-background-color: black; -fx-border-color: white; -fx-border-width: 1;"
+         xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10" />
+    </padding>
+    <children>
+        <Label text="Wave form:" textFill="WHITE">
+            <HBox.margin>
+                <Insets left="15.0" />
+            </HBox.margin>
+        </Label>
+        <ComboBox fx:id="waveFormComboBox" focusTraversable="false" />
+        <Label text="Tone:" textFill="WHITE">
+            <HBox.margin>
+                <Insets left="15.0" />
+            </HBox.margin>
+        </Label>
+        <Label fx:id="toneValueLabel" text="x0.00" textFill="WHITE" />
+        <Label text="Volume: " textFill="WHITE">
+            <HBox.margin>
+                <Insets left="50.0" />
+            </HBox.margin>
+        </Label>
+        <Label fx:id="volumeParameter" text=" 100%" textFill="WHITE" />
+    </children>
+</fx:root>

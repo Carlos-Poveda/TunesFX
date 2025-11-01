@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.layout.StackPane?>
+
+<fx:root type="javafx.scene.layout.StackPane"
+         style="-fx-border-color: white; -fx-border-width: 1;"
+         xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <Canvas fx:id="canvas" height="320.0" width="320.0" />
+    </children>
+</fx:root>
