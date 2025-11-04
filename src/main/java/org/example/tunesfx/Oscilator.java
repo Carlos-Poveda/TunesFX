@@ -1,20 +1,17 @@
 package org.example.tunesfx;
 
 import javafx.collections.FXCollections;
-import javafx.fxml.FXML; // Importar
-import javafx.fxml.FXMLLoader; // Importar
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color; // No se usa si el FXML lo define
-import javafx.geometry.Insets; // No se usa si el FXML lo define
 import javafx.scene.Cursor;
 
-import java.io.IOException; // Importar
+import java.io.IOException;
 
-public class Oscilator extends HBox { // HBox es el equivalente a un JPanel con FlowLayout horizontal
+public class Oscilator extends HBox {
 
-    // --- Atributos lógicos (sin cambios) ---
     private WaveTable waveTable = WaveTable.Sine;
     private int waveTableStepSize;
     private int waveTableIndex;
@@ -22,17 +19,14 @@ public class Oscilator extends HBox { // HBox es el equivalente a un JPanel con 
     private int toneOffset;
     private int volume = 100;
 
-    // --- Variables de estado de UI (adaptadas) ---
-    private double lastMouseY = -1; // Usamos double para e.getScreenY()
-    private double lastMouseYVolume = -1; // Usamos double para e.getScreenY()
+    private double lastMouseY = -1;
+    private double lastMouseYVolume = -1;
 
     // Callback para notificar al Sintetizador que actualice el WaveViewer
     private Runnable updateCallback;
 
-    // --- Constantes (sin cambios) ---
     private static final int TONE_OFFSET_LIMIT = 400;
 
-    // --- Componentes de la interfaz (JavaFX) ---
     @FXML
     private ComboBox<WaveTable> waveFormComboBox;
     @FXML
@@ -46,11 +40,12 @@ public class Oscilator extends HBox { // HBox es el equivalente a un JPanel con 
      * Constructor adaptado para JavaFX.
      * Recibe un 'Runnable' (callback) en lugar de la instancia de 'Sintetizador'.
      */
+
     public Oscilator() {
         // Cargar el FXML
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("oscilador.fxml"));
-        fxmlLoader.setRoot(this); // El HBox raíz es esta misma clase
-        fxmlLoader.setController(this); // El controlador es esta misma clase
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
 
         try {
             fxmlLoader.load();
@@ -74,8 +69,7 @@ public class Oscilator extends HBox { // HBox es el equivalente a un JPanel con 
         });
 
         toneValueLabel.setOnMousePressed(e -> {
-            lastMouseY = e.getScreenY(); // Reemplaza e.getYOnScreen()
-            // Reemplaza la creación del Cursor BLANK_CURSOR
+            lastMouseY = e.getScreenY();
             setCursor(Cursor.NONE);
         });
 
@@ -91,10 +85,10 @@ public class Oscilator extends HBox { // HBox es el equivalente a un JPanel con 
             }
 
             double currentMouseY = e.getScreenY();
-            double deltaY = currentMouseY - lastMouseY; // Usamos double
+            double deltaY = currentMouseY - lastMouseY;
             final int SENSITIVITY_FACTOR = 4;
 
-            int change = (int)(-deltaY / SENSITIVITY_FACTOR); // El cálculo es el mismo
+            int change = (int)(-deltaY / SENSITIVITY_FACTOR);
 
             if (change != 0) {
                 toneOffset += change;
@@ -162,8 +156,6 @@ public class Oscilator extends HBox { // HBox es el equivalente a un JPanel con 
 
 
     private void inicializarOscilador() {
-        // Quita toda la configuración de UI (setStyle, setSpacing, setPadding).
-        // Déjalo solo con la lógica de audio.
         keyFrequency = 440.0;
         toneOffset = 0;
     }
@@ -183,7 +175,6 @@ public class Oscilator extends HBox { // HBox es el equivalente a un JPanel con 
 
     public double[] getSampleWaveform(int numSamples) {
         double[] samples = new double[numSamples];
-        // Asegúrate de que Sintetizador.AudioInfo.SAMPLE_RATE siga siendo accesible
         double frequency = 1.0 / (numSamples / (double)Sintetizador.AudioInfo.SAMPLE_RATE) * 3.0;
         int index = 0;
         int stepSize = (int)(WaveTable.SIZE * (frequency * Math.pow(2, getToneOffset())) / Sintetizador.AudioInfo.SAMPLE_RATE);
@@ -195,7 +186,6 @@ public class Oscilator extends HBox { // HBox es el equivalente a un JPanel con 
     }
 
     private void applyToneOffset() {
-        // Asegúrate de que Sintetizador.AudioInfo.SAMPLE_RATE siga siendo accesible
         waveTableStepSize = (int)(WaveTable.SIZE * (keyFrequency * Math.pow(2, getToneOffset())) / Sintetizador.AudioInfo.SAMPLE_RATE);
     }
 

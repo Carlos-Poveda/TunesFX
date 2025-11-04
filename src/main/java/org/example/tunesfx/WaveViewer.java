@@ -29,13 +29,6 @@ public class WaveViewer extends StackPane { // Ahora extiende StackPane
         }
     }
 
-//    @FXML
-//    private void initialize() {
-//
-//    }
-
-
-
     public void setOscillators(Oscilator[] oscillators) {
         this.oscillators = oscillators;
         draw();
@@ -57,7 +50,7 @@ public class WaveViewer extends StackPane { // Ahora extiende StackPane
         g.setFill(Color.BLACK);
         g.fillRect(0, 0, width, height);
 
-        // 2. Tu lógica de dibujo (sin cambios de lógica)
+        // 2. Lógica de dibujo (sin cambios de lógica)
         final int PAD = 25;
         int numSamples = (int) (width - PAD * 2);
         double[] mixedSamples = new double[numSamples];

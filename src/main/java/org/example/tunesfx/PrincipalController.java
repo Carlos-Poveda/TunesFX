@@ -4,15 +4,25 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class PrincipalController {
+    @FXML
+    private Button openSynthButton;
+    @FXML
+    private HBox panelRitmo;
+    @FXML
+    private Button btnRitmo1;
+    @FXML
+    private Button salirButton;
+    @FXML
+    private Button btnEncenderRitmo;
 
-    // @FXML private Button openSynthButton; // No es necesario si solo usas onAction
-    // @FXML private Button salirButton;     // No es necesario si solo usas onAction
 
     @FXML
     private void handleOpenSynth(ActionEvent event) {
