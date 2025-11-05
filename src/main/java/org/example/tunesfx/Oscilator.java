@@ -33,13 +33,6 @@ public class Oscilator extends HBox {
     private Label toneValueLabel;
     @FXML
     private Label volumeParameter;
-    // (Los otros JLabels eran solo texto estático, los creamos en el método)
-
-
-    /**
-     * Constructor adaptado para JavaFX.
-     * Recibe un 'Runnable' (callback) en lugar de la instancia de 'Sintetizador'.
-     */
 
     public Oscilator() {
         // Cargar el FXML
@@ -160,7 +153,9 @@ public class Oscilator extends HBox {
         toneOffset = 0;
     }
 
-
+    public void resetPhase() {
+        this.waveTableIndex = 0;
+    }
 
     public double getNextSample() {
         double sample = waveTable.getSamples()[waveTableIndex] * getVolumenMultiplier();

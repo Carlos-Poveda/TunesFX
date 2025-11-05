@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 public class Sintetizador {
 
-    // --- Lógica de audio y estado (sin cambios) ---
     private static final HashMap<Character,Double> KEY_FREQUENCIES = new HashMap<>();
     private boolean shouldGenerate;
     private static final int NUM_OSCILLATORS = 5;
@@ -70,6 +69,31 @@ public class Sintetizador {
         return totalSample / NUM_OSCILLATORS;
     }
 
+    /**
+     * Genera un bloque de audio (sample)
+     * basado en la configuración actual del oscilador.
+     * @param numSamples La longitud del sample (ej. 44100 para 1 segundo)
+     * @return Un array de shorts con los datos del sample.
+     */
+    public short[] generateSample(int numSamples) {
+        // 1. Reiniciar la fase de todos los osciladores
+        for (Oscilator osc : oscillators) {
+            osc.resetPhase();
+        }
+
+        // 2. Crear el array del sample
+        short[] s = new short[numSamples];
+
+        // 3. Llenar el array
+        for (int i = 0; i < numSamples; i++) {
+            double d = nextSample(); // Obtener el siguiente valor de la mezcla
+            s[i] = (short) (Short.MAX_VALUE * d);
+        }
+
+        // 4. Devolver los datos
+        return s;
+    }
+
     public void onKeyPressed(char keyChar) {
         if (!KEY_FREQUENCIES.containsKey(keyChar)) {
             return;
@@ -91,13 +115,13 @@ public class Sintetizador {
 
     // --- Getters para que la clase Main obtenga los nodos de UI ---
 
-//    public Oscilator[] getOscillatorsFX() {
-//        return oscillators;
-//    }
-//
-//    public WaveViewer getWaveViewerFX() {
-//        return waveViewer;
-//    }
+    public Oscilator[] getOscillatorsFX() {
+        return oscillators;
+    }
+
+    public WaveViewer getWaveViewerFX() {
+        return waveViewer;
+    }
 
     // --- Clase interna de info (sin cambios) ---
     public static class AudioInfo {

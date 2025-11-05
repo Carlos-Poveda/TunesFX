@@ -20,6 +20,18 @@ public class Principal extends Application {
         primaryStage.show();
     }
 
+    /**
+     * NUEVO MÉTODO:
+     * Sobrescribimos el método stop() de Application
+     * para apagar OpenAL de forma segura.
+     */
+    @Override
+    public void stop() throws Exception {
+        Audio.shutdownOpenAL(); // <-- Llamar al apagado
+        // System.exit(0) no es necesario aquí,
+        // pero asegúrate de que todos los hilos 'daemon' se detengan.
+    }
+
     public static void main(String[] args) {
         launch(args);
     }

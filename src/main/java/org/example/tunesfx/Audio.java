@@ -21,9 +21,12 @@ public class Audio extends Thread {
     private final Supplier<short[]> bufferSupplier;
     private final int[] buffers = new int[BUFFER_COUNT];
 
-    private long device;
-    private long context;
+    private static long device;
+    private static long context;
+    private static boolean openALInitialized = false;
+
     private int source;
+
 
     private int bufferIndex;
     private volatile boolean closed;
@@ -35,12 +38,17 @@ public class Audio extends Thread {
     }
 
     private void initAudio() {
-        device = alcOpenDevice(alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER));
-        context = alcCreateContext(device, new int[1]);
-        alcMakeContextCurrent(context);
+        synchronized (Audio.class) {
+            if (!openALInitialized) {
+                device = alcOpenDevice(alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER));
+                context = alcCreateContext(device, new int[1]);
+                alcMakeContextCurrent(context);
 
-        AL.createCapabilities(ALC.createCapabilities(device));
-
+                AL.createCapabilities(ALC.createCapabilities(device));
+                openALInitialized = true;
+                System.out.println("OpenAL inicializado por hilo: " + this.getName());
+            }
+        }
         source = alGenSources();
         catchInternalException();
 
@@ -89,8 +97,8 @@ public class Audio extends Thread {
         }
         alDeleteSources(source);
         alDeleteBuffers(buffers);
-        alcDestroyContext(context);
-        alcCloseDevice(device);
+//        alcDestroyContext(context);
+//        alcCloseDevice(device);
     }
 
     synchronized void triggerPlayBack() {
@@ -102,6 +110,20 @@ public class Audio extends Thread {
         closed = true;
         triggerPlayBack();
     }
+
+    /**
+     * NUEVO MÉTODO ESTÁTICO:
+     * Se debe llamar cuando la aplicación se cierra.
+     */
+    public static void shutdownOpenAL() {
+        if (openALInitialized) {
+            alcDestroyContext(context);
+            alcCloseDevice(device);
+            openALInitialized = false;
+            System.out.println("OpenAL apagado.");
+        }
+    }
+
 
     private void catchInternalException() {
         int err = alGetError();

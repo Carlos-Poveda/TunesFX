@@ -8,6 +8,13 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+import org.example.tunesfx.Sample;
+import org.example.tunesfx.SampleBank;
+import org.example.tunesfx.SamplePlayer;
 
 import java.io.IOException;
 
@@ -57,8 +64,32 @@ public class PrincipalController {
         }
     }
 
+    /**
+     * NUEVO MÉTODO:
+     * Se llama al pulsar el botón "Play" (btnEncenderRitmo).
+     */
+    @FXML
+    private void handlePlayRitmo(ActionEvent event) {
+        // 1. Preguntar al banco si tiene un sample guardado
+        Sample sampleToPlay = SampleBank.getInstance().getCurrentSample();
+
+        if (sampleToPlay != null) {
+            // 2. Si lo tiene, pedir al SamplePlayer que lo reproduzca
+            System.out.println("PrincipalController: Reproduciendo sample...");
+            SamplePlayer.playSample(sampleToPlay);
+        } else {
+            // 3. Si no, informar al usuario
+            System.out.println("PrincipalController: No hay sample. Abre el sinte y guarda uno.");
+            // (Opcional: podrías hacer que el botón parpadee en rojo)
+        }
+    }
+
     @FXML
     private void handleSalir(ActionEvent event) {
-        System.exit(0);
+        // MODIFICADO: No llames a System.exit(0) directamente.
+        // Cierra el Stage para permitir que el método stop() de Principal se ejecute.
+        Stage stage = (Stage) salirButton.getScene().getWindow();
+        stage.close();
+        // System.exit(0); // <-- Eliminar esto
     }
 }
