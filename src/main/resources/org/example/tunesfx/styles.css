@@ -1,0 +1,47 @@
+/* Estilo por defecto para los botones del secuenciador */
+.step-button {
+    -fx-background-color: #3d3d3d;
+    -fx-border-color: #505050;
+    -fx-min-width: 30px;
+    -fx-pref-width: 30px;
+}
+
+/* Estilo para un botón "encendido" (activado) */
+.step-button-on {
+    -fx-background-color: #ffa500; /* Naranja */
+    -fx-border-color: #ffc966;
+}
+
+/* Estilo para el "playhead" (el paso que está sonando) */
+.step-button-playhead {
+    -fx-border-color: #ffffff; /* Borde blanco brillante */
+    -fx-border-width: 2;
+}
+
+/* Estilo para todos los ScrollPane */
+.scroll-pane {
+    /* Color de fondo para las esquinas y detrás de las barras */
+    -fx-background: #121212;
+    -fx-background-color: #121212;
+}
+
+/* ¡Esta es la regla clave! */
+/* Cambia el fondo del área de contenido "blanca" */
+.scroll-pane .viewport {
+    -fx-background: #121212;
+}
+
+/* Estilo de la barra de scroll (el "carril") */
+.scroll-bar:vertical, .scroll-bar:horizontal {
+    -fx-background-color: #121212;
+}
+
+/* Estilo del "pulgar" (la parte que arrastras) */
+.scroll-bar .thumb {
+    -fx-background-color: #555555; /* Un gris más claro */
+    -fx-background-radius: 5; /* Bordes redondeados */
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #777777; /* Más claro al pasar el ratón */
+}

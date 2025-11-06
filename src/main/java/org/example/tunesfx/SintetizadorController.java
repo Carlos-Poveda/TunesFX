@@ -49,7 +49,8 @@ public class SintetizadorController {
      */
     private void handleSaveSample() {
         // Definimos la longitud del sample (ej. 1 segundo)
-        int sampleLength = Sintetizador.AudioInfo.SAMPLE_RATE;
+//        int sampleLength = Sintetizador.AudioInfo.SAMPLE_RATE;
+        int sampleLength = 5000;
 
         // 1. Pedir a la lógica del sintetizador que genere el sample
         short[] sampleData = logic.generateSample(sampleLength);
@@ -61,7 +62,7 @@ public class SintetizadorController {
         SampleBank.getInstance().setCurrentSample(newSample);
 
         // Feedback visual/consola (opcional)
-        guardarSample.setText("Sample Saved!");
+        guardarSample.setText("Sample saved");
         System.out.println("Sample guardado en el banco. Longitud: " + sampleData.length);
 
         // Opcional: resetear el texto después de un tiempo

@@ -13,10 +13,14 @@ public class Principal extends Application {
         // 1. Cargar el FXML de la vista principal
         FXMLLoader loader = new FXMLLoader(getClass().getResource("PrincipalView.fxml"));
         Pane root = loader.load();
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+
 
         // 2. Configurar el Stage
         primaryStage.setTitle("TunesFX");
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 
