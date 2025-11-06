@@ -32,25 +32,60 @@ public class Sintetizador {
 
     private Oscilator[] oscillators;
     private WaveViewer waveViewer;
-
     private Runnable updateCallback;
 
-    // --- NUEVOS CAMPOS PARA FILTRO ---
+    // Filtro
     private Filter filter;
     private boolean filterEnabled = true;
-    private double filterCutoff = 1000.0;
-    private double filterResonance = 1.0;
+    private double filterCutoff = 12000.0;
+    private double filterResonance = 0.7;
+    private Filter.FilterType defaultFilterType = Filter.FilterType.LOW_PASS;
+
+    // LFO y modulación
+    private LFO lfo1;
+    private double lfo1ToFilter = 0.0;
+    private double lfo1ToPitch = 0.0;
+
+    // Envolvente de modulación
+    private Envelope modEnvelope;
+    private double modEnvToFilter = 0.0;
+
+    // Efectos
+    private EffectsProcessor effectsProcessor;
+    private double effectsMix = 0.0;
+
+    // Glide
+    private double glideTime = 0.0;
+    private double currentFrequency = 440.0;
+    private double targetFrequency = 440.0;
+
+    // Unison
+    private int unisonVoices = 1;
+    private double unisonDetune = 0.0;
+    private double unisonSpread = 0.0;
+    private double[] unisonDetuneValues;
 
     public Sintetizador(Oscilator[] oscillators, WaveViewer waveViewer) {
         this.oscillators = oscillators;
         this.waveViewer = waveViewer;
-
-        // Configura los osciladores en el waveViewer
         this.waveViewer.setOscillators(this.oscillators);
 
         // Inicializar filtro
         this.filter = new Filter(AudioInfo.SAMPLE_RATE);
+        this.filter.setType(defaultFilterType);
         updateFilter();
+
+        // Inicializar LFO
+        this.lfo1 = new LFO(AudioInfo.SAMPLE_RATE);
+
+        // Inicializar envolvente de modulación
+        this.modEnvelope = new Envelope(AudioInfo.SAMPLE_RATE);
+
+        // Inicializar efectos
+        this.effectsProcessor = new EffectsProcessor(AudioInfo.SAMPLE_RATE);
+
+        // Inicializar unison
+        updateUnisonDetune();
     }
 
     public void updateWaveviewer() {
@@ -63,18 +98,21 @@ public class Sintetizador {
         this.updateCallback = callback;
     }
 
-    // --- NUEVOS MÉTODOS PARA CONTROLAR EL FILTRO ---
+    // === FILTRO ===
     public void setFilterEnabled(boolean enabled) {
         this.filterEnabled = enabled;
         if (enabled) {
-            filter.setType(Filter.FilterType.LOW_PASS);
+            filter.setType(defaultFilterType);
         } else {
             filter.setType(Filter.FilterType.OFF);
         }
     }
 
     public void setFilterType(Filter.FilterType type) {
-        filter.setType(type);
+        this.defaultFilterType = type;
+        if (filterEnabled) {
+            filter.setType(type);
+        }
     }
 
     public void setFilterCutoff(double cutoff) {
@@ -92,50 +130,218 @@ public class Sintetizador {
         filter.setResonance(filterResonance);
     }
 
-    // --- Métodos de lógica de audio ---
+    // === LFO Y MODULACIÓN ===
+    public void setLFO1Frequency(double freq) {
+        lfo1.setFrequency(freq);
+    }
 
+    public void setLFO1Amplitude(double amp) {
+        lfo1.setAmplitude(amp);
+    }
+
+    public void setLFO1Waveform(LFO.Waveform wave) {
+        lfo1.setWaveform(wave);
+    }
+
+    public void setLFO1ToFilter(double amount) {
+        this.lfo1ToFilter = amount;
+    }
+
+    public void setLFO1ToPitch(double amount) {
+        this.lfo1ToPitch = amount;
+    }
+
+    // === ENVOLVENTE DE MODULACIÓN ===
+    public void setModEnvAttack(double attack) {
+        modEnvelope.setAttackTime(attack);
+    }
+
+    public void setModEnvDecay(double decay) {
+        modEnvelope.setDecayTime(decay);
+    }
+
+    public void setModEnvSustain(double sustain) {
+        modEnvelope.setSustainLevel(sustain);
+    }
+
+    public void setModEnvRelease(double release) {
+        modEnvelope.setReleaseTime(release);
+    }
+
+    public void setModEnvToFilter(double amount) {
+        this.modEnvToFilter = amount;
+    }
+
+    public void triggerModEnv() {
+        modEnvelope.trigger();
+    }
+
+    public void releaseModEnv() {
+        modEnvelope.release();
+    }
+
+    // === EFECTOS ===
+    public void setReverbLevel(double level) {
+        effectsProcessor.setReverbLevel(level);
+    }
+
+    public void setDelayLevel(double level) {
+        effectsProcessor.setDelayLevel(level);
+    }
+
+    public void setDelayFeedback(double feedback) {
+        effectsProcessor.setDelayFeedback(feedback);
+    }
+
+    public void setDelayTime(double time) {
+        effectsProcessor.setDelayTime(time);
+    }
+
+    public void setEffectsMix(double mix) {
+        this.effectsMix = mix;
+        effectsProcessor.setMix(mix);
+    }
+
+    // === GLIDE ===
+    public void setGlideTime(double time) {
+        this.glideTime = time;
+    }
+
+    // === UNISON ===
+    public void setUnisonVoices(int voices) {
+        this.unisonVoices = Math.max(1, Math.min(8, voices));
+        updateUnisonDetune();
+    }
+
+    public void setUnisonDetune(double detune) {
+        this.unisonDetune = detune;
+        updateUnisonDetune();
+    }
+
+    public void setUnisonSpread(double spread) {
+        this.unisonSpread = spread;
+        updateUnisonDetune();
+    }
+
+    private void updateUnisonDetune() {
+        unisonDetuneValues = new double[unisonVoices];
+        for (int i = 0; i < unisonVoices; i++) {
+            double detuneCents = unisonDetune * (i - (unisonVoices - 1) / 2.0);
+            double spreadFactor = unisonSpread * (i - (unisonVoices - 1) / 2.0);
+            unisonDetuneValues[i] = detuneCents + spreadFactor;
+        }
+    }
+
+    // === MÉTODOS DE AUDIO PRINCIPALES ===
     public void setFrequency(double frequency) {
-        for (Oscilator osc : oscillators) {
-            osc.setKeyFrequency(frequency);
+        if (glideTime > 0 && currentFrequency != frequency) {
+            targetFrequency = frequency;
+        } else {
+            currentFrequency = frequency;
+            targetFrequency = frequency;
+            applyFrequencyToOscillators();
+        }
+    }
+
+    private void applyFrequencyToOscillators() {
+        for (int i = 0; i < Math.min(oscillators.length, unisonVoices); i++) {
+            double detuneFactor = Math.pow(2, unisonDetuneValues[i] / 1200.0);
+            oscillators[i].setKeyFrequency(currentFrequency * detuneFactor);
+        }
+
+        // Silenciar osciladores no usados en unison
+        for (int i = unisonVoices; i < oscillators.length; i++) {
+            oscillators[i].setKeyFrequency(0);
         }
     }
 
     public double nextSample() {
-        double totalSample = 0;
-        for (Oscilator osc : oscillators) {
-            totalSample += osc.getNextSample();
+        // Aplicar glide
+        if (glideTime > 0 && currentFrequency != targetFrequency) {
+            double diff = targetFrequency - currentFrequency;
+            double maxChange = (targetFrequency * glideTime) / AudioInfo.SAMPLE_RATE;
+            if (Math.abs(diff) > maxChange) {
+                currentFrequency += Math.signum(diff) * maxChange;
+            } else {
+                currentFrequency = targetFrequency;
+            }
+            applyFrequencyToOscillators();
         }
-        double mixedSample = totalSample / NUM_OSCILLATORS;
 
-        // Aplicar filtro si está habilitado
-        return filter.process(mixedSample);
+        double deltaTime = 1.0 / AudioInfo.SAMPLE_RATE;
+
+        // Calcular modulación del LFO
+        double lfo1Value = lfo1.getNextSample();
+
+        // Calcular modulación de la envolvente
+        double modEnvValue = modEnvelope.nextSample();
+
+        // Aplicar modulación de la envolvente al cutoff del filtro
+        if (modEnvToFilter > 0) {
+            double modulatedCutoff = filterCutoff;
+            double modulationAmount = modEnvValue * modEnvToFilter * 5000;
+            modulatedCutoff += modulationAmount;
+            modulatedCutoff = Math.max(20, Math.min(22000, modulatedCutoff));
+            filter.setCutoff(modulatedCutoff);
+        }
+
+        // Aplicar modulación del LFO al cutoff del filtro
+        if (lfo1ToFilter > 0) {
+            double modulatedCutoff = filterCutoff;
+            double modulationAmount = lfo1Value * lfo1ToFilter * 5000;
+            modulatedCutoff += modulationAmount;
+            modulatedCutoff = Math.max(20, Math.min(22000, modulatedCutoff));
+            filter.setCutoff(modulatedCutoff);
+        }
+
+        // Aplicar modulación de pitch a los osciladores
+        if (lfo1ToPitch > 0) {
+            double pitchModulation = lfo1Value * lfo1ToPitch * 2.0;
+            for (int i = 0; i < Math.min(oscillators.length, unisonVoices); i++) {
+                double baseFrequency = 440.0;
+                double detuneFactor = Math.pow(2, unisonDetuneValues[i] / 1200.0);
+                double modulatedFrequency = baseFrequency * Math.pow(2, pitchModulation / 12.0) * detuneFactor;
+                oscillators[i].setKeyFrequency(modulatedFrequency);
+            }
+        }
+
+        // Generar muestras de osciladores
+        double totalSample = 0;
+        int activeOscillators = 0;
+
+        for (int i = 0; i < Math.min(oscillators.length, unisonVoices); i++) {
+            totalSample += oscillators[i].getNextSample();
+            activeOscillators++;
+        }
+
+        double mixedSample = activeOscillators > 0 ? totalSample / activeOscillators : 0;
+
+        // Aplicar filtro
+        double filteredSample = filter.process(mixedSample);
+
+        // Aplicar efectos
+        double effectedSample = effectsProcessor.process(filteredSample);
+
+        // Mezcla dry/wet para efectos
+        double finalSample = (filteredSample * (1.0 - effectsMix)) + (effectedSample * effectsMix);
+
+        return finalSample;
     }
 
-    /**
-     * Genera un bloque de audio (sample)
-     * basado en la configuración actual del oscilador.
-     * @param numSamples La longitud del sample (ej. 44100 para 1 segundo)
-     * @return Un array de shorts con los datos del sample.
-     */
     public short[] generateSample(int numSamples) {
-        // 1. Reiniciar la fase de todos los osciladores
         for (Oscilator osc : oscillators) {
             osc.resetPhase();
         }
-
-        // 2. Reiniciar el filtro para un sample limpio
         filter.reset();
+        lfo1.reset();
+        modEnvelope.trigger();
+        effectsProcessor = new EffectsProcessor(AudioInfo.SAMPLE_RATE); // Reset effects
 
-        // 3. Crear el array del sample
         short[] s = new short[numSamples];
-
-        // 4. Llenar el array
         for (int i = 0; i < numSamples; i++) {
-            double d = nextSample(); // Obtener el siguiente valor de la mezcla (ya incluye filtro)
+            double d = nextSample();
             s[i] = (short) (Short.MAX_VALUE * d);
         }
-
-        // 5. Devolver los datos
         return s;
     }
 
@@ -147,18 +353,18 @@ public class Sintetizador {
             setFrequency(KEY_FREQUENCIES.get(keyChar));
             shouldGenerate = true;
             hiloAudio.triggerPlayBack();
+            triggerModEnv();
         }
     }
 
     public void onKeyReleased() {
         shouldGenerate = false;
+        releaseModEnv();
     }
 
     public void shutdownAudio() {
         hiloAudio.close();
     }
-
-    // --- Getters para que la clase Main obtenga los nodos de UI ---
 
     public Oscilator[] getOscillatorsFX() {
         return oscillators;
@@ -168,7 +374,6 @@ public class Sintetizador {
         return waveViewer;
     }
 
-    // --- Clase interna de info (sin cambios) ---
     public static class AudioInfo {
         public static final int SAMPLE_RATE = 44100;
     }

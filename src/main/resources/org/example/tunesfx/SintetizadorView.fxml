@@ -12,58 +12,282 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
 
-<Pane prefHeight="500.0" prefWidth="850.0" style="-fx-background-color: black;"
+<Pane prefHeight="900.0" prefWidth="1200.0" style="-fx-background-color: #1a1a1a;"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.tunesfx.SintetizadorController">
     <children>
-        <!-- Osciladores existentes -->
-        <Oscilator fx:id="oscilador1" layoutX="15.0" layoutY="10.0" />
-        <Oscilator fx:id="oscilador2" layoutX="15.0" layoutY="75.0" />
-        <Oscilator fx:id="oscilador3" layoutX="15.0" layoutY="140.0" />
-        <Oscilator fx:id="oscilador4" layoutX="15.0" layoutY="205.0" />
-        <Oscilator fx:id="oscilador5" layoutX="15.0" layoutY="270.0" />
-        <Button fx:id="guardarSample" layoutX="15.0" layoutY="335.0" text="Save Sample"
-                style="-fx-background-color: #444; -fx-text-fill: white;"/>
+        <!-- Layout principal en dos columnas -->
+        <HBox layoutX="10.0" layoutY="10.0" spacing="20">
+            <!-- Columna izquierda: Osciladores -->
+            <VBox spacing="10">
+                <Oscilator fx:id="oscilador1" />
+                <Oscilator fx:id="oscilador2" />
+                <Oscilator fx:id="oscilador3" />
+                <Oscilator fx:id="oscilador4" />
+                <Oscilator fx:id="oscilador5" />
+                <Button fx:id="guardarSample" text="Save Sample"
+                        style="-fx-background-color: #2d2d2d; -fx-text-fill: white; -fx-border-color: #444; -fx-border-width: 1;"/>
+            </VBox>
 
-        <!-- WaveViewer -->
-        <WaveViewer fx:id="waveViewer" layoutX="440.0" layoutY="10.0" />
+            <!-- Columna derecha: Controles -->
+            <VBox spacing="15" prefWidth="800">
+                <!-- WaveViewer -->
+                <WaveViewer fx:id="waveViewer" />
 
-        <!-- NUEVO: Panel de Filtro -->
-        <VBox layoutX="440.0" layoutY="340.0" spacing="10"
-              style="-fx-border-color: #666; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #222;">
-            <Label text="FILTER" style="-fx-font-weight: bold; -fx-text-fill: #fff; -fx-font-size: 14;"/>
-
-            <HBox spacing="15" alignment="CENTER_LEFT">
-                <CheckBox fx:id="filterEnableCheckbox" text="Enable"
-                          style="-fx-text-fill: #fff;"/>
-                <VBox spacing="5">
-                    <Label text="Type" style="-fx-text-fill: #ccc;"/>
-                    <ComboBox fx:id="filterTypeComboBox" prefWidth="120"
-                              style="-fx-background-color: #444; -fx-text-fill: white;"/>
-                </VBox>
-            </HBox>
-
-            <HBox spacing="20" alignment="CENTER_LEFT">
-                <VBox spacing="5">
-                    <Label text="Cutoff Frequency" style="-fx-text-fill: #ccc;"/>
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Slider fx:id="filterCutoffSlider" prefWidth="150"
-                                style="-fx-background-color: #333;"/>
-                        <Label fx:id="filterCutoffLabel" text="1000 Hz"
-                               style="-fx-text-fill: #ccc; -fx-min-width: 70;"/>
+                <!-- Filtro -->
+                <VBox spacing="10" style="-fx-border-color: #333; -fx-border-width: 2; -fx-border-radius: 4; -fx-padding: 12; -fx-background-color: #252525; -fx-background-radius: 4;">
+                    <Label text="FILTER" style="-fx-font-weight: bold; -fx-text-fill: #4CAF50; -fx-font-size: 16;"/>
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <CheckBox fx:id="filterEnableCheckbox" text="ON"
+                                  style="-fx-text-fill: #4CAF50; -fx-font-weight: bold;"/>
+                        <VBox spacing="4">
+                            <Label text="TYPE" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                            <ComboBox fx:id="filterTypeComboBox" prefWidth="100"
+                                      style="-fx-background-color: #333; -fx-text-fill: white; -fx-border-color: #444;"/>
+                        </VBox>
+                    </HBox>
+                    <HBox spacing="20" alignment="CENTER_LEFT">
+                        <VBox spacing="4">
+                            <Label text="CUTOFF" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Slider fx:id="filterCutoffSlider" prefWidth="150"
+                                        style="-fx-background-color: #333;"/>
+                                <Label fx:id="filterCutoffLabel" text="12.0 kHz"
+                                       style="-fx-text-fill: #4CAF50; -fx-font-weight: bold; -fx-alignment: center;"/>
+                            </HBox>
+                        </VBox>
+                        <VBox spacing="4">
+                            <Label text="RESONANCE" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Slider fx:id="filterResonanceSlider" prefWidth="150"
+                                        style="-fx-background-color: #333;"/>
+                                <Label fx:id="filterResonanceLabel" text="0.7"
+                                       style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                            </HBox>
+                        </VBox>
                     </HBox>
                 </VBox>
 
-                <VBox spacing="5">
-                    <Label text="Resonance" style="-fx-text-fill: #ccc;"/>
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Slider fx:id="filterResonanceSlider" prefWidth="150"
-                                style="-fx-background-color: #333;"/>
-                        <Label fx:id="filterResonanceLabel" text="1.0"
-                               style="-fx-text-fill: #ccc; -fx-min-width: 40;"/>
+                <!-- LFO -->
+                <VBox spacing="10" style="-fx-border-color: #333; -fx-border-width: 2; -fx-border-radius: 4; -fx-padding: 12; -fx-background-color: #252525; -fx-background-radius: 4;">
+                    <Label text="LFO 1" style="-fx-font-weight: bold; -fx-text-fill: #4CAF50; -fx-font-size: 16;"/>
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <VBox spacing="4">
+                            <Label text="WAVEFORM" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                            <ComboBox fx:id="lfo1WaveformComboBox" prefWidth="100"
+                                      style="-fx-background-color: #333; -fx-text-fill: white; -fx-border-color: #444;"/>
+                        </VBox>
+                    </HBox>
+                    <HBox spacing="20" alignment="CENTER_LEFT">
+                        <VBox spacing="4">
+                            <Label text="FREQUENCY" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Slider fx:id="lfo1FrequencySlider" prefWidth="150"
+                                        style="-fx-background-color: #333;"/>
+                                <Label fx:id="lfo1FrequencyLabel" text="1.0 Hz"
+                                       style="-fx-text-fill: #4CAF50; -fx-font-weight: bold; -fx-alignment: center;"/>
+                            </HBox>
+                        </VBox>
+                        <VBox spacing="4">
+                            <Label text="AMPLITUDE" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Slider fx:id="lfo1AmplitudeSlider" prefWidth="150"
+                                        style="-fx-background-color: #333;"/>
+                                <Label fx:id="lfo1AmplitudeLabel" text="1.0"
+                                       style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                    <HBox spacing="20" alignment="CENTER_LEFT">
+                        <VBox spacing="4">
+                            <Label text="TO FILTER" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Slider fx:id="lfo1ToFilterSlider" prefWidth="150"
+                                        style="-fx-background-color: #333;"/>
+                                <Label fx:id="lfo1ToFilterLabel" text="0.0"
+                                       style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                            </HBox>
+                        </VBox>
+                        <VBox spacing="4">
+                            <Label text="TO PITCH" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Slider fx:id="lfo1ToPitchSlider" prefWidth="150"
+                                        style="-fx-background-color: #333;"/>
+                                <Label fx:id="lfo1ToPitchLabel" text="0.0"
+                                       style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                            </HBox>
+                        </VBox>
                     </HBox>
                 </VBox>
-            </HBox>
-        </VBox>
+
+                <!-- Envolvente de Modulación y Efectos en misma fila -->
+                <HBox spacing="20">
+                    <!-- Envolvente de Modulación -->
+                    <VBox spacing="10" style="-fx-border-color: #333; -fx-border-width: 2; -fx-border-radius: 4; -fx-padding: 12; -fx-background-color: #252525; -fx-background-radius: 4;">
+                        <Label text="MOD ENV" style="-fx-font-weight: bold; -fx-text-fill: #4CAF50; -fx-font-size: 16;"/>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="ATTACK" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="modAttackSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="modAttackLabel" text="0.01 s"
+                                           style="-fx-text-fill: #4CAF50; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label text="DECAY" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="modDecaySlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="modDecayLabel" text="0.1 s"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="SUSTAIN" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="modSustainSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="modSustainLabel" text="0.5"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label text="RELEASE" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="modReleaseSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="modReleaseLabel" text="0.2 s"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="TO FILTER" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="modEnvToFilterSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="modEnvToFilterLabel" text="0.0"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Efectos -->
+                    <VBox spacing="10" style="-fx-border-color: #333; -fx-border-width: 2; -fx-border-radius: 4; -fx-padding: 12; -fx-background-color: #252525; -fx-background-radius: 4;">
+                        <Label text="EFFECTS" style="-fx-font-weight: bold; -fx-text-fill: #4CAF50; -fx-font-size: 16;"/>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="REVERB" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="reverbLevelSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="reverbLevelLabel" text="0.0"
+                                           style="-fx-text-fill: #4CAF50; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label text="DELAY" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="delayLevelSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="delayLevelLabel" text="0.0"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="FEEDBACK" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="delayFeedbackSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="delayFeedbackLabel" text="0.5"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label text="TIME" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="delayTimeSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="delayTimeLabel" text="0.5 s"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="MIX" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="effectsMixSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="effectsMixLabel" text="0.0"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Glide y Unisono en misma fila -->
+                <HBox spacing="20">
+                    <!-- Glide -->
+                    <VBox spacing="10" style="-fx-border-color: #333; -fx-border-width: 2; -fx-border-radius: 4; -fx-padding: 12; -fx-background-color: #252525; -fx-background-radius: 4;">
+                        <Label text="GLOBAL" style="-fx-font-weight: bold; -fx-text-fill: #4CAF50; -fx-font-size: 16;"/>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="GLIDE TIME" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="glideTimeSlider" prefWidth="150"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="glideTimeLabel" text="0.00 s"
+                                           style="-fx-text-fill: #4CAF50; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Unisono -->
+                    <VBox spacing="10" style="-fx-border-color: #333; -fx-border-width: 2; -fx-border-radius: 4; -fx-padding: 12; -fx-background-color: #252525; -fx-background-radius: 4;">
+                        <Label text="UNISON" style="-fx-font-weight: bold; -fx-text-fill: #4CAF50; -fx-font-size: 16;"/>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <VBox spacing="4">
+                                <Label text="VOICES" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="unisonVoicesSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="unisonVoicesLabel" text="1"
+                                           style="-fx-text-fill: #4CAF50; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label text="DETUNE" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="unisonDetuneSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="unisonDetuneLabel" text="0.0"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label text="SPREAD" style="-fx-text-fill: #888; -fx-font-size: 11;"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Slider fx:id="unisonSpreadSlider" prefWidth="120"
+                                            style="-fx-background-color: #333;"/>
+                                    <Label fx:id="unisonSpreadLabel" text="0.0"
+                                           style="-fx-text-fill: #ccc; -fx-font-weight: bold; -fx-alignment: center;"/>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </HBox>
+            </VBox>
+        </HBox>
     </children>
 </Pane>

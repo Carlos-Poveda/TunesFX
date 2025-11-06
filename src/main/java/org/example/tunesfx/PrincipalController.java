@@ -12,9 +12,6 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
-import org.example.tunesfx.Sample;
-import org.example.tunesfx.SampleBank;
-import org.example.tunesfx.SamplePlayer;
 
 import java.io.IOException;
 
@@ -30,6 +27,106 @@ public class PrincipalController {
     @FXML
     private Button btnEncenderRitmo;
 
+    private Timeline sequencerTimeline;
+    private boolean isPlaying = false;
+    private static final double BPM = 120.0;
+
+    /**
+     * NUEVO MÉTODO:
+     * Este método es llamado automáticamente por el FXMLLoader después
+     * de que todos los componentes @FXML han sido inyectados.
+     */
+    @FXML
+    public void initialize() {
+        // Inicializamos nuestro secuenciador
+        initializeSequencer();
+    }
+
+    /**
+     * NUEVO MÉTODO:
+     * Configura el Timeline pero no lo inicia.
+     */
+    private void initializeSequencer() {
+        // Calculamos la duración de cada "beat" (golpe)
+        // 120 BPM = 2 beats por segundo = 500ms por beat
+        // Fórmula: 60,000 milisegundos / BPM
+        double beatDurationMillis = 60000.0 / BPM;
+
+        // 1. Crear la Timeline
+        sequencerTimeline = new Timeline();
+        sequencerTimeline.setCycleCount(Animation.INDEFINITE); // Bucle infinito
+
+        // 2. Crear el KeyFrame (la acción que se repite)
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(beatDurationMillis), e -> {
+            // Esta es la acción que se ejecuta en cada "beat"
+            runSequencerStep();
+        });
+
+        // 3. Añadir el KeyFrame a la Timeline
+        sequencerTimeline.getKeyFrames().add(keyFrame);
+    }
+
+    /**
+     * NUEVO MÉTODO:
+     * La lógica que se ejecuta en cada paso del bucle.
+     */
+    private void runSequencerStep() {
+        // 1. Coger el sample del banco
+        Sample sampleToPlay = SampleBank.getInstance().getCurrentSample();
+
+        if (sampleToPlay != null) {
+            // 2. Si existe, reproducirlo
+            System.out.println("Sequencer Step! Reproduciendo sample.");
+            SamplePlayer.playSample(sampleToPlay);
+        } else {
+            // 3. Si no existe (ej. el usuario nunca guardó uno),
+            // detenemos el bucle para evitar errores.
+            System.out.println("Sequencer: No hay sample. Deteniendo bucle.");
+            sequencerTimeline.stop();
+            isPlaying = false;
+            btnEncenderRitmo.setText("Play");
+        }
+    }
+
+    /**
+     * Se llama al pulsar el botón "Play" (btnEncenderRitmo).
+     */
+    @FXML
+    private void handlePlayRitmo(ActionEvent event) {
+        if (isPlaying) {
+            // --- Estaba sonando -> PARAR ---
+            sequencerTimeline.stop();
+            btnEncenderRitmo.setText("Play");
+            isPlaying = false;
+            System.out.println("Sequencer Detenido.");
+
+        } else {
+            // --- Estaba parado -> INICIAR ---
+
+            // Verificación previa: ¿Hay un sample?
+            Sample currentSample = SampleBank.getInstance().getCurrentSample();
+            if (currentSample == null) {
+                System.out.println("PrincipalController: No hay sample. Abre el sinte y guarda uno.");
+                // Opcional: podrías hacer que el botón parpadee en rojo un momento
+                return; // No iniciar si no hay sample
+            }
+
+            // Hay sample, así que iniciamos el bucle
+            sequencerTimeline.play();
+            btnEncenderRitmo.setText("Stop");
+            isPlaying = true;
+            System.out.println("Sequencer Iniciado...");
+        }
+    }
+
+    @FXML
+    private void handleSalir(ActionEvent event) {
+        // MODIFICADO: No llames a System.exit(0) directamente.
+        // Cierra el Stage para permitir que el método stop() de Principal se ejecute.
+        Stage stage = (Stage) salirButton.getScene().getWindow();
+        stage.close();
+        // System.exit(0); // <-- Eliminar esto
+    }
 
     @FXML
     private void handleOpenSynth(ActionEvent event) {
@@ -64,32 +161,5 @@ public class PrincipalController {
         }
     }
 
-    /**
-     * NUEVO MÉTODO:
-     * Se llama al pulsar el botón "Play" (btnEncenderRitmo).
-     */
-    @FXML
-    private void handlePlayRitmo(ActionEvent event) {
-        // 1. Preguntar al banco si tiene un sample guardado
-        Sample sampleToPlay = SampleBank.getInstance().getCurrentSample();
 
-        if (sampleToPlay != null) {
-            // 2. Si lo tiene, pedir al SamplePlayer que lo reproduzca
-            System.out.println("PrincipalController: Reproduciendo sample...");
-            SamplePlayer.playSample(sampleToPlay);
-        } else {
-            // 3. Si no, informar al usuario
-            System.out.println("PrincipalController: No hay sample. Abre el sinte y guarda uno.");
-            // (Opcional: podrías hacer que el botón parpadee en rojo)
-        }
-    }
-
-    @FXML
-    private void handleSalir(ActionEvent event) {
-        // MODIFICADO: No llames a System.exit(0) directamente.
-        // Cierra el Stage para permitir que el método stop() de Principal se ejecute.
-        Stage stage = (Stage) salirButton.getScene().getWindow();
-        stage.close();
-        // System.exit(0); // <-- Eliminar esto
-    }
 }

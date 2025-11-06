@@ -7,7 +7,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.Cursor;
-
 import java.io.IOException;
 
 public class Oscilator extends HBox {
@@ -21,10 +20,7 @@ public class Oscilator extends HBox {
 
     private double lastMouseY = -1;
     private double lastMouseYVolume = -1;
-
-    // Callback para notificar al Sintetizador que actualice el WaveViewer
     private Runnable updateCallback;
-
     private static final int TONE_OFFSET_LIMIT = 400;
 
     @FXML
@@ -35,7 +31,6 @@ public class Oscilator extends HBox {
     private Label volumeParameter;
 
     public Oscilator() {
-        // Cargar el FXML
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("oscilador.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -46,16 +41,14 @@ public class Oscilator extends HBox {
             throw new RuntimeException(exception);
         }
 
-        inicializarOscilador(); // Lógica de audio
+        inicializarOscilador();
     }
 
     @FXML
     private void initialize() {
-        // --- Configuración de componentes ---
         waveFormComboBox.setItems(FXCollections.observableArrayList(WaveTable.values()));
         waveFormComboBox.setValue(WaveTable.Sine);
 
-        // --- Listeners ---
         waveFormComboBox.setOnAction(e -> {
             waveTable = waveFormComboBox.getValue();
             if (updateCallback != null) updateCallback.run();
@@ -96,8 +89,7 @@ public class Oscilator extends HBox {
                 toneValueLabel.setText("x" + String.format("%.2f", getToneOffset()));
                 lastMouseY = currentMouseY;
                 if (change != 0 && updateCallback != null) {
-                    // ...
-                    updateCallback.run(); // Probar a dejarlo sin if
+                    updateCallback.run();
                 }
             }
         });
@@ -136,8 +128,7 @@ public class Oscilator extends HBox {
                 volumeParameter.setText(" " + volume + "%");
                 lastMouseYVolume = currentMouseY;
                 if (change != 0 && updateCallback != null) {
-                    // ...
-                    updateCallback.run(); // Probar sin if
+                    updateCallback.run();
                 }
             }
         });
@@ -147,10 +138,10 @@ public class Oscilator extends HBox {
         this.updateCallback = updateCallback;
     }
 
-
     private void inicializarOscilador() {
         keyFrequency = 440.0;
         toneOffset = 0;
+        applyToneOffset();
     }
 
     public void resetPhase() {
@@ -166,6 +157,11 @@ public class Oscilator extends HBox {
     public void setKeyFrequency(double frequency) {
         keyFrequency = frequency;
         applyToneOffset();
+
+        // DEBUG: Mostrar cambios de frecuencia
+        if (Math.random() < 0.01) { // Solo el 1% de las veces
+            System.out.println("Oscillator frequency set to: " + frequency + " Hz");
+        }
     }
 
     public double[] getSampleWaveform(int numSamples) {
