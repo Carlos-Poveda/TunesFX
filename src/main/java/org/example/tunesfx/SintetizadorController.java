@@ -2,6 +2,10 @@ package org.example.tunesfx;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 
 public class SintetizadorController {
@@ -14,6 +18,14 @@ public class SintetizadorController {
     @FXML private Oscilator oscilador4;
     @FXML private Oscilator oscilador5;
     @FXML private WaveViewer waveViewer;
+
+    // --- NUEVOS CAMPOS PARA CONTROLES DE FILTRO ---
+    @FXML private CheckBox filterEnableCheckbox;
+    @FXML private ComboBox<String> filterTypeComboBox;
+    @FXML private Slider filterCutoffSlider;
+    @FXML private Slider filterResonanceSlider;
+    @FXML private Label filterCutoffLabel;
+    @FXML private Label filterResonanceLabel;
 
     private Oscilator[] oscillators;
 
@@ -40,8 +52,65 @@ public class SintetizadorController {
         for (Oscilator osc : oscillators) {
             osc.setUpdateCallback(logic::updateWaveviewer);
         }
-        
+
         guardarSample.setOnAction(e -> handleSaveSample());
+
+        // --- INICIALIZAR CONTROLES DEL FILTRO ---
+        initializeFilterControls();
+    }
+
+    private void initializeFilterControls() {
+        // Configurar ComboBox de tipos de filtro
+        filterTypeComboBox.getItems().addAll("Low Pass", "High Pass", "Band Pass", "Notch");
+        filterTypeComboBox.setValue("Low Pass");
+
+        // Configurar sliders
+        filterCutoffSlider.setMin(20);
+        filterCutoffSlider.setMax(20000);
+        filterCutoffSlider.setValue(1000);
+        filterCutoffSlider.setBlockIncrement(100);
+
+        filterResonanceSlider.setMin(0.1);
+        filterResonanceSlider.setMax(10.0);
+        filterResonanceSlider.setValue(1.0);
+        filterResonanceSlider.setBlockIncrement(0.1);
+
+        // Listeners para controles de filtro
+        filterEnableCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setFilterEnabled(newVal);
+            // Habilitar/deshabilitar otros controles
+            filterTypeComboBox.setDisable(!newVal);
+            filterCutoffSlider.setDisable(!newVal);
+            filterResonanceSlider.setDisable(!newVal);
+        });
+
+        filterTypeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            Filter.FilterType type = Filter.FilterType.LOW_PASS;
+            switch (newVal) {
+                case "High Pass": type = Filter.FilterType.HIGH_PASS; break;
+                case "Band Pass": type = Filter.FilterType.BAND_PASS; break;
+                case "Notch": type = Filter.FilterType.NOTCH; break;
+                default: type = Filter.FilterType.LOW_PASS;
+            }
+            logic.setFilterType(type);
+        });
+
+        filterCutoffSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setFilterCutoff(newVal.doubleValue());
+            filterCutoffLabel.setText(String.format("%.0f Hz", newVal.doubleValue()));
+        });
+
+        filterResonanceSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setFilterResonance(newVal.doubleValue());
+            filterResonanceLabel.setText(String.format("%.1f", newVal.doubleValue()));
+        });
+
+        // Valores iniciales
+        filterCutoffLabel.setText("1000 Hz");
+        filterResonanceLabel.setText("1.0");
+
+        // Inicialmente activado
+        filterEnableCheckbox.setSelected(true);
     }
 
     /**

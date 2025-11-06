@@ -35,12 +35,22 @@ public class Sintetizador {
 
     private Runnable updateCallback;
 
+    // --- NUEVOS CAMPOS PARA FILTRO ---
+    private Filter filter;
+    private boolean filterEnabled = true;
+    private double filterCutoff = 1000.0;
+    private double filterResonance = 1.0;
+
     public Sintetizador(Oscilator[] oscillators, WaveViewer waveViewer) {
         this.oscillators = oscillators;
         this.waveViewer = waveViewer;
 
         // Configura los osciladores en el waveViewer
         this.waveViewer.setOscillators(this.oscillators);
+
+        // Inicializar filtro
+        this.filter = new Filter(AudioInfo.SAMPLE_RATE);
+        updateFilter();
     }
 
     public void updateWaveviewer() {
@@ -51,6 +61,35 @@ public class Sintetizador {
 
     public void setUpdateCallback(Runnable callback) {
         this.updateCallback = callback;
+    }
+
+    // --- NUEVOS MÉTODOS PARA CONTROLAR EL FILTRO ---
+    public void setFilterEnabled(boolean enabled) {
+        this.filterEnabled = enabled;
+        if (enabled) {
+            filter.setType(Filter.FilterType.LOW_PASS);
+        } else {
+            filter.setType(Filter.FilterType.OFF);
+        }
+    }
+
+    public void setFilterType(Filter.FilterType type) {
+        filter.setType(type);
+    }
+
+    public void setFilterCutoff(double cutoff) {
+        this.filterCutoff = cutoff;
+        updateFilter();
+    }
+
+    public void setFilterResonance(double resonance) {
+        this.filterResonance = resonance;
+        updateFilter();
+    }
+
+    private void updateFilter() {
+        filter.setCutoff(filterCutoff);
+        filter.setResonance(filterResonance);
     }
 
     // --- Métodos de lógica de audio ---
@@ -66,7 +105,10 @@ public class Sintetizador {
         for (Oscilator osc : oscillators) {
             totalSample += osc.getNextSample();
         }
-        return totalSample / NUM_OSCILLATORS;
+        double mixedSample = totalSample / NUM_OSCILLATORS;
+
+        // Aplicar filtro si está habilitado
+        return filter.process(mixedSample);
     }
 
     /**
@@ -81,16 +123,19 @@ public class Sintetizador {
             osc.resetPhase();
         }
 
-        // 2. Crear el array del sample
+        // 2. Reiniciar el filtro para un sample limpio
+        filter.reset();
+
+        // 3. Crear el array del sample
         short[] s = new short[numSamples];
 
-        // 3. Llenar el array
+        // 4. Llenar el array
         for (int i = 0; i < numSamples; i++) {
-            double d = nextSample(); // Obtener el siguiente valor de la mezcla
+            double d = nextSample(); // Obtener el siguiente valor de la mezcla (ya incluye filtro)
             s[i] = (short) (Short.MAX_VALUE * d);
         }
 
-        // 4. Devolver los datos
+        // 5. Devolver los datos
         return s;
     }
 
