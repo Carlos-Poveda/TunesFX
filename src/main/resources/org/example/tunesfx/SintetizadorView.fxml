@@ -15,6 +15,7 @@
 <Pane prefHeight="900.0" prefWidth="1200.0" style="-fx-background-color: #1a1a1a;"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.tunesfx.SintetizadorController">
+
     <children>
         <!-- Layout principal en dos columnas -->
         <HBox layoutX="10.0" layoutY="10.0" spacing="20">
