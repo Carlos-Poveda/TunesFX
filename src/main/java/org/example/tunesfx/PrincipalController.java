@@ -1,6 +1,5 @@
 package org.example.tunesfx;
 
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,12 +13,9 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
-import org.example.tunesfx.Sample;
-import org.example.tunesfx.SampleBank;
-import org.example.tunesfx.SamplePlayer;
+
 
 import java.util.ArrayList;
-import java.util.Arrays; //
 import java.util.List;
 
 import java.io.IOException;
@@ -49,7 +45,6 @@ public class PrincipalController {
     private List<ChannelRackRowController> allRows = new ArrayList<>();
 
     /**
-     * NUEVO MÉTODO:
      * Este método es llamado automáticamente por el FXMLLoader después
      * de que todos los componentes @FXML han sido inyectados.
      */
@@ -74,9 +69,6 @@ public class PrincipalController {
         sequencerTimeline.getKeyFrames().add(keyFrame);
     }
 
-    /**
-     * NUEVO: Se llama al pulsar "Añadir Pista".
-     */
     @FXML
     private void handleNuevaPista(ActionEvent event) {
         Sample sampleToAdd = SampleBank.getInstance().getCurrentSample();
@@ -121,7 +113,7 @@ public class PrincipalController {
     }
 
     /**
-     * MODIFICADO: Esta es la nueva lógica del secuenciador
+     * Lógica del secuenciador
      */
     private void runSequencerStep() {
         // 1. Calcular paso anterior y actual
@@ -149,9 +141,6 @@ public class PrincipalController {
         }
     }
 
-    /**
-     * Se llama al pulsar el botón "Play" (btnEncenderRitmo).
-     */
     @FXML
     private void handlePlayRitmo(ActionEvent event) {
         if (isPlaying) {
@@ -187,6 +176,9 @@ public class PrincipalController {
         currentStep = -1; // Resetear el contador
         System.out.println("Sequencer Detenido.");
     }
+
+
+    // Abrir sintetizador
 
     @FXML
     private void handleOpenSynth(ActionEvent event) {
