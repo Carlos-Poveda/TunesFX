@@ -1,46 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.geometry.Insets?>
 
-<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.tunesfx.ChannelRackRowController"
-      spacing="5" style="-fx-background-color: #4a4a4a; -fx-border-color: #202020; -fx-border-width: 1;"
-      alignment="CENTER_LEFT">
+<HBox alignment="CENTER_LEFT" spacing="5" style="-fx-background-color: #4a4a4a; -fx-border-color: #202020; -fx-border-width: 1;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.ChannelRackRowController">
 
     <padding>
-        <Insets top="5" right="5" bottom="5" left="5"/>
+        <Insets bottom="5" left="5" right="5" top="5" />
     </padding>
 
-    <Button fx:id="deleteRowButton" text="X" onAction="#handleDeleteRow"
-            style="-fx-background-color: #8B0000; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    <Label fx:id="trackNameLabel" prefHeight="17.0" prefWidth="46.0" style="-fx-font-weight: bold;" text="Sample" textFill="white" />
 
-    <Label fx:id="trackNameLabel" text="Sample" textFill="white" prefWidth="100" style="-fx-font-weight: bold;"/>
+    <Button fx:id="stepBtn1" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn2" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn3" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn4" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
 
-    <Button fx:id="stepBtn1" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn2" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn3" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn4" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
+    <Button fx:id="stepBtn5" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn6" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn7" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn8" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
 
-    <Button fx:id="stepBtn5" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" HBox.margin="$btnMargin"/>
-    <Button fx:id="stepBtn6" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn7" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn8" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
+    <Button fx:id="stepBtn9" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn10" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn11" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn12" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
 
-    <Button fx:id="stepBtn9" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" HBox.margin="$btnMargin"/>
-    <Button fx:id="stepBtn10" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn11" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn12" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
+    <Button fx:id="stepBtn13" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn14" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn15" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn16" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
 
-    <Button fx:id="stepBtn13" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" HBox.margin="$btnMargin"/>
-    <Button fx:id="stepBtn14" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn15" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
-    <Button fx:id="stepBtn16" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button"/>
+    <Button fx:id="deleteRowButton" onAction="#handleDeleteRow" style="-fx-background-color: #480000; -fx-text-fill: white; -fx-font-weight: bold;" text="X" />
 
     <fx:define>
-        <Insets fx:id="btnMargin" left="10"/>
+        <Insets fx:id="btnMargin" left="10" />
     </fx:define>
 
 </HBox>
