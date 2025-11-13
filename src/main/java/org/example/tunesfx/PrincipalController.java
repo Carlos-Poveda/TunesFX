@@ -5,6 +5,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -13,6 +15,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+import javafx.application.Platform;
 
 
 import java.util.ArrayList;
@@ -30,12 +33,14 @@ public class PrincipalController {
     @FXML
     private Button btnNuevaPista;
     @FXML
-    private VBox rackContainer; // <-- El nuevo contenedor de filas
+    private VBox rackContainer;
+    @FXML
+    private Spinner<Integer> spinnerBPM;
 
     // Lógica del secuenciador
     private Timeline sequencerTimeline;
     private boolean isPlaying = false;
-    private static final double BPM = 120.0; // Beats Por Minuto
+    private static double referenciaBPM = 120.0; // Beats Por Minuto
 
     // Variables del secuenciador ---
     private List<Button> stepButtons; // Una lista para agrupar los botones
@@ -50,14 +55,25 @@ public class PrincipalController {
      */
     @FXML
     public void initialize() {
+        SpinnerValueFactory<Integer> valueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(60, 300, 120, 1);
+        spinnerBPM.setValueFactory(valueFactory);
+        spinnerBPM.valueProperty().addListener((obs, oldVal, newVal) -> {
+            updateSequencerRate(newVal);
+        });
         initializeSequencer();
+        // --- ¡AQUÍ ESTÁ LA MAGIA! ---
+        // 1. Registramos este controlador como "oyente" en el SampleBank.
+        // 2. Le decimos: "Cuando recibas un sample, llama a mi método 'addNewRow'".
+        // 3. (El "this::addNewRow" es un atajo para "sample -> addNewRow(sample)")
+        SampleBank.getInstance().setOnSampleSaved(this::addNewRow);
+        // --- FIN DE LA MAGIA ---
     }
 
     private void initializeSequencer() {
-        // beatDuration (negra) = 60000 / BPM
-        double beatDurationMillis = 60000.0 / BPM;
-        // stepDuration (semicorchea) = beatDuration / 4
-        double stepDurationMillis = beatDurationMillis / 4.0; // Ej: 120 BPM -> 500ms / 4 = 125ms
+        // Calculamos la duración del paso basado en 120 BPM
+        double beatDurationMillis = 60000.0 / referenciaBPM;
+        double stepDurationMillis = beatDurationMillis / 4.0;
 
         sequencerTimeline = new Timeline();
         sequencerTimeline.setCycleCount(Animation.INDEFINITE);
@@ -67,6 +83,21 @@ public class PrincipalController {
         });
 
         sequencerTimeline.getKeyFrames().add(keyFrame);
+
+        // Establecer la tasa de reproducción inicial
+        // basada en el valor por defecto del spinner
+        updateSequencerRate(spinnerBPM.getValue());
+    }
+
+    private void updateSequencerRate(double newBPM) {
+        if (sequencerTimeline == null) return;
+
+        // Calcula la nueva tasa (rate)
+        // ej. 180 BPM -> 180 / 120 = 1.5x (más rápido)
+        // ej. 90 BPM  -> 90 / 120 = 0.75x (más lento)
+        double newRate = newBPM / referenciaBPM;
+
+        sequencerTimeline.setRate(newRate);
     }
 
     @FXML
@@ -74,42 +105,43 @@ public class PrincipalController {
         Sample sampleToAdd = SampleBank.getInstance().getCurrentSample();
 
         if (sampleToAdd == null) {
-            System.err.println("¡No hay sample guardado! Abre el sinte y guarda uno.");
+            System.err.println("¡No hay sample guardado! Abre el sinte y guarda uno primero.");
             return;
         }
 
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("ChannelRackRow.fxml"));
+        // Llama al método reutilizable
+        addNewRow(sampleToAdd);
+    }
 
-            // 1. Cargar el nodo raíz (el HBox)
-            //    Esto también crea la instancia del ChannelRackRowController
-            HBox newRowNode = loader.load();
+    /**
+     * NUEVO MÉTODO REUTILIZABLE:
+     * Esta es la lógica central para añadir una fila.
+     * Ahora puede ser llamado por el botón (handleNuevaPista)
+     * O por el SampleBank (el listener que pusimos en initialize).
+     */
+    public void addNewRow(Sample sample) {
+        Platform.runLater(() -> {
+            if (sample == null) {
+                System.err.println("Intento de añadir fila con sample nulo.");
+                return;
+            }
 
-            // 2. Obtener la instancia del controlador
-            ChannelRackRowController rowController = loader.getController();
-
-            // 3. Asignarle el sample
-            rowController.setSample(sampleToAdd);
-
-            // 4. Asignar la función de borrado (Callback/Lambda)
-            //    Le decimos a la fila: "Cuando te borren, ejecuta ESTO:"
-            rowController.setOnDelete(() -> {
-                // Lógica que SÓLO el PrincipalController conoce:
-                // a) Borrar el controlador de la lista lógica
-                allRows.remove(rowController);
-                // b) Borrar el nodo de la interfaz visual
-                rackContainer.getChildren().remove(newRowNode);
-            });
-            // --- FIN DE LA MAGIA ---
-
-            // 5. Guardar el controlador y añadir el nodo (como antes)
-            allRows.add(rowController);
-            rackContainer.getChildren().add(newRowNode);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error al cargar ChannelRackRow.fxml");
-        }
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("ChannelRackRow.fxml"));
+                HBox newRowNode = loader.load();
+                ChannelRackRowController rowController = loader.getController();
+                rowController.setSample(sample);
+                rowController.setOnDelete(() -> {
+                    allRows.remove(rowController);
+                    rackContainer.getChildren().remove(newRowNode);
+                });
+                allRows.add(rowController);
+                rackContainer.getChildren().add(newRowNode);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.err.println("Error al cargar ChannelRackRow.fxml");
+            }
+        });
     }
 
     /**

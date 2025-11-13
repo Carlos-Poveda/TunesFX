@@ -15,14 +15,22 @@ public class ChannelRackRowController {
     private Button deleteRowButton;
     @FXML
     private Label trackNameLabel;
-    @FXML
-    private Button stepBtn1, stepBtn2, stepBtn3, stepBtn4;
-    @FXML
-    private Button stepBtn5, stepBtn6, stepBtn7, stepBtn8;
-    @FXML
-    private Button stepBtn9, stepBtn10, stepBtn11, stepBtn12;
-    @FXML
-    private Button stepBtn13, stepBtn14, stepBtn15, stepBtn16;
+    @FXML private Button stepBtn1, stepBtn2, stepBtn3, stepBtn4;
+    @FXML private Button stepBtn5, stepBtn6, stepBtn7, stepBtn8;
+    @FXML private Button stepBtn9, stepBtn10, stepBtn11, stepBtn12;
+    @FXML private Button stepBtn13, stepBtn14, stepBtn15, stepBtn16;
+    @FXML private Button stepBtn17, stepBtn18, stepBtn19, stepBtn20;
+    @FXML private Button stepBtn21, stepBtn22, stepBtn23, stepBtn24;
+    @FXML private Button stepBtn25, stepBtn26, stepBtn27, stepBtn28;
+    @FXML private Button stepBtn29, stepBtn30, stepBtn31, stepBtn32;
+    @FXML private Button stepBtn33, stepBtn34, stepBtn35, stepBtn36;
+    @FXML private Button stepBtn37, stepBtn38, stepBtn39, stepBtn40;
+    @FXML private Button stepBtn41, stepBtn42, stepBtn43, stepBtn44;
+    @FXML private Button stepBtn45, stepBtn46, stepBtn47, stepBtn48;
+    @FXML private Button stepBtn49, stepBtn50, stepBtn51, stepBtn52;
+    @FXML private Button stepBtn53, stepBtn54, stepBtn55, stepBtn56;
+    @FXML private Button stepBtn57, stepBtn58, stepBtn59, stepBtn60;
+    @FXML private Button stepBtn61, stepBtn62, stepBtn63, stepBtn64;
 
 
 
@@ -34,20 +42,20 @@ public class ChannelRackRowController {
 
     private Runnable deleteCallback;
 
-    // Asumimos 16 pasos
-    public static final int NUM_STEPS = 16;
-    // (Cambia esto a 12 si usaste 12 botones)
+    public static final int NUM_STEPS = 64;
 
     @FXML
     public void initialize() {
-        // Agrupa los botones en una lista para fácil acceso
         stepButtons = Arrays.asList(
-                stepBtn1, stepBtn2, stepBtn3, stepBtn4,
-                stepBtn5, stepBtn6, stepBtn7, stepBtn8,
-                stepBtn9, stepBtn10, stepBtn11, stepBtn12,
-                stepBtn13, stepBtn14, stepBtn15, stepBtn16
+                stepBtn1, stepBtn2, stepBtn3, stepBtn4, stepBtn5, stepBtn6, stepBtn7, stepBtn8,
+                stepBtn9, stepBtn10, stepBtn11, stepBtn12, stepBtn13, stepBtn14, stepBtn15, stepBtn16,
+                stepBtn17, stepBtn18, stepBtn19, stepBtn20, stepBtn21, stepBtn22, stepBtn23, stepBtn24,
+                stepBtn25, stepBtn26, stepBtn27, stepBtn28, stepBtn29, stepBtn30, stepBtn31, stepBtn32,
+                stepBtn33, stepBtn34, stepBtn35, stepBtn36, stepBtn37, stepBtn38, stepBtn39, stepBtn40,
+                stepBtn41, stepBtn42, stepBtn43, stepBtn44, stepBtn45, stepBtn46, stepBtn47, stepBtn48,
+                stepBtn49, stepBtn50, stepBtn51, stepBtn52, stepBtn53, stepBtn54, stepBtn55, stepBtn56,
+                stepBtn57, stepBtn58, stepBtn59, stepBtn60, stepBtn61, stepBtn62, stepBtn63, stepBtn64
         );
-        // (Si usas 12, elimina los últimos 4 de esta lista)
     }
 
     /**
