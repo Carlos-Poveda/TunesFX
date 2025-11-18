@@ -79,7 +79,7 @@ public class SintetizadorController {
         SampleBank.getInstance().setCurrentSample(newSample);
 
         System.out.println("Sample guardado (" + durationSeconds + "s) y notificación enviada.");
-        guardarSample.setText("Sample Saved!");
+        guardarSample.setText("Sample Saved");
     }
 
     /**

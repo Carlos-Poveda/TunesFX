@@ -8,89 +8,79 @@
 <HBox alignment="CENTER_LEFT" prefHeight="49.0" prefWidth="1475.0" spacing="5" style="-fx-background-color: #4a4a4a; -fx-border-color: #202020; -fx-border-width: 1;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.ChannelRackRowController">
 
     <Button fx:id="deleteRowButton" mnemonicParsing="false" onAction="#handleDeleteRow" text="X">
-      <HBox.margin>
-         <Insets left="10.0" right="10.0" />
-      </HBox.margin></Button>
-    <Label fx:id="trackNameLabel" minWidth="80.0" prefWidth="80" text="SAMPLE" />
+        <HBox.margin>
+            <Insets left="10.0" right="10.0" />
+        </HBox.margin>
+    </Button>
 
-    <Button fx:id="stepBtn1" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn2" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn3" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn4" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Label fx:id="trackNameLabel" minWidth="80.0" prefWidth="80" style="-fx-text-fill: white; -fx-font-weight: bold;" text="SAMPLE" />
 
-    <Button fx:id="stepBtn5" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn6" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn7" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn8" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn1" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn2" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn3" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn4" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn5" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn6" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn7" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn8" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn9" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn10" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn11" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn12" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn13" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn14" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn15" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn16" mnemonicParsing="false" styleClass="step-button" />
 
-    <Button fx:id="stepBtn9" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn10" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn11" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn12" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn17" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn18" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn19" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn20" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn21" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn22" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn23" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn24" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn25" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn26" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn27" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn28" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn29" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn30" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn31" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn32" mnemonicParsing="false" styleClass="step-button" />
 
-    <Button fx:id="stepBtn13" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn14" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn15" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn16" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn33" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn34" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn35" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn36" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn37" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn38" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn39" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn40" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn41" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn42" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn43" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn44" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn45" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn46" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn47" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn48" mnemonicParsing="false" styleClass="step-button" />
 
-    <Button fx:id="stepBtn17" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn18" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn19" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn20" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn21" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn22" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn23" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn24" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn25" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn26" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn27" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn28" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn29" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn30" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn31" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn32" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn33" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn34" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn35" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn36" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn37" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn38" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn39" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn40" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn41" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn42" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn43" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn44" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn45" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn46" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn47" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn48" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn49" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn50" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn51" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn52" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn53" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn54" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn55" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn56" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn57" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn58" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn59" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn60" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-
-    <Button fx:id="stepBtn61" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn62" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn63" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
-    <Button fx:id="stepBtn64" mnemonicParsing="false" onAction="#handleStepButtonToggle" styleClass="step-button" />
+    <Button fx:id="stepBtn49" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn50" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn51" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn52" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn53" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn54" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn55" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn56" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn57" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn58" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn59" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn60" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn61" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn62" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn63" mnemonicParsing="false" styleClass="step-button" />
+    <Button fx:id="stepBtn64" mnemonicParsing="false" styleClass="step-button" />
 
 </HBox>

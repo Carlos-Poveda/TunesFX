@@ -2,19 +2,31 @@
 .step-button {
     -fx-background-color: #3d3d3d;
     -fx-border-color: #505050;
+
+    /* Ajusta el tamaño del botón según tus necesidades (ej. 30px) */
     -fx-min-width: 30px;
     -fx-pref-width: 30px;
+    -fx-min-height: 25px; /* Asegúrate de que tenga altura suficiente */
+
+    -fx-font-size: 10px;
+
+    -fx-padding: 0;
+
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-text-fill: white;
 }
 
-/* Estilo para un botón "encendido" (activado) */
+/* Mantén tus otras clases como estaban */
 .step-button-on {
-    -fx-background-color: #ffa500; /* Naranja */
+    -fx-background-color: #ffa500;
     -fx-border-color: #ffc966;
+    /* Si quieres que el texto sea negro cuando está encendido para mejor contraste: */
+    -fx-text-fill: black;
 }
 
-/* Estilo para el "playhead" (el paso que está sonando) */
 .step-button-playhead {
-    -fx-border-color: #ffffff; /* Borde blanco brillante */
+    -fx-border-color: #ffffff;
     -fx-border-width: 2;
 }
 

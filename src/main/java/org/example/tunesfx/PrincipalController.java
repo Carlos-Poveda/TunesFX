@@ -148,28 +148,30 @@ public class PrincipalController {
      * Lógica del secuenciador
      */
     private void runSequencerStep() {
-        // 1. Calcular paso anterior y actual
         int prevStep = currentStep;
         currentStep = (currentStep + 1) % NUM_STEPS;
 
-        // 2. Iterar por TODAS las filas
         for (ChannelRackRowController row : allRows) {
-
-            // 3. Mover el playhead visual
             if (prevStep != -1) {
                 row.clearPlayhead(prevStep);
             }
             row.setPlayhead(currentStep);
 
-            // 4. Comprobar si esta fila debe sonar en este paso
-            if (row.isStepOn(currentStep)) {
+            // 1. Obtener los datos del paso actual
+            StepData stepData = row.getStepData(currentStep);
 
-                // 5. Si sí, coger SU sample y reproducirlo
+            // 2. Verificar si existe y está activo
+            if (stepData != null && stepData.isActive()) {
                 Sample sampleToPlay = row.getSample();
+
                 if (sampleToPlay != null) {
-                    SamplePlayer.playSample(sampleToPlay);
-                    }
+                    // 3. Calcular el pitch (OpenAL lo necesita como float)
+                    float pitch = stepData.getPitchMultiplier();
+
+                    // 4. Reproducir con pitch
+                    SamplePlayer.playSample(sampleToPlay, pitch);
                 }
+            }
         }
     }
 

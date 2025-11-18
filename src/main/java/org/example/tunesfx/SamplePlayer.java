@@ -9,14 +9,13 @@ public class SamplePlayer {
      * Reutiliza el contexto de OpenAL que 'Audio.java' ya inicializó.
      * @param sample El sample a reproducir.
      */
-    public static void playSample(Sample sample) {
+    public static void playSample(Sample sample, float pitchMultiplier) {
         if (sample == null || sample.getLength() == 0) {
             System.err.println("SamplePlayer: Intento de reproducir sample nulo o vacío.");
             return;
         }
 
         // Importante: La reproducción de audio no debe bloquear el hilo de JavaFX.
-        // Por eso, lanzamos todo en un nuevo hilo.
         new Thread(() -> {
             // 1. Generar un búfer de OpenAL
             int buffer = alGenBuffers();
@@ -33,6 +32,8 @@ public class SamplePlayer {
             // 4. Asignar nuestro búfer a la fuente
             alSourcei(source, AL_BUFFER, buffer);
             catchInternalException();
+
+            alSourcef(source, AL_PITCH, pitchMultiplier);
 
             // 5. ¡Reproducir!
             alSourcePlay(source);
