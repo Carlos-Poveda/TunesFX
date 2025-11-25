@@ -2,11 +2,16 @@ package org.example.tunesfx;
 
 public class StepData {
     private boolean active;
-    private int semitoneOffset; // 0 = nota original, 2 = +2 semitonos, -12 = octava abajo
+    private int semitoneOffset;
+    // 0.0 = Instantáneo, 1.0 = Muy lento/largo
+    private double attack = 0.0;
+    private double release = 0.0;
+    private double volume = 1.0; // Ganancia extra (0.0 a 1.0)
 
     public StepData() {
         this.active = false;
         this.semitoneOffset = 0;
+
     }
 
     public boolean isActive() { return active; }
@@ -19,5 +24,29 @@ public class StepData {
     // Fórmula: 2^(semitonos/12)
     public float getPitchMultiplier() {
         return (float) Math.pow(2, semitoneOffset / 12.0);
+    }
+
+    public double getAttack() {
+        return attack;
+    }
+
+    public void setAttack(double attack) {
+        this.attack = attack;
+    }
+
+    public double getRelease() {
+        return release;
+    }
+
+    public void setRelease(double release) {
+        this.release = release;
+    }
+
+    public double getVolume() {
+        return volume;
+    }
+
+    public void setVolume(double volume) {
+        this.volume = volume;
     }
 }

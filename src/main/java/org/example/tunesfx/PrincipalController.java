@@ -1,5 +1,4 @@
 package org.example.tunesfx;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -169,7 +168,7 @@ public class PrincipalController {
                     float pitch = stepData.getPitchMultiplier();
 
                     // 4. Reproducir con pitch
-                    SamplePlayer.playSample(sampleToPlay, pitch);
+                    SamplePlayer.playStep(sampleToPlay, stepData);
                 }
             }
         }
@@ -222,7 +221,7 @@ public class PrincipalController {
             Pane synthRoot = loader.load();
 
             // 2. Obtener el controlador del Sintetizador
-            org.example.tunesfx.SintetizadorController synthController = loader.getController();
+            SintetizadorController synthController = loader.getController();
 
             // 3. Crear el nuevo Stage (Ventana)
             Stage synthStage = new Stage();

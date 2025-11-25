@@ -1,5 +1,7 @@
 package org.example.tunesfx;
 
+import org.example.tunesfx.utils.AudioDSP;
+
 import static org.lwjgl.openal.AL10.*;
 
 public class SamplePlayer {
@@ -9,51 +11,44 @@ public class SamplePlayer {
      * Reutiliza el contexto de OpenAL que 'Audio.java' ya inicializó.
      * @param sample El sample a reproducir.
      */
-    public static void playSample(Sample sample, float pitchMultiplier) {
-        if (sample == null || sample.getLength() == 0) {
-            System.err.println("SamplePlayer: Intento de reproducir sample nulo o vacío.");
-            return;
-        }
+    public static void playStep(Sample sample, StepData stepData) {
+        if (sample == null || sample.getLength() == 0) return;
 
-        // Importante: La reproducción de audio no debe bloquear el hilo de JavaFX.
         new Thread(() -> {
-            // 1. Generar un búfer de OpenAL
             int buffer = alGenBuffers();
-            catchInternalException();
 
-            // 2. Cargar nuestros datos de short[] en el búfer
-            alBufferData(buffer, AL_FORMAT_MONO16, sample.getData(), Sintetizador.AudioInfo.SAMPLE_RATE);
-            catchInternalException();
+            // --- PROCESAMIENTO DSP ---
+            // Si el step tiene modificaciones, procesamos el audio.
+            // Si no, usamos el original para ahorrar CPU.
+            short[] audioData;
+            if (stepData.getAttack() > 0 || stepData.getRelease() > 0 || stepData.getVolume() < 1.0) {
+                audioData = AudioDSP.applyEnvelope(
+                        sample.getData(),
+                        stepData.getAttack(),
+                        stepData.getRelease(),
+                        stepData.getVolume()
+                );
+            } else {
+                audioData = sample.getData();
+            }
+            // -------------------------
 
-            // 3. Generar una fuente de audio (un "reproductor")
+            alBufferData(buffer, AL_FORMAT_MONO16, audioData, Sintetizador.AudioInfo.SAMPLE_RATE);
+
             int source = alGenSources();
-            catchInternalException();
-
-            // 4. Asignar nuestro búfer a la fuente
             alSourcei(source, AL_BUFFER, buffer);
-            catchInternalException();
+            alSourcef(source, AL_PITCH, stepData.getPitchMultiplier()); // Usar pitch del stepData
 
-            alSourcef(source, AL_PITCH, pitchMultiplier);
-
-            // 5. ¡Reproducir!
             alSourcePlay(source);
-            catchInternalException();
 
-            // 6. Esperar a que la fuente termine de reproducir
-            //    (Esto es un "poll", comprobamos el estado repetidamente)
             while (alGetSourcei(source, AL_SOURCE_STATE) == AL_PLAYING) {
-                try {
-                    // Dormimos el hilo para no consumir 100% de CPU
-                    Thread.sleep(10);
-                } catch (InterruptedException ignored) {
-                }
+                try { Thread.sleep(10); } catch (InterruptedException ignored) {}
             }
 
-            // 7. Limpieza: Una vez terminado, borramos la fuente y el búfer
             alDeleteSources(source);
             alDeleteBuffers(buffer);
 
-        }).start(); // No olvides iniciar el hilo
+        }).start();
     }
 
     /**

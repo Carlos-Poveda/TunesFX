@@ -16,7 +16,6 @@ public class Principal extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
-
         // 2. Configurar el Stage
         primaryStage.setTitle("TunesFX");
         primaryStage.setScene(scene);
@@ -24,16 +23,9 @@ public class Principal extends Application {
         primaryStage.show();
     }
 
-    /**
-     * NUEVO MÉTODO:
-     * Sobrescribimos el método stop() de Application
-     * para apagar OpenAL de forma segura.
-     */
     @Override
     public void stop() throws Exception {
-        Audio.shutdownOpenAL(); // <-- Llamar al apagado
-        // System.exit(0) no es necesario aquí,
-        // pero asegúrate de que todos los hilos 'daemon' se detengan.
+        Audio.shutdownOpenAL();
     }
 
     public static void main(String[] args) {

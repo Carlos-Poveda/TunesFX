@@ -3,9 +3,11 @@ package org.example.tunesfx;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 
 import java.util.Arrays;
 import java.util.List;
@@ -91,45 +93,88 @@ public class ChannelRackRowController {
     private void showPitchMenu(Button btn, StepData data, double x, double y) {
         ContextMenu menu = new ContextMenu();
 
-        // Opción: Resetear (Nota original)
-        MenuItem resetItem = new MenuItem("Original");
+        // --- SECCIÓN 1: PITCH ---
+        Menu pitchMenu = new Menu("Pitch / Tono");
+
+        MenuItem resetItem = new MenuItem("Reset (Original)");
         resetItem.setOnAction(e -> {
             data.setSemitoneOffset(0);
-            updateButtonText(btn, 0);
+            updateButtonText(btn, data);
         });
-        menu.getItems().add(resetItem);
-        menu.getItems().add(new SeparatorMenuItem());
+        pitchMenu.getItems().add(resetItem);
 
-        // Opciones: Rango de -12 a +12 semitonos
-        // Puedes ajustar este rango según necesites
         for (int i = 12; i >= -12; i--) {
-            if (i == 0) continue; // Ya tenemos el reset
-
+            if (i == 0) continue;
             final int offset = i;
-            String label = (offset > 0 ? "+" : "") + offset + " semitones";
-            MenuItem item = new MenuItem(label);
+            MenuItem item = new MenuItem((offset > 0 ? "+" : "") + offset + " Semi");
             item.setOnAction(e -> {
                 data.setSemitoneOffset(offset);
-                updateButtonText(btn, offset);
-
-                // Auto-activar el botón si cambiamos el tono
-                if (!data.isActive()) {
-                    data.setActive(true);
-                    btn.getStyleClass().add("step-button-on");
-                }
+                updateButtonText(btn, data);
+                if (!data.isActive()) { data.setActive(true); btn.getStyleClass().add("step-button-on"); }
             });
-            menu.getItems().add(item);
+            pitchMenu.getItems().add(item);
         }
+        menu.getItems().add(pitchMenu);
+
+        menu.getItems().add(new SeparatorMenuItem());
+
+        // --- SECCIÓN 2: ATTACK (Slider) ---
+        Slider attackSlider = new Slider(0, 0.5, data.getAttack()); // Máx 50% del sample
+        attackSlider.setShowTickLabels(false);
+        Label attackLabel = new Label("Attack: " + String.format("%.2f", data.getAttack()));
+
+        attackSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            data.setAttack(newVal.doubleValue());
+            attackLabel.setText("Attack: " + String.format("%.2f", newVal));
+        });
+
+        VBox attackBox = new VBox(attackLabel, attackSlider);
+        attackBox.setPadding(new Insets(5));
+        CustomMenuItem attackItem = new CustomMenuItem(attackBox);
+        attackItem.setHideOnClick(false); // ¡Importante para poder arrastrar!
+        menu.getItems().add(attackItem);
+
+        // --- SECCIÓN 3: RELEASE (Slider) ---
+        Slider releaseSlider = new Slider(0, 0.5, data.getRelease()); // Máx 50% del sample
+        Label releaseLabel = new Label("Release: " + String.format("%.2f", data.getRelease()));
+
+        releaseSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            data.setRelease(newVal.doubleValue());
+            releaseLabel.setText("Release: " + String.format("%.2f", newVal));
+        });
+
+        VBox releaseBox = new VBox(releaseLabel, releaseSlider);
+        releaseBox.setPadding(new Insets(5));
+        CustomMenuItem releaseItem = new CustomMenuItem(releaseBox);
+        releaseItem.setHideOnClick(false);
+        menu.getItems().add(releaseItem);
+
+        // --- SECCIÓN 4: VOLUMEN (Slider) ---
+        Slider volSlider = new Slider(0, 1.0, data.getVolume());
+        Label volLabel = new Label("Vol: " + (int)(data.getVolume()*100) + "%");
+
+        volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            data.setVolume(newVal.doubleValue());
+            volLabel.setText("Vol: " + (int)(newVal.doubleValue()*100) + "%");
+        });
+
+        VBox volBox = new VBox(volLabel, volSlider);
+        volBox.setPadding(new Insets(5));
+        CustomMenuItem volItem = new CustomMenuItem(volBox);
+        volItem.setHideOnClick(false);
+        menu.getItems().add(volItem);
 
         menu.show(btn, x, y);
     }
 
     // Pequeña ayuda visual: poner un numerito en el botón si tiene pitch
-    private void updateButtonText(Button btn, int offset) {
+    private void updateButtonText(Button btn, StepData data) {
+        int offset = data.getSemitoneOffset();
         if (offset == 0) {
             btn.setText("");
         } else {
             btn.setText(String.valueOf(offset));
+            btn.setStyle("-fx-font-size: 9px; -fx-padding: 0;");
         }
     }
 
