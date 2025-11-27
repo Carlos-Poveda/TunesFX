@@ -1,7 +1,8 @@
 package org.example.tunesfx;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 
 public class SintetizadorController {
@@ -14,6 +15,23 @@ public class SintetizadorController {
     @FXML private Oscilator oscilador4;
     @FXML private Oscilator oscilador5;
     @FXML private WaveViewer waveViewer;
+
+    // --- NUEVOS CAMPOS FXML PARA FILTRO ---
+    @FXML private ComboBox<Filter.Tipo> filterTypeCombo;
+    @FXML private Slider filterCutoffSlider;
+    @FXML private Slider filterResonanceSlider;
+    @FXML private ToggleButton filterToggleButton;
+    @FXML private Label filterCutoffLabel;
+    @FXML private Label filterResonanceLabel;
+
+    // --- NUEVOS COMPONENTES PARA LFO ---
+    @FXML private ComboBox<LFO.Waveform> lfoWaveformCombo;
+    @FXML private ComboBox<LFO.Target> lfoTargetCombo;
+    @FXML private Slider lfoRateSlider;
+    @FXML private Slider lfoAmountSlider;
+    @FXML private ToggleButton lfoToggleButton;
+    @FXML private Label lfoRateLabel;
+    @FXML private Label lfoAmountLabel;
 
     private Oscilator[] oscillators;
 
@@ -42,6 +60,137 @@ public class SintetizadorController {
         }
         
         guardarSample.setOnAction(e -> handleSaveSample());
+
+        configurarFiltro();
+
+        configurarLFO();
+    }
+
+    private void configurarLFO() {
+        // Configurar ComboBox de waveform y target
+        lfoWaveformCombo.setItems(FXCollections.observableArrayList(LFO.Waveform.values()));
+        lfoWaveformCombo.setValue(LFO.Waveform.SINE);
+
+        lfoTargetCombo.setItems(FXCollections.observableArrayList(LFO.Target.values()));
+        lfoTargetCombo.setValue(LFO.Target.FILTER_CUTOFF);
+
+        // Configurar sliders
+        lfoRateSlider.setMin(0.1);
+        lfoRateSlider.setMax(20.0);
+        lfoRateSlider.setValue(1.0);
+        lfoRateSlider.setShowTickLabels(true);
+        lfoRateSlider.setShowTickMarks(true);
+
+        lfoAmountSlider.setMin(0.0);
+        lfoAmountSlider.setMax(1.0);
+        lfoAmountSlider.setValue(0.5);
+        lfoAmountSlider.setShowTickLabels(true);
+        lfoAmountSlider.setShowTickMarks(true);
+
+        // Actualizar labels
+        actualizarLabelsLFO();
+
+        // Listeners
+        lfoWaveformCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setLFWaveform(newVal);
+        });
+
+        lfoTargetCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setLFOTarget(newVal);
+            lfoToggleButton.setSelected(newVal != LFO.Target.NONE);
+            logic.setLFOActivado(newVal != LFO.Target.NONE);
+        });
+
+        lfoRateSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setLFORate(newVal.doubleValue());
+            actualizarLabelsLFO();
+        });
+
+        lfoAmountSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setLFOAmount(newVal.doubleValue());
+            actualizarLabelsLFO();
+        });
+
+        lfoToggleButton.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal && lfoTargetCombo.getValue() == LFO.Target.NONE) {
+                lfoTargetCombo.setValue(LFO.Target.FILTER_CUTOFF);
+            } else if (!newVal) {
+                lfoTargetCombo.setValue(LFO.Target.NONE);
+            }
+            logic.setLFOActivado(newVal);
+        });
+    }
+
+    private void actualizarLabelsLFO() {
+        lfoRateLabel.setText(String.format("%.1f Hz", lfoRateSlider.getValue()));
+        lfoAmountLabel.setText(String.format("%.2f", lfoAmountSlider.getValue()));
+    }
+
+    private void configurarFiltro() {
+        // Configurar ComboBox de tipos de filtro
+        filterTypeCombo.setItems(FXCollections.observableArrayList(Filter.Tipo.values()));
+        filterTypeCombo.setValue(Filter.Tipo.OFF);
+
+        // Configurar sliders
+        filterCutoffSlider.setMin(20);
+        filterCutoffSlider.setMax(20000);
+        filterCutoffSlider.setValue(1000);
+        filterCutoffSlider.setShowTickLabels(true);
+        filterCutoffSlider.setShowTickMarks(true);
+
+        filterResonanceSlider.setMin(0.1);
+        filterResonanceSlider.setMax(1.0);
+        filterResonanceSlider.setValue(0.5);
+        filterResonanceSlider.setShowTickLabels(true);
+        filterResonanceSlider.setShowTickMarks(true);
+
+        // Actualizar labels iniciales
+        actualizarLabelsFiltro();
+
+        // Listeners para los controles del filtro
+        filterTypeCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setTipoFiltro(newVal);
+
+            // --- NUEVO: SINCRONIZAR LOS SLIDERS CON LOS VALORES POR DEFECTO DEL FILTRO ---
+            if (newVal != Filter.Tipo.OFF) {
+                // Obtener los valores actuales del filtro y actualizar los sliders
+                filterCutoffSlider.setValue(logic.getFrecuenciaCorteFiltro());
+                filterResonanceSlider.setValue(logic.getResonanciaFiltro());
+            }
+
+            // Sincronizar el toggle button con el tipo de filtro
+            filterToggleButton.setSelected(newVal != Filter.Tipo.OFF);
+            logic.setFiltroActivado(newVal != Filter.Tipo.OFF);
+
+            // Actualizar los labels
+            actualizarLabelsFiltro();
+        });
+
+        filterCutoffSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setFrecuenciaCorteFiltro(newVal.doubleValue());
+            actualizarLabelsFiltro();
+        });
+
+        filterResonanceSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            logic.setResonanciaFiltro(newVal.doubleValue());
+            actualizarLabelsFiltro();
+        });
+
+        filterToggleButton.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            // Si se activa el toggle y el filtro está en OFF, cambiar a LOW_PASS
+            if (newVal && filterTypeCombo.getValue() == Filter.Tipo.OFF) {
+                filterTypeCombo.setValue(Filter.Tipo.LOW_PASS);
+            }
+            // Si se desactiva el toggle, cambiar a OFF
+            else if (!newVal) {
+                filterTypeCombo.setValue(Filter.Tipo.OFF);
+            }
+            logic.setFiltroActivado(newVal);
+        });
+    }
+    private void actualizarLabelsFiltro() {
+        filterCutoffLabel.setText(String.format("%.0f Hz", filterCutoffSlider.getValue()));
+        filterResonanceLabel.setText(String.format("%.2f", filterResonanceSlider.getValue()));
     }
 
     /**
