@@ -21,12 +21,13 @@ public class SamplePlayer {
             // Si el step tiene modificaciones, procesamos el audio.
             // Si no, usamos el original para ahorrar CPU.
             short[] audioData;
-            if (stepData.getAttack() > 0 || stepData.getRelease() > 0 || stepData.getVolume() < 1.0) {
+            if (stepData.getAttack() > 0 || stepData.getRelease() > 0 || stepData.getVolume() < 1.0 || stepData.getDurationFactor() < 1.0) {
                 audioData = AudioDSP.applyEnvelope(
                         sample.getData(),
                         stepData.getAttack(),
                         stepData.getRelease(),
-                        stepData.getVolume()
+                        stepData.getVolume(),
+                        stepData.getDurationFactor()
                 );
             } else {
                 audioData = sample.getData();

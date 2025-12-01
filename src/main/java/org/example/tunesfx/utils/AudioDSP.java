@@ -10,40 +10,44 @@ public class AudioDSP {
      * @param volume 0.0 a 1.0
      * @return Un NUEVO array procesado.
      */
-    public static short[] applyEnvelope(short[] originalData, double attackFactor, double releaseFactor, double volume) {
-        int length = originalData.length;
-        short[] processed = new short[length];
+    public static short[] applyEnvelope(short[] originalData, double attackFactor, double releaseFactor, double volume, double durationFactor) {
+// 1. Calcular la longitud final del array
+        int targetLength = (int) (originalData.length * durationFactor);
+        // Aseguramos una duración mínima (ej. 10ms o 100 muestras) para evitar fallos
+        if (targetLength < 100) targetLength = 100;
+        if (targetLength > originalData.length) targetLength = originalData.length;
 
-        // Definir longitudes en muestras
-        // Limitamos el ataque y release para que no se solapen extrañamente si suman > 100%
-        int attackSamples = (int) (length * attackFactor);
-        int releaseSamples = (int) (length * releaseFactor);
+        short[] processed = new short[targetLength];
 
-        // Evitar que attack + release sea mayor que la longitud total
-        if (attackSamples + releaseSamples > length) {
-            // Ajuste simple: comprimirlos proporcionalmente
-            double factor = (double) length / (attackSamples + releaseSamples);
-            attackSamples *= factor;
-            releaseSamples *= factor;
+        // 2. Definir longitudes en muestras basadas en la LONGITUD OBJETIVO
+        int attackSamples = (int) (targetLength * attackFactor);
+        int releaseSamples = (int) (targetLength * releaseFactor);
+
+        // Manejar superposición (reutilizando la lógica anterior)
+        if (attackSamples + releaseSamples > targetLength) {
+            double factor = (double) targetLength / (attackSamples + releaseSamples);
+            attackSamples = (int)(attackSamples * factor);
+            releaseSamples = (int)(releaseSamples * factor);
         }
 
-        int releaseStartIndex = length - releaseSamples;
+        int releaseStartIndex = targetLength - releaseSamples;
 
-        for (int i = 0; i < length; i++) {
+        // 3. Aplicar envolvente y truncar
+        for (int i = 0; i < targetLength; i++) { // Bucle hasta la longitud objetivo
             double envelope = 1.0;
 
-            // 1. Lógica de Attack (Fade In)
+            // Lógica de Attack (Fade In)
             if (i < attackSamples) {
                 envelope = (double) i / attackSamples;
             }
-            // 2. Lógica de Release (Fade Out)
+            // Lógica de Release (Fade Out)
             else if (i >= releaseStartIndex) {
                 int samplesIntoRelease = i - releaseStartIndex;
                 envelope = 1.0 - ((double) samplesIntoRelease / releaseSamples);
             }
 
-            // 3. Aplicar Volumen y Envolvente
-            // Multiplicamos: Sample * Volumen * Envolvente
+            // Aplicar Volumen, Envolvente y Truncamiento
+            // Usamos originalData[i] pero solo hasta targetLength
             double val = originalData[i] * volume * envelope;
 
             // Clamping (asegurar que no nos pasamos del límite de short)
@@ -53,6 +57,6 @@ public class AudioDSP {
             processed[i] = (short) val;
         }
 
-        return processed;
+        return processed; // Devolvemos el array truncado
     }
 }

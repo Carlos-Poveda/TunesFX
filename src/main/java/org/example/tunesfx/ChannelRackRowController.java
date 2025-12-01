@@ -165,6 +165,22 @@ public class ChannelRackRowController {
         menu.getItems().add(volItem);
 
         menu.show(btn, x, y);
+
+        // --- SECCIÓN 5: DURACIÓN (Slider) ---
+        // Rango: 0.1 (10%) a 1.0 (100%)
+        Slider durationSlider = new Slider(0.1, 1.0, data.getDurationFactor());
+        Label durationLabel = new Label("Duración: " + (int)(data.getDurationFactor()*100) + "%");
+
+        durationSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            data.setDurationFactor(newVal.doubleValue());
+            durationLabel.setText("Duración: " + (int)(newVal.doubleValue()*100) + "%");
+        });
+
+        VBox durationBox = new VBox(durationLabel, durationSlider);
+        durationBox.setPadding(new Insets(5));
+        CustomMenuItem durationItem = new CustomMenuItem(durationBox);
+        durationItem.setHideOnClick(false); // No se cierra al interactuar con el Slider
+        menu.getItems().add(durationItem);
     }
 
     // Pequeña ayuda visual: poner un numerito en el botón si tiene pitch

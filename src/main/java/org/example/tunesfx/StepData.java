@@ -7,7 +7,7 @@ public class StepData {
     private double attack = 0.0;
     private double release = 0.0;
     private double volume = 1.0; // Ganancia extra (0.0 a 1.0)
-
+    private double durationFactor = 1.0; // 1.0 = 100% de la duración original
     public StepData() {
         this.active = false;
         this.semitoneOffset = 0;
@@ -48,5 +48,13 @@ public class StepData {
 
     public void setVolume(double volume) {
         this.volume = volume;
+    }
+
+    public double getDurationFactor() {
+        return durationFactor;
+    }
+
+    public void setDurationFactor(double durationFactor) {
+        this.durationFactor = durationFactor;
     }
 }
