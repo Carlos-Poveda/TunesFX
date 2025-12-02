@@ -277,19 +277,4 @@ public class ChannelRackRowController {
         }
         return -1; // Fila vacía
     }
-
-    /**
-     * Se llama cuando se hace clic en CUALQUIER botón de paso de esta fila.
-     */
-//    @FXML
-//    private void handleStepButtonToggle(ActionEvent event) {
-//        Button clickedButton = (Button) event.getSource();
-//        ObservableList<String> styleClasses = clickedButton.getStyleClass();
-//
-//        if (styleClasses.contains("step-button-on")) {
-//            styleClasses.remove("step-button-on");
-//        } else {
-//            styleClasses.add("step-button-on");
-//        }
-//    }
 }

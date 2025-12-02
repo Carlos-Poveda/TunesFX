@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -19,7 +20,11 @@ import org.example.tunesfx.audio.Sample;
 import org.example.tunesfx.audio.SampleBank;
 import org.example.tunesfx.audio.SamplePlayer;
 import org.example.tunesfx.audio.StepData;
+import javafx.stage.FileChooser;
+import org.example.tunesfx.utils.AudioFileLoader;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
@@ -71,6 +76,45 @@ public class PrincipalController {
         // --- FIN DE LA MAGIA ---
     }
 
+    @FXML
+    private void handleNuevaPista(ActionEvent event) {
+        cargarSonidoExterno();
+    }
+
+    private void cargarSonidoExterno() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Load sample (WAV)");
+
+        // Filtro para solo ver archivos WAV
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Archivos de Audio WAV", "*.wav")
+        );
+
+        // Obtener la ventana actual para mostrar el diálogo encima
+        Stage stage = (Stage) btnNuevaPista.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+
+        if (file != null) {
+            try {
+                // 1. Usar nuestro cargador para obtener los datos raw
+                short[] data = AudioFileLoader.loadSample(file);
+
+                // 2. Crear un objeto Sample nativo de tu motor
+                Sample externalSample = new Sample(data);
+
+                // 3. Añadir la fila directamente
+                addNewRow(externalSample);
+
+                System.out.println("Sample externo cargado: " + file.getName());
+
+            } catch (IOException | UnsupportedAudioFileException e) {
+                e.printStackTrace();
+                System.err.println("Error al cargar el archivo de audio.");
+                // Aquí podrías mostrar un Alert de error al usuario
+            }
+        }
+    }
+
     private void initializeSequencer() {
         // Calculamos la duración del paso basado en 120 BPM
         double beatDurationMillis = 60000.0 / referenciaBPM;
@@ -101,16 +145,16 @@ public class PrincipalController {
         sequencerTimeline.setRate(newRate);
     }
 
-    @FXML
-    private void handleNuevaPista(ActionEvent event) {
-        Sample sampleToAdd = SampleBank.getInstance().getCurrentSample();
-
-        if (sampleToAdd == null) {
-            return;
-        }
-
-        addNewRow(sampleToAdd);
-    }
+//    @FXML
+//    private void handleNuevaPista(ActionEvent event) {
+//        Sample sampleToAdd = SampleBank.getInstance().getCurrentSample();
+//
+//        if (sampleToAdd == null) {
+//            return;
+//        }
+//
+//        addNewRow(sampleToAdd);
+//    }
 
     /**
      * NUEVO MÉTODO REUTILIZABLE:
