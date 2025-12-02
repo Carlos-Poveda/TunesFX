@@ -39,7 +39,7 @@ public class SampleBank {
 
     public void setCurrentSample(Sample sample) {
         this.currentSample = sample;
-        System.out.println("SampleBank: Nuevo sample almacenado.");
+//        System.out.println("SampleBank: Nuevo sample almacenado.");
 
         // Si hay alguien escuchando (el PrincipalController)...
         if (onSampleSavedListener != null) {
