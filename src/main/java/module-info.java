@@ -6,4 +6,6 @@ module org.example.tunesfx {
 
     opens org.example.tunesfx to javafx.fxml, javafx.graphics;
     exports org.example.tunesfx;
+    exports org.example.tunesfx.utils;
+    opens org.example.tunesfx.utils to javafx.fxml, javafx.graphics;
 }

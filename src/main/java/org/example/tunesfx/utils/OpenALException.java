@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.utils;
 
 import static org.lwjgl.openal.AL10.*;
 

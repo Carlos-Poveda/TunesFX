@@ -104,11 +104,9 @@ public class PrincipalController {
         Sample sampleToAdd = SampleBank.getInstance().getCurrentSample();
 
         if (sampleToAdd == null) {
-            System.err.println("¡No hay sample guardado! Abre el sinte y guarda uno primero.");
             return;
         }
 
-        // Llama al método reutilizable
         addNewRow(sampleToAdd);
     }
 
@@ -147,27 +145,59 @@ public class PrincipalController {
      * Lógica del secuenciador
      */
     private void runSequencerStep() {
-        int prevStep = currentStep;
-        currentStep = (currentStep + 1) % NUM_STEPS;
+        // 1. Calcular el punto de retorno dinámico (Loop Point)
+        int maxActiveStep = -1;
 
+        for (ChannelRackRowController row : allRows) {
+            // Buscamos cuál es el paso activo más lejano de TODAS las filas
+            int rowLastStep = row.getLastActiveStepIndex();
+            if (rowLastStep > maxActiveStep) {
+                maxActiveStep = rowLastStep;
+            }
+        }
+
+        // 2. Definir el límite del bucle
+        // Si no hay ninguna nota (maxActiveStep == -1), ponemos un mínimo (ej. 15 para 16 pasos)
+        // para que el secuenciador no se vuelva loco o se quede en 0.
+        int loopLimit = (maxActiveStep == -1) ? 15 : maxActiveStep;
+
+           if (maxActiveStep != -1) {
+               // Redondea hacia arriba al siguiente múltiplo de 4 (ej: si acaba en 2, sube a 3)
+               // Esto hace que los bucles suenen más "cuadrados" musicalmente.
+               int remainder = (loopLimit + 1) % 4;
+               if (remainder != 0) {
+                   loopLimit += (4 - remainder);
+               }
+           }
+
+        // 3. Avanzar el paso
+        int prevStep = currentStep;
+
+        // Si el paso actual ya superó el límite (porque borraste notas mientras sonaba)
+        // O si hemos llegado al final del bucle activo...
+        if (currentStep >= loopLimit) {
+            currentStep = 0; // ...reiniciamos al principio
+        } else {
+            currentStep++;   // ...avanzamos normal
+        }
+
+        // 4. Actualizar la UI y reproducir (El resto es igual que antes)
         for (ChannelRackRowController row : allRows) {
             if (prevStep != -1) {
                 row.clearPlayhead(prevStep);
             }
+            // Asegurarnos de limpiar también si saltamos bruscamente de un paso alto a 0
+            if (currentStep == 0 && prevStep > 0) {
+                row.clearPlayhead(prevStep);
+            }
+
             row.setPlayhead(currentStep);
 
-            // 1. Obtener los datos del paso actual
+            // Reproducir sonido
             StepData stepData = row.getStepData(currentStep);
-
-            // 2. Verificar si existe y está activo
             if (stepData != null && stepData.isActive()) {
                 Sample sampleToPlay = row.getSample();
-
                 if (sampleToPlay != null) {
-                    // 3. Calcular el pitch (OpenAL lo necesita como float)
-                    float pitch = stepData.getPitchMultiplier();
-
-                    // 4. Reproducir con pitch
                     SamplePlayer.playStep(sampleToPlay, stepData);
                 }
             }
@@ -181,14 +211,13 @@ public class PrincipalController {
         } else {
             // No iniciar si no hay pistas
             if (allRows.isEmpty()) {
-                System.out.println("Añade una pista primero.");
                 return;
             }
             // Iniciar
             sequencerTimeline.play();
             btnEncenderRitmo.setText("Stop");
             isPlaying = true;
-            System.out.println("Sequencer Iniciado...");
+//            System.out.println("Sequencer Iniciado...");
         }
     }
 
@@ -207,7 +236,7 @@ public class PrincipalController {
             }
         }
         currentStep = -1; // Resetear el contador
-        System.out.println("Sequencer Detenido.");
+//        System.out.println("Sequencer Detenido.");
     }
 
 

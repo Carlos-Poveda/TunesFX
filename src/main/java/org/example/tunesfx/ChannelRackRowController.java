@@ -1,7 +1,5 @@
 package org.example.tunesfx;
 
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -86,11 +84,11 @@ public class ChannelRackRowController {
 
         } else if (event.getButton() == MouseButton.SECONDARY) {
             // --- CLICK DERECHO: Menú de Tono ---
-            showPitchMenu(clickedButton, data, event.getScreenX(), event.getScreenY());
+            showMenu(clickedButton, data, event.getScreenX(), event.getScreenY());
         }
     }
 
-    private void showPitchMenu(Button btn, StepData data, double x, double y) {
+    private void showMenu(Button btn, StepData data, double x, double y) {
         ContextMenu menu = new ContextMenu();
 
         // --- SECCIÓN 1: PITCH ---
@@ -261,6 +259,21 @@ public class ChannelRackRowController {
     public void clearPlayhead(int step) {
         if (step < 0 || step >= stepButtons.size()) return;
         stepButtons.get(step).getStyleClass().remove("step-button-playhead");
+    }
+
+    /**
+     * Devuelve el índice del último paso activo en esta fila.
+     * Si no hay ninguno, devuelve -1.
+     */
+    public int getLastActiveStepIndex() {
+        // Recorremos de atrás hacia adelante (desde el paso 63 hasta el 0)
+        for (int i = stepButtons.size() - 1; i >= 0; i--) {
+            StepData data = getStepData(i);
+            if (data != null && data.isActive()) {
+                return i;
+            }
+        }
+        return -1; // Fila vacía
     }
 
     /**

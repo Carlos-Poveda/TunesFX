@@ -1,5 +1,6 @@
 package org.example.tunesfx;
 
+import org.example.tunesfx.utils.OpenALException;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.ALC;
 import org.example.tunesfx.utils.Utils;
