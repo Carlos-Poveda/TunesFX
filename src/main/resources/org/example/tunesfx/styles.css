@@ -19,8 +19,8 @@
 
 /* Mantén tus otras clases como estaban */
 .step-button-on {
-    -fx-background-color: #ffa500;
-    -fx-border-color: #ffc966;
+    -fx-background-color: #03ab10;
+    -fx-border-color: #00ff17;
     /* Si quieres que el texto sea negro cuando está encendido para mejor contraste: */
     -fx-text-fill: black;
 }

@@ -95,6 +95,7 @@ public class ChannelRackRowController {
 
         // --- SECCIÓN 1: PITCH ---
         Menu pitchMenu = new Menu("Pitch / Tono");
+        pitchMenu.setStyle("-fx-text-fill: black;");
 
         MenuItem resetItem = new MenuItem("Reset (Original)");
         resetItem.setOnAction(e -> {
@@ -122,6 +123,7 @@ public class ChannelRackRowController {
         Slider attackSlider = new Slider(0, 0.5, data.getAttack()); // Máx 50% del sample
         attackSlider.setShowTickLabels(false);
         Label attackLabel = new Label("Attack: " + String.format("%.2f", data.getAttack()));
+        attackLabel.setStyle("-fx-text-fill: black;");
 
         attackSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             data.setAttack(newVal.doubleValue());
@@ -137,6 +139,7 @@ public class ChannelRackRowController {
         // --- SECCIÓN 3: RELEASE (Slider) ---
         Slider releaseSlider = new Slider(0, 0.5, data.getRelease()); // Máx 50% del sample
         Label releaseLabel = new Label("Release: " + String.format("%.2f", data.getRelease()));
+        releaseLabel.setStyle("-fx-text-fill: black;");
 
         releaseSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             data.setRelease(newVal.doubleValue());
@@ -151,7 +154,8 @@ public class ChannelRackRowController {
 
         // --- SECCIÓN 4: VOLUMEN (Slider) ---
         Slider volSlider = new Slider(0, 1.0, data.getVolume());
-        Label volLabel = new Label("Vol: " + (int)(data.getVolume()*100) + "%");
+        Label volLabel = new Label("Volume: " + (int)(data.getVolume()*100) + "%");
+        volLabel.setStyle("-fx-text-fill: black;");
 
         volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             data.setVolume(newVal.doubleValue());
@@ -169,7 +173,8 @@ public class ChannelRackRowController {
         // --- SECCIÓN 5: DURACIÓN (Slider) ---
         // Rango: 0.1 (10%) a 1.0 (100%)
         Slider durationSlider = new Slider(0.1, 1.0, data.getDurationFactor());
-        Label durationLabel = new Label("Duración: " + (int)(data.getDurationFactor()*100) + "%");
+        Label durationLabel = new Label("Duration: " + (int)(data.getDurationFactor()*100) + "%");
+        durationLabel.setStyle("-fx-text-fill: black;");
 
         durationSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             data.setDurationFactor(newVal.doubleValue());
