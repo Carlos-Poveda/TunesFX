@@ -10,7 +10,7 @@ import javafx.scene.paint.Color;
 import java.io.IOException; // Importar
 import java.util.function.Function;
 
-public class WaveViewer extends StackPane { // Ahora extiende StackPane
+public class WaveViewer extends StackPane {
 
     @FXML
     private Canvas canvas;

@@ -7,6 +7,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.Cursor;
+import org.example.tunesfx.utils.WaveTable;
 
 import java.io.IOException;
 

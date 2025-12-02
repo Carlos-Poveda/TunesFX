@@ -1,9 +1,9 @@
-package org.example.tunesfx;
-import org.example.tunesfx.utils.Utils;
+package org.example.tunesfx.utils;
+import org.example.tunesfx.Sintetizador;
 
-enum WaveTable {
+public enum WaveTable {
     Sine,Square,Saw,Triangle;
-    static final int SIZE = 8192;
+    public static final int SIZE = 8192;
     private final float[] samples = new float[SIZE];
     static {
         final double FUND_FREQ = 1d/(SIZE/(double) Sintetizador.AudioInfo.SAMPLE_RATE);
@@ -16,7 +16,7 @@ enum WaveTable {
             Triangle.samples[i] = (float)(2d * Math.abs(Saw.samples[i]) - 1d);
         }
     }
-    float[] getSamples() {
+    public float[] getSamples() {
         return samples;
     }
 }

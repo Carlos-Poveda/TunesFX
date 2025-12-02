@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.audio;
 
 public class Sample {
     private final short[] data;

@@ -1,6 +1,8 @@
 package org.example.tunesfx;
 
+import org.example.tunesfx.audio.Audio;
 import org.example.tunesfx.utils.Utils;
+
 import java.util.HashMap;
 
 public class Sintetizador {

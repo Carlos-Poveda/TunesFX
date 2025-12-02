@@ -7,6 +7,8 @@ import javafx.scene.layout.Pane;
 
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import org.example.tunesfx.audio.Sample;
+import org.example.tunesfx.audio.SampleBank;
 
 public class SintetizadorController {
     @FXML

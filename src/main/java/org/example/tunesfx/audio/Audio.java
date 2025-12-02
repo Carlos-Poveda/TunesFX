@@ -1,7 +1,9 @@
-package org.example.tunesfx;
+package org.example.tunesfx.audio;
 
+import org.example.tunesfx.Sintetizador;
 import org.example.tunesfx.utils.OpenALException;
 import org.lwjgl.openal.AL;
+import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.ALC;
 import org.example.tunesfx.utils.Utils;
 import java.util.function.Supplier;
@@ -10,13 +12,13 @@ import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.ALC10.*;
 
 public class Audio extends Thread {
-    private volatile boolean initialized = false; // Usar volatile para acceso entre hilos
+    private volatile boolean initialized = false;
 
-    boolean isInitialized() {
+    public boolean isInitialized() {
         return initialized;
     }
 
-    static final int BUFFER_SIZE = 512; // 1024?
+    public static final int BUFFER_SIZE = 512; // 1024?
     static final int BUFFER_COUNT = 8;
 
     private final Supplier<short[]> bufferSupplier;
@@ -33,7 +35,7 @@ public class Audio extends Thread {
     private volatile boolean closed;
     private volatile boolean running;
 
-    Audio(Supplier<short[]> bufferSupplier) {
+    public Audio(Supplier<short[]> bufferSupplier) {
         this.bufferSupplier = bufferSupplier;
         start();
     }
@@ -47,7 +49,7 @@ public class Audio extends Thread {
 
                 AL.createCapabilities(ALC.createCapabilities(device));
                 openALInitialized = true;
-                System.out.println("OpenAL inicializado por hilo: " + this.getName());
+//                System.out.println("OpenAL inicializado por hilo: " + this.getName());
             }
         }
         source = alGenSources();
@@ -58,7 +60,7 @@ public class Audio extends Thread {
 
         for (int i = 0; i < BUFFER_COUNT; i++) {
             int buf = buffers[i];
-            alBufferData(buf, AL_FORMAT_MONO16, new short[0], Sintetizador.AudioInfo.SAMPLE_RATE);
+            AL10.alBufferData(buf, AL_FORMAT_MONO16, new short[0], Sintetizador.AudioInfo.SAMPLE_RATE);
             alSourceQueueBuffers(source, buf);
         }
         bufferIndex = 0;
@@ -68,7 +70,7 @@ public class Audio extends Thread {
         initialized = true;
     }
 
-    boolean isRunning() {
+    public boolean isRunning() {
         return running;
     }
 
@@ -102,12 +104,12 @@ public class Audio extends Thread {
 //        alcCloseDevice(device);
     }
 
-    synchronized void triggerPlayBack() {
+    public synchronized void triggerPlayBack() {
         running = true;
         notify();
     }
 
-    void close() {
+    public void close() {
         closed = true;
         triggerPlayBack();
     }
@@ -121,7 +123,7 @@ public class Audio extends Thread {
             alcDestroyContext(context);
             alcCloseDevice(device);
             openALInitialized = false;
-            System.out.println("OpenAL apagado.");
+//            System.out.println("OpenAL apagado.");
         }
     }
 

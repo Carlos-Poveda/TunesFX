@@ -6,6 +6,8 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import org.example.tunesfx.audio.Sample;
+import org.example.tunesfx.audio.StepData;
 
 import java.util.Arrays;
 import java.util.List;

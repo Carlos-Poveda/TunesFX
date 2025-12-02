@@ -1,6 +1,8 @@
-package org.example.tunesfx;
+package org.example.tunesfx.audio;
 
+import org.example.tunesfx.Sintetizador;
 import org.example.tunesfx.utils.AudioDSP;
+import org.lwjgl.openal.AL10;
 
 import static org.lwjgl.openal.AL10.*;
 
@@ -34,7 +36,7 @@ public class SamplePlayer {
             }
             // -------------------------
 
-            alBufferData(buffer, AL_FORMAT_MONO16, audioData, Sintetizador.AudioInfo.SAMPLE_RATE);
+            AL10.alBufferData(buffer, AL_FORMAT_MONO16, audioData, Sintetizador.AudioInfo.SAMPLE_RATE);
 
             int source = alGenSources();
             alSourcei(source, AL_BUFFER, buffer);

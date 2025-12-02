@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.audio;
 
 import java.util.function.Consumer;
 

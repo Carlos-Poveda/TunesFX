@@ -15,11 +15,13 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import javafx.application.Platform;
-
+import org.example.tunesfx.audio.Sample;
+import org.example.tunesfx.audio.SampleBank;
+import org.example.tunesfx.audio.SamplePlayer;
+import org.example.tunesfx.audio.StepData;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.io.IOException;
 
 public class PrincipalController {
@@ -264,7 +266,7 @@ public class PrincipalController {
             synthStage.setOnCloseRequest(e -> synthController.shutdown());
 
             // 5. Mostrar la ventana
-            synthStage.setTitle("Sintetizador");
+            synthStage.setTitle("Synth");
             synthStage.setScene(synthScene);
             synthStage.setResizable(false);
             synthStage.show();
