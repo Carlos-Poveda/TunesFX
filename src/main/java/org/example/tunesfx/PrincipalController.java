@@ -104,13 +104,10 @@ public class PrincipalController {
 
                 // 3. Añadir la fila directamente
                 addNewRow(externalSample);
-
-                System.out.println("Sample externo cargado: " + file.getName());
-
+//                System.out.println("Sample externo cargado: " + file.getName());
             } catch (IOException | UnsupportedAudioFileException e) {
                 e.printStackTrace();
                 System.err.println("Error al cargar el archivo de audio.");
-                // Aquí podrías mostrar un Alert de error al usuario
             }
         }
     }
@@ -144,17 +141,6 @@ public class PrincipalController {
 
         sequencerTimeline.setRate(newRate);
     }
-
-//    @FXML
-//    private void handleNuevaPista(ActionEvent event) {
-//        Sample sampleToAdd = SampleBank.getInstance().getCurrentSample();
-//
-//        if (sampleToAdd == null) {
-//            return;
-//        }
-//
-//        addNewRow(sampleToAdd);
-//    }
 
     /**
      * NUEVO MÉTODO REUTILIZABLE:
