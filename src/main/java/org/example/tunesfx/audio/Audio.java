@@ -30,7 +30,6 @@ public class Audio extends Thread {
 
     private int source;
 
-
     private int bufferIndex;
     private volatile boolean closed;
     private volatile boolean running;
