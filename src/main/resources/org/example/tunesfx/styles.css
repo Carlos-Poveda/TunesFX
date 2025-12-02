@@ -4,8 +4,8 @@
     -fx-border-color: #505050;
 
     /* Ajusta el tamaño del botón según tus necesidades (ej. 30px) */
-    -fx-min-width: 30px;
-    -fx-pref-width: 30px;
+    -fx-min-width: 20px;
+    -fx-pref-width: 20px;
     -fx-min-height: 25px; /* Asegúrate de que tenga altura suficiente */
 
     -fx-font-size: 10px;

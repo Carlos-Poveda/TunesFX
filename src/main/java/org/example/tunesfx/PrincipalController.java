@@ -76,7 +76,7 @@ public class PrincipalController {
     }
 
     @FXML
-    private void handleNuevaPista(ActionEvent event) {
+    private void addSample(ActionEvent event) {
         cargarSonidoExterno();
     }
 

@@ -10,9 +10,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="949.0" prefWidth="1908.0" style="-fx-background-color: #0F0F0F;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.PrincipalController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="949.0" prefWidth="1908.0" style="-fx-background-color: #0F0F0F;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.PrincipalController">
    <children>
-      <VBox layoutX="5.0" layoutY="76.0" prefHeight="730.0" prefWidth="1898.0" spacing="10.0" style="-fx-background-color: #121212; -fx-border-color: #5d5d5d; -fx-border-width: 1;">
+      <VBox layoutX="5.0" layoutY="76.0" prefHeight="730.0" prefWidth="719.0" spacing="10.0" style="-fx-background-color: #121212; -fx-border-color: #5d5d5d; -fx-border-width: 1;">
          <padding>
             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
          </padding>
@@ -23,7 +23,7 @@
                   <HBox alignment="CENTER_LEFT" prefHeight="11.0" prefWidth="676.0" spacing="10" style="-fx-background-color: gray; -fx-padding: 10;">
                      <children>
                         <Button fx:id="btnEncenderRitmo" mnemonicParsing="false" onAction="#handlePlayRitmo" prefWidth="80" text="Play" />
-                        <Button fx:id="btnNuevaPista" mnemonicParsing="false" onAction="#handleNuevaPista" text="Añadir Pista" />
+                        <Button fx:id="btnNuevaPista" mnemonicParsing="false" onAction="#addSample" text="Add sample" />
                      </children>
                   </HBox>
 
@@ -39,9 +39,9 @@
       </VBox>
       <HBox alignment="CENTER" layoutX="118.0" layoutY="841.0" prefHeight="25.0" prefWidth="500.0" style="-fx-background-color: #0F0F0F;" />
       <Button fx:id="openSynthButton" layoutX="14.0" layoutY="816.0" maxWidth="1.7976931348623157E308" onAction="#handleOpenSynth" prefHeight="25.0" prefWidth="500.0" style="-fx-background-color: #3d3d3d; -fx-text-fill: white;" text="Abrir Sintetizador" />
-      <HBox alignment="CENTER_LEFT" prefHeight="55.0" prefWidth="500.0" spacing="10.0" style="-fx-background-color: grey;">
+      <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="259.0" spacing="10.0" style="-fx-background-color: grey;">
          <children>
-            <Label text="BPM: " textFill="WHITE">
+            <Label prefHeight="21.0" prefWidth="55.0" text="BPM: " textFill="WHITE">
                <HBox.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </HBox.margin>
