@@ -11,24 +11,17 @@ import java.io.IOException;
 
 public class Oscilator extends HBox {
 
-    private WaveTable waveTable = WaveTable.Sine;
-    private int waveTableStepSize;
-    private int waveTableIndex;
-    private double keyFrequency;
-    private int toneOffset;
-    private int volume = 100;
+    // === NUEVO: La instancia lógica ===
+    private final OscillatorDSP dsp = new OscillatorDSP();
 
+    // Variables puramente visuales (interacción del ratón)
     private double lastMouseY = -1;
     private double lastMouseYVolume = -1;
     private Runnable updateCallback;
-    private static final int TONE_OFFSET_LIMIT = 400;
 
-    @FXML
-    private ComboBox<WaveTable> waveFormComboBox;
-    @FXML
-    private Label toneValueLabel;
-    @FXML
-    private Label volumeParameter;
+    @FXML private ComboBox<WaveTable> waveFormComboBox;
+    @FXML private Label toneValueLabel;
+    @FXML private Label volumeParameter;
 
     public Oscilator() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("oscilador.fxml"));
@@ -41,19 +34,57 @@ public class Oscilator extends HBox {
             throw new RuntimeException(exception);
         }
 
-        inicializarOscilador();
+        // Actualizamos las etiquetas visuales con los valores por defecto del DSP
+        updateUI();
     }
+
+    // Método para permitir acceso al DSP desde fuera (para Sintetizador.java más tarde)
+    public OscillatorDSP getDsp() {
+        return dsp;
+    }
+
+    // === MÉTODOS PUENTE (Delegación) ===
+    // Estos métodos conectan el mundo antiguo con el nuevo DSP
+    // Así Sintetizador.java sigue funcionando por ahora.
+
+    public void setKeyFrequency(double frequency) {
+        dsp.setKeyFrequency(frequency);
+    }
+
+    public double getNextSample() {
+        return dsp.getNextSample();
+    }
+
+    public void resetPhase() {
+        dsp.resetPhase();
+    }
+
+    public double[] getSampleWaveform(int numSamples) {
+        return dsp.getSampleWaveform(numSamples);
+    }
+
 
     @FXML
     private void initialize() {
         waveFormComboBox.setItems(FXCollections.observableArrayList(WaveTable.values()));
         waveFormComboBox.setValue(WaveTable.Sine);
 
+        // Evento cambio de Onda
         waveFormComboBox.setOnAction(e -> {
-            waveTable = waveFormComboBox.getValue();
+            dsp.setWaveTable(waveFormComboBox.getValue()); // Actualizamos DSP
             if (updateCallback != null) updateCallback.run();
         });
 
+        setupMouseControls();
+    }
+
+    private void updateUI() {
+        toneValueLabel.setText("x" + String.format("%.2f", dsp.getToneOffsetInt() / 100d));
+        volumeParameter.setText(" " + dsp.getVolume() + "%");
+    }
+
+    private void setupMouseControls() {
+        // --- CONTROL DE TONO (MOUSE) ---
         toneValueLabel.setOnMousePressed(e -> {
             lastMouseY = e.getScreenY();
             setCursor(Cursor.NONE);
@@ -69,31 +100,24 @@ public class Oscilator extends HBox {
                 lastMouseY = e.getScreenY();
                 return;
             }
-
             double currentMouseY = e.getScreenY();
             double deltaY = currentMouseY - lastMouseY;
             final int SENSITIVITY_FACTOR = 4;
-
             int change = (int)(-deltaY / SENSITIVITY_FACTOR);
 
             if (change != 0) {
-                toneOffset += change;
+                // Actualizamos el DSP
+                int newTone = dsp.getToneOffsetInt() + change;
+                dsp.setToneOffset(newTone);
 
-                if (toneOffset > TONE_OFFSET_LIMIT) {
-                    toneOffset = TONE_OFFSET_LIMIT;
-                } else if (toneOffset < -TONE_OFFSET_LIMIT) {
-                    toneOffset = -TONE_OFFSET_LIMIT;
-                }
-
-                applyToneOffset();
-                toneValueLabel.setText("x" + String.format("%.2f", getToneOffset()));
+                // Actualizamos la Vista
+                toneValueLabel.setText("x" + String.format("%.2f", dsp.getToneOffsetInt() / 100d));
                 lastMouseY = currentMouseY;
-                if (change != 0 && updateCallback != null) {
-                    updateCallback.run();
-                }
+                if (updateCallback != null) updateCallback.run();
             }
         });
 
+        // --- CONTROL DE VOLUMEN (MOUSE) ---
         volumeParameter.setOnMousePressed(e -> {
             lastMouseYVolume = e.getScreenY();
             setCursor(Cursor.NONE);
@@ -109,82 +133,25 @@ public class Oscilator extends HBox {
                 lastMouseYVolume = e.getScreenY();
                 return;
             }
-
             double currentMouseY = e.getScreenY();
             double deltaY = currentMouseY - lastMouseYVolume;
             final int SENSITIVITY_FACTOR = 3;
-
             int change = (int)(-deltaY / SENSITIVITY_FACTOR);
 
             if (change != 0) {
-                volume += change;
+                // Actualizamos el DSP
+                int newVol = dsp.getVolume() + change;
+                dsp.setVolume(newVol);
 
-                if (volume > 100) {
-                    volume = 100;
-                } else if (volume < 0) {
-                    volume = 0;
-                }
-
-                volumeParameter.setText(" " + volume + "%");
+                // Actualizamos la Vista
+                volumeParameter.setText(" " + dsp.getVolume() + "%");
                 lastMouseYVolume = currentMouseY;
-                if (change != 0 && updateCallback != null) {
-                    updateCallback.run();
-                }
+                if (updateCallback != null) updateCallback.run();
             }
         });
     }
 
     public void setUpdateCallback(Runnable updateCallback) {
         this.updateCallback = updateCallback;
-    }
-
-    private void inicializarOscilador() {
-        keyFrequency = 440.0;
-        toneOffset = 0;
-        applyToneOffset();
-    }
-
-    public void resetPhase() {
-        this.waveTableIndex = 0;
-    }
-
-    public double getNextSample() {
-        double sample = waveTable.getSamples()[waveTableIndex] * getVolumenMultiplier();
-        waveTableIndex = (waveTableIndex + waveTableStepSize) % WaveTable.SIZE;
-        return sample;
-    }
-
-    public void setKeyFrequency(double frequency) {
-        keyFrequency = frequency;
-        applyToneOffset();
-
-        // DEBUG: Mostrar cambios de frecuencia
-        if (Math.random() < 0.01) { // Solo el 1% de las veces
-            System.out.println("Oscillator frequency set to: " + frequency + " Hz");
-        }
-    }
-
-    public double[] getSampleWaveform(int numSamples) {
-        double[] samples = new double[numSamples];
-        double frequency = 1.0 / (numSamples / (double)Sintetizador.AudioInfo.SAMPLE_RATE) * 3.0;
-        int index = 0;
-        int stepSize = (int)(WaveTable.SIZE * (frequency * Math.pow(2, getToneOffset())) / Sintetizador.AudioInfo.SAMPLE_RATE);
-        for (int i = 0; i < numSamples; i++) {
-            samples[i] = waveTable.getSamples()[index] * getVolumenMultiplier();
-            index = (index + stepSize) % WaveTable.SIZE;
-        }
-        return samples;
-    }
-
-    private void applyToneOffset() {
-        waveTableStepSize = (int)(WaveTable.SIZE * (keyFrequency * Math.pow(2, getToneOffset())) / Sintetizador.AudioInfo.SAMPLE_RATE);
-    }
-
-    private double getVolumenMultiplier() {
-        return volume / 100.0;
-    }
-
-    private double getToneOffset() {
-        return toneOffset / 100d;
     }
 }

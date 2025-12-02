@@ -77,7 +77,7 @@ public class PrincipalController {
         if (sampleToPlay != null) {
             // 2. Si existe, reproducirlo
             System.out.println("Sequencer Step! Reproduciendo sample.");
-            SamplePlayer.playSample(sampleToPlay);
+            Audio.getInstance().playSample(sampleToPlay);
         } else {
             // 3. Si no existe (ej. el usuario nunca guardó uno),
             // detenemos el bucle para evitar errores.

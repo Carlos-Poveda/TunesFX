@@ -5,23 +5,20 @@ import java.util.HashMap;
 
 public class Sintetizador {
 
-    private static final HashMap<Character,Double> KEY_FREQUENCIES = new HashMap<>();
+    private static final HashMap<Character, Double> KEY_FREQUENCIES = new HashMap<>();
     private boolean shouldGenerate;
     private static final int NUM_OSCILLATORS = 5;
+    private int controlCounter = 0;
+    private static final int CONTROL_RATE = 32;
+    private double lastModulateCutoff = 12000.0;
 
-    private final Audio hiloAudio = new Audio(() -> {
-        if (!shouldGenerate) {
-            return null;
-        }
-        short[] s = new short[Audio.BUFFER_SIZE];
-        for (int i = 0; i < Audio.BUFFER_SIZE; i++) {
-            double d = nextSample();
-            s[i] = (short) (Short.MAX_VALUE * d);
-        }
-        return s;
-    });
+
+
+    // === OPTIMIZACIÓN (Paso 1): Buffer reutilizable para evitar Garbage Collection ===
+    private final short[] bufferCache = new short[Audio.BUFFER_SIZE];
 
     static {
+        // Mapeo de teclas del teclado a notas musicales
         final char[] PIANO_KEYS = "-<zsxdcvgbhnjmq2w3er5t6y7ui9o0p".toCharArray();
         final int STARTING_NOTE = 46;
         for (int i = 0; i < PIANO_KEYS.length; i++) {
@@ -30,6 +27,7 @@ public class Sintetizador {
         }
     }
 
+    // Componentes del Sintetizador
     private Oscilator[] oscillators;
     private WaveViewer waveViewer;
     private Runnable updateCallback;
@@ -54,12 +52,12 @@ public class Sintetizador {
     private EffectsProcessor effectsProcessor;
     private double effectsMix = 0.0;
 
-    // Glide
+    // Glide (Portamento)
     private double glideTime = 0.0;
     private double currentFrequency = 440.0;
     private double targetFrequency = 440.0;
 
-    // Unison
+    // Unison (Voces múltiples desafinadas)
     private int unisonVoices = 1;
     private double unisonDetune = 0.0;
     private double unisonSpread = 0.0;
@@ -86,6 +84,27 @@ public class Sintetizador {
 
         // Inicializar unison
         updateUnisonDetune();
+
+        // === INTEGRACIÓN AUDIO (Paso 3) con OPTIMIZACIÓN (Paso 1) ===
+        // Iniciamos el sistema de audio pasando la lógica de generación
+        Audio.startAudioSystem(() -> {
+            if (!shouldGenerate) {
+                return null;
+            }
+
+            // Rellenamos el buffer reutilizable (Zero Allocation)
+            for (int i = 0; i < Audio.BUFFER_SIZE; i++) {
+                double d = nextSample();
+
+                // Clipping (Limitador) para evitar distorsión digital si sumamos > 1.0
+                if (d > 1.0) d = 1.0;
+                if (d < -1.0) d = -1.0;
+
+                bufferCache[i] = (short) (Short.MAX_VALUE * d);
+            }
+            // Devolvemos siempre la misma referencia con datos nuevos
+            return bufferCache;
+        });
     }
 
     public void updateWaveviewer() {
@@ -98,7 +117,7 @@ public class Sintetizador {
         this.updateCallback = callback;
     }
 
-    // === FILTRO ===
+    // ================== SECCIÓN DE FILTRO ==================
     public void setFilterEnabled(boolean enabled) {
         this.filterEnabled = enabled;
         if (enabled) {
@@ -130,7 +149,7 @@ public class Sintetizador {
         filter.setResonance(filterResonance);
     }
 
-    // === LFO Y MODULACIÓN ===
+    // ================== SECCIÓN DE LFO ==================
     public void setLFO1Frequency(double freq) {
         lfo1.setFrequency(freq);
     }
@@ -151,7 +170,7 @@ public class Sintetizador {
         this.lfo1ToPitch = amount;
     }
 
-    // === ENVOLVENTE DE MODULACIÓN ===
+    // ================== SECCIÓN DE ENVOLVENTE ==================
     public void setModEnvAttack(double attack) {
         modEnvelope.setAttackTime(attack);
     }
@@ -180,7 +199,7 @@ public class Sintetizador {
         modEnvelope.release();
     }
 
-    // === EFECTOS ===
+    // ================== SECCIÓN DE EFECTOS ==================
     public void setReverbLevel(double level) {
         effectsProcessor.setReverbLevel(level);
     }
@@ -202,12 +221,11 @@ public class Sintetizador {
         effectsProcessor.setMix(mix);
     }
 
-    // === GLIDE ===
+    // ================== SECCIÓN GLOBAL / UNISON ==================
     public void setGlideTime(double time) {
         this.glideTime = time;
     }
 
-    // === UNISON ===
     public void setUnisonVoices(int voices) {
         this.unisonVoices = Math.max(1, Math.min(8, voices));
         updateUnisonDetune();
@@ -232,7 +250,8 @@ public class Sintetizador {
         }
     }
 
-    // === MÉTODOS DE AUDIO PRINCIPALES ===
+    // ================== LÓGICA DE AUDIO (DSP) ==================
+
     public void setFrequency(double frequency) {
         if (glideTime > 0 && currentFrequency != frequency) {
             targetFrequency = frequency;
@@ -246,17 +265,22 @@ public class Sintetizador {
     private void applyFrequencyToOscillators() {
         for (int i = 0; i < Math.min(oscillators.length, unisonVoices); i++) {
             double detuneFactor = Math.pow(2, unisonDetuneValues[i] / 1200.0);
+            // NOTA: oscillators[i] es la clase Oscilator (Wrapper), que delega al DSP
             oscillators[i].setKeyFrequency(currentFrequency * detuneFactor);
         }
 
-        // Silenciar osciladores no usados en unison
+        // Silenciar osciladores que sobran (si bajamos las voces unison)
         for (int i = unisonVoices; i < oscillators.length; i++) {
             oscillators[i].setKeyFrequency(0);
         }
     }
 
+    /**
+     * Calcula la siguiente muestra de audio combinando todo.
+     * @return Valor double entre -1.0 y 1.0 (aprox)
+     */
     public double nextSample() {
-        // Aplicar glide
+        // 1. Procesar Glide (suavizado de pitch)
         if (glideTime > 0 && currentFrequency != targetFrequency) {
             double diff = targetFrequency - currentFrequency;
             double maxChange = (targetFrequency * glideTime) / AudioInfo.SAMPLE_RATE;
@@ -268,44 +292,48 @@ public class Sintetizador {
             applyFrequencyToOscillators();
         }
 
-        double deltaTime = 1.0 / AudioInfo.SAMPLE_RATE;
-
-        // Calcular modulación del LFO
+        // 2. Calcular valores de Modulación (LFO y Envolvente)
         double lfo1Value = lfo1.getNextSample();
-
-        // Calcular modulación de la envolvente
         double modEnvValue = modEnvelope.nextSample();
 
-        // Aplicar modulación de la envolvente al cutoff del filtro
-        if (modEnvToFilter > 0) {
-            double modulatedCutoff = filterCutoff;
-            double modulationAmount = modEnvValue * modEnvToFilter * 5000;
-            modulatedCutoff += modulationAmount;
-            modulatedCutoff = Math.max(20, Math.min(22000, modulatedCutoff));
-            filter.setCutoff(modulatedCutoff);
-        }
+        // 3. Modular Cutoff del Filtro
+        controlCounter++;
+        if (controlCounter >= CONTROL_RATE) {
+            controlCounter = 0; //Reiniciar contador
 
-        // Aplicar modulación del LFO al cutoff del filtro
-        if (lfo1ToFilter > 0) {
-            double modulatedCutoff = filterCutoff;
-            double modulationAmount = lfo1Value * lfo1ToFilter * 5000;
-            modulatedCutoff += modulationAmount;
-            modulatedCutoff = Math.max(20, Math.min(22000, modulatedCutoff));
-            filter.setCutoff(modulatedCutoff);
-        }
+            if (modEnvToFilter > 0 || lfo1ToFilter > 0) {
+                double modulatedCutoff = filterCutoff;
 
-        // Aplicar modulación de pitch a los osciladores
-        if (lfo1ToPitch > 0) {
-            double pitchModulation = lfo1Value * lfo1ToPitch * 2.0;
-            for (int i = 0; i < Math.min(oscillators.length, unisonVoices); i++) {
-                double baseFrequency = 440.0;
-                double detuneFactor = Math.pow(2, unisonDetuneValues[i] / 1200.0);
-                double modulatedFrequency = baseFrequency * Math.pow(2, pitchModulation / 12.0) * detuneFactor;
-                oscillators[i].setKeyFrequency(modulatedFrequency);
+                // Modulación por Envolvente
+                if (modEnvToFilter > 0) {
+                    modulatedCutoff += modEnvValue * modEnvToFilter * 5000;
+                }
+                // Modulación por LFO
+                if (lfo1ToFilter > 0) {
+                    modulatedCutoff += lfo1Value * lfo1ToFilter * 5000;
+                }
+
+                modulatedCutoff = Math.max(20, Math.min(22000, modulatedCutoff));
+                if (Math.abs(modulatedCutoff - lastModulateCutoff) > 0.1) {
+                    filter.setCutoff(modulatedCutoff);
+                    lastModulateCutoff = modulatedCutoff;
+                }
             }
         }
 
-        // Generar muestras de osciladores
+        // 4. Modular Pitch de Osciladores
+        if (lfo1ToPitch > 0) {
+            double pitchModulation = lfo1Value * lfo1ToPitch * 2.0; // +/- 2 semitonos
+            for (int i = 0; i < Math.min(oscillators.length, unisonVoices); i++) {
+                double baseFrequency = 440.0; // Solo referencia para cálculo relativo
+                double detuneFactor = Math.pow(2, unisonDetuneValues[i] / 1200.0);
+                double modulatedFrequency = baseFrequency * Math.pow(2, pitchModulation / 12.0) * detuneFactor;
+                // Ajustamos sobre la frecuencia actual que se está tocando
+                oscillators[i].setKeyFrequency(currentFrequency * (modulatedFrequency/baseFrequency));
+            }
+        }
+
+        // 5. Sumar Osciladores
         double totalSample = 0;
         int activeOscillators = 0;
 
@@ -316,44 +344,65 @@ public class Sintetizador {
 
         double mixedSample = activeOscillators > 0 ? totalSample / activeOscillators : 0;
 
-        // Aplicar filtro
+        // 6. Aplicar Filtro
         double filteredSample = filter.process(mixedSample);
 
-        // Aplicar efectos
+        // 7. Aplicar Efectos (Delay / Reverb)
         double effectedSample = effectsProcessor.process(filteredSample);
 
-        // Mezcla dry/wet para efectos
-        double finalSample = (filteredSample * (1.0 - effectsMix)) + (effectedSample * effectsMix);
-
-        return finalSample;
+        // 8. Mezcla Final (Dry/Wet)
+        return (filteredSample * (1.0 - effectsMix)) + (effectedSample * effectsMix);
     }
 
+    /**
+     * Genera un sample "offline" (para guardar en archivo/banco)
+     */
     public short[] generateSample(int numSamples) {
+        // Resetear fases para que el sample empiece limpio
         for (Oscilator osc : oscillators) {
             osc.resetPhase();
         }
         filter.reset();
         lfo1.reset();
         modEnvelope.trigger();
-        effectsProcessor = new EffectsProcessor(AudioInfo.SAMPLE_RATE); // Reset effects
+
+        // Nota: Usamos el effectsProcessor actual.
+        // No creamos uno nuevo para no perder configuraciones ni romper referencias.
 
         short[] s = new short[numSamples];
         for (int i = 0; i < numSamples; i++) {
             double d = nextSample();
+
+            // Protección de clipping
+            if (d > 1.0) d = 1.0;
+            if (d < -1.0) d = -1.0;
+
             s[i] = (short) (Short.MAX_VALUE * d);
         }
         return s;
     }
 
+    // ================== EVENTOS DE TECLADO ==================
     public void onKeyPressed(char keyChar) {
         if (!KEY_FREQUENCIES.containsKey(keyChar)) {
             return;
         }
-        if (hiloAudio.isInitialized() && !hiloAudio.isRunning()) {
-            setFrequency(KEY_FREQUENCIES.get(keyChar));
-            shouldGenerate = true;
-            hiloAudio.triggerPlayBack();
-            triggerModEnv();
+
+        // Lógica actualizada para Audio Singleton (Paso 3)
+        Audio audio = Audio.getInstance();
+
+        if (audio.isInitialized()) {
+            // Si estaba en silencio, arrancamos nota nueva
+            if (!audio.isRunning()) {
+                setFrequency(KEY_FREQUENCIES.get(keyChar));
+                shouldGenerate = true;
+                audio.triggerPlayBack();
+                triggerModEnv();
+            } else {
+                // Si ya sonaba (Legato), solo cambiamos nota y reactivamos envolvente
+                setFrequency(KEY_FREQUENCIES.get(keyChar));
+                triggerModEnv();
+            }
         }
     }
 
@@ -363,7 +412,7 @@ public class Sintetizador {
     }
 
     public void shutdownAudio() {
-        hiloAudio.close();
+        Audio.shutdownOpenAL();
     }
 
     public Oscilator[] getOscillatorsFX() {
