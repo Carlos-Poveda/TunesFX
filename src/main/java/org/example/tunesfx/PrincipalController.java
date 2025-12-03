@@ -248,7 +248,7 @@ public class PrincipalController {
             }
             // Iniciar
             sequencerTimeline.play();
-            btnEncenderRitmo.setText("Stop");
+//            btnEncenderRitmo.setText("Stop");
             isPlaying = true;
 //            System.out.println("Sequencer Iniciado...");
         }
@@ -259,7 +259,7 @@ public class PrincipalController {
      */
     private void stopSequencer() {
         sequencerTimeline.stop();
-        btnEncenderRitmo.setText("Play");
+//        btnEncenderRitmo.setText("Play");
         isPlaying = false;
 
         // Limpiar el playhead de todas las filas
