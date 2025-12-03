@@ -3,6 +3,7 @@ package org.example.tunesfx;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.example.tunesfx.audio.Audio;
@@ -18,6 +19,19 @@ public class Principal extends Application {
         scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
         // 2. Configurar el Stage
+        try {
+            Image applicationIcon = new Image(getClass().getResourceAsStream("/images/logo.png"));
+            if (applicationIcon.isError()) {
+                throw new Exception("La imagen del ícono no pudo ser cargada o es inválida.");
+            }
+
+            primaryStage.getIcons().add(applicationIcon);
+
+        } catch (Exception e) {
+            // Es buena práctica actualizar el mensaje de error para reflejar el nombre del archivo
+            System.err.println("Error al cargar el ícono: images/logo.png. Usando ícono por defecto.");
+            e.printStackTrace();
+        }
         primaryStage.setTitle("TunesFX");
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
