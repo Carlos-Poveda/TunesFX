@@ -90,6 +90,8 @@ public class ChannelRackRowController {
         }
     }
 
+    // MENÚ DE STEPS
+
     private void showMenu(Button btn, StepData data, double x, double y) {
         ContextMenu menu = new ContextMenu();
         menu.getStyleClass().add("context-menu");
@@ -179,6 +181,24 @@ public class ChannelRackRowController {
         CustomMenuItem durationItem = new CustomMenuItem(durationBox);
         durationItem.setHideOnClick(false); // No se cierra al interactuar con el Slider
         menu.getItems().add(durationItem);
+
+        // --- SECCIÓN 6: DELAY (Slider) ---
+        // Rango: 0.0 (0%) a 1.0 (100% del paso, es decir, sonar casi en el siguiente paso)
+        Slider delaySlider = new Slider(0.0, 1.0, data.getDelay());
+        Label delayLabel = new Label("Delay: " + (int)(data.getDelay()*100) + "%");
+        delayLabel.setStyle("-fx-text-fill: white;");
+
+        delaySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            data.setDelay(newVal.doubleValue());
+            delayLabel.setText("Delay: " + (int)(newVal.doubleValue()*100) + "%");
+        });
+
+        VBox delayBox = new VBox(delayLabel, delaySlider);
+        delayBox.setPadding(new Insets(5));
+        CustomMenuItem delayItem = new CustomMenuItem(delayBox);
+        delayItem.setHideOnClick(false);
+        delayItem.setStyle("-fx-background-color: transparent;");
+        menu.getItems().add(delayItem);
     }
 
     // Pequeña ayuda visual: poner un numerito en el botón si tiene pitch
@@ -190,6 +210,142 @@ public class ChannelRackRowController {
             btn.setText(String.valueOf(offset));
             btn.setStyle("-fx-font-size: 9px; -fx-padding: 0;");
         }
+    }
+
+    public void handleLabelClick(MouseEvent event) {
+        // Detectar Click Derecho (Secundario)
+        if (event.getButton() == MouseButton.SECONDARY) {
+            showTrackSettingsMenu(event.getScreenX(), event.getScreenY());
+        }
+    }
+
+    // MENÚ GENERAL
+
+    private void showTrackSettingsMenu(double x, double y) {
+        ContextMenu menu = new ContextMenu();
+        menu.getStyleClass().add("context-menu"); // Usar tu estilo CSS existente
+
+        // --- PARTE 1: RENOMBRAR (Tu código anterior mejorado) ---
+        TextField renameField = new TextField(trackNameLabel.getText());
+        renameField.setPromptText("Renombrar pista...");
+        renameField.setStyle("-fx-background-color: #333333; -fx-text-fill: white;"); // Estilo oscuro
+
+        Label titleLabel = new Label("Track Settings / Rename:");
+        titleLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+
+        VBox renameBox = new VBox(5, titleLabel, renameField);
+        renameBox.setPadding(new Insets(10));
+
+        CustomMenuItem renameItem = new CustomMenuItem(renameBox);
+        renameItem.setHideOnClick(false);
+        renameItem.setStyle("-fx-background-color: transparent;");
+        menu.getItems().add(renameItem);
+
+        renameField.setOnAction(e -> {
+            String newName = renameField.getText();
+            if (newName != null && !newName.trim().isEmpty()) {
+                trackNameLabel.setText(newName.trim());
+                menu.hide();
+            }
+        });
+
+        menu.getItems().add(new SeparatorMenuItem());
+
+        // Obtenemos los datos del primer paso para poner los valores iniciales de los sliders
+        StepData referenceData = (StepData) stepBtn1.getUserData();
+
+        // --- PARTE 2: CONTROLES GLOBALES ---
+
+        // 2.1 PITCH GLOBAL
+        Menu pitchMenu = new Menu("Set All Pitch");
+        // (El estilo del texto lo maneja tu CSS .context-menu .menu-item > .label)
+
+        MenuItem resetItem = new MenuItem("Reset All (C5)");
+        resetItem.setOnAction(e -> applyToAllSteps(d -> d.setSemitoneOffset(0)));
+        pitchMenu.getItems().add(resetItem);
+
+        for (int i = 12; i >= -12; i--) {
+            if (i == 0) continue;
+            final int offset = i;
+            MenuItem item = new MenuItem((offset > 0 ? "+" : "") + offset + " Semi");
+            item.setOnAction(e -> applyToAllSteps(d -> d.setSemitoneOffset(offset)));
+            pitchMenu.getItems().add(item);
+        }
+        menu.getItems().add(pitchMenu);
+
+        // 2.2 ATTACK GLOBAL
+        Slider attackSlider = new Slider(0, 0.5, referenceData.getAttack());
+        Label attackLabel = new Label("All Attack: " + String.format("%.2f", referenceData.getAttack()));
+        attackLabel.setStyle("-fx-text-fill: white;");
+
+        attackSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double val = newVal.doubleValue();
+            attackLabel.setText("All Attack: " + String.format("%.2f", val));
+            applyToAllSteps(d -> d.setAttack(val));
+        });
+        addSliderToMenu(menu, attackLabel, attackSlider);
+
+        // 2.3 RELEASE GLOBAL
+        Slider releaseSlider = new Slider(0, 0.5, referenceData.getRelease());
+        Label releaseLabel = new Label("All Release: " + String.format("%.2f", referenceData.getRelease()));
+        releaseLabel.setStyle("-fx-text-fill: white;");
+
+        releaseSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double val = newVal.doubleValue();
+            releaseLabel.setText("All Release: " + String.format("%.2f", val));
+            applyToAllSteps(d -> d.setRelease(val));
+        });
+        addSliderToMenu(menu, releaseLabel, releaseSlider);
+
+        // 2.4 VOLUME GLOBAL
+        Slider volSlider = new Slider(0, 1.0, referenceData.getVolume());
+        Label volLabel = new Label("All Volume: " + (int)(referenceData.getVolume()*100) + "%");
+        volLabel.setStyle("-fx-text-fill: white;");
+
+        volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double val = newVal.doubleValue();
+            volLabel.setText("All Volume: " + (int)(val*100) + "%");
+            applyToAllSteps(d -> d.setVolume(val));
+        });
+        addSliderToMenu(menu, volLabel, volSlider);
+
+        // 2.5 DURATION GLOBAL
+        Slider durSlider = new Slider(0.1, 1.0, referenceData.getDurationFactor());
+        Label durLabel = new Label("All Duration: " + (int)(referenceData.getDurationFactor()*100) + "%");
+        durLabel.setStyle("-fx-text-fill: white;");
+
+        durSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double val = newVal.doubleValue();
+            durLabel.setText("All Duration: " + (int)(val*100) + "%");
+            applyToAllSteps(d -> d.setDurationFactor(val));
+        });
+        addSliderToMenu(menu, durLabel, durSlider);
+
+        // 2.6 DELAY GLOBAL
+        Slider delaySlider = new Slider(0.0, 1.0, referenceData.getDelay());
+        Label delayLabel = new Label("All Delay: " + (int)(referenceData.getDelay()*100) + "%");
+        delayLabel.setStyle("-fx-text-fill: white;");
+
+        delaySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double val = newVal.doubleValue();
+            delayLabel.setText("All Delay: " + (int)(val*100) + "%");
+            applyToAllSteps(d -> d.setDelay(val));
+        });
+        addSliderToMenu(menu, delayLabel, delaySlider);
+
+
+        menu.show(trackNameLabel, x, y);
+        renameField.requestFocus();
+    }
+
+    // Pequeño helper para no repetir el código de añadir sliders al menú
+    private void addSliderToMenu(ContextMenu menu, Label label, Slider slider) {
+        VBox box = new VBox(label, slider);
+        box.setPadding(new Insets(5));
+        CustomMenuItem item = new CustomMenuItem(box);
+        item.setHideOnClick(false);
+        item.setStyle("-fx-background-color: transparent;");
+        menu.getItems().add(item);
     }
 
     /**
@@ -276,48 +432,18 @@ public class ChannelRackRowController {
         return -1; // Fila vacía
     }
 
-    public void handleLabelClick(MouseEvent event) {
-        // Detectar Click Derecho (Secundario)
-        if (event.getButton() == MouseButton.SECONDARY) {
-            showRenameMenu(event.getScreenX(), event.getScreenY());
-        }
-    }
-
-    private void showRenameMenu(double x, double y) {
-        ContextMenu menu = new ContextMenu();
-        menu.getStyleClass().add("rename-menu");
-//        menu.setStyle("-fx-background-color: rgba(0,0,0,0.5);-fx-border-radius: 15;-fx-background-radius: 15;-fx-border-color: #333333;");
-        // Crear un TextField para escribir el nuevo nombre
-        TextField renameField = new TextField(trackNameLabel.getText());
-        renameField.setPromptText("New name");
-
-        // Crear un contenedor bonito con etiqueta
-        Label titleLabel = new Label("Rename track:");
-        titleLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
-
-        VBox container = new VBox(5, titleLabel, renameField);
-        container.setPadding(new Insets(10));
-
-        // Crear el item de menú personalizado
-        CustomMenuItem item = new CustomMenuItem(container);
-        item.setHideOnClick(false); // No cerrar al hacer clic dentro (para poder escribir)
-        item.setStyle("-fx-background-color: transparent;");
-        menu.getItems().add(item);
-
-        // Lógica al pulsar ENTER dentro del TextField
-        renameField.setOnAction(e -> {
-            String newName = renameField.getText();
-            if (newName != null && !newName.trim().isEmpty()) {
-                // Actualizar el Label principal
-                trackNameLabel.setText(newName.trim());
-                menu.hide(); // Cerrar el menú manualmente
+    /**
+     * Helper para aplicar un cambio a TODOS los pasos de la fila.
+     */
+    private void applyToAllSteps(java.util.function.Consumer<StepData> action) {
+        for (Button btn : stepButtons) {
+            StepData data = (StepData) btn.getUserData();
+            if (data != null) {
+                action.accept(data);
+                // Si cambias el Pitch, hay que actualizar el texto del botón visualmente
+                // (Esta comprobación es específica para el pitch, pero no hace daño aquí)
+                updateButtonText(btn, data);
             }
-        });
-
-        // Mostrar el menú
-        menu.show(trackNameLabel, x, y);
-
-        // Poner el foco en el TextField automáticamente para escribir directo
-        renameField.requestFocus();
+        }
     }
 }

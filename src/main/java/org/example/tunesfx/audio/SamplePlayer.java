@@ -13,10 +13,25 @@ public class SamplePlayer {
      * Reutiliza el contexto de OpenAL que 'Audio.java' ya inicializó.
      * @param sample El sample a reproducir.
      */
-    public static void playStep(Sample sample, StepData stepData) {
+    public static void playStep(Sample sample, StepData stepData, double stepDurationMillis) {
         if (sample == null || sample.getLength() == 0) return;
 
         new Thread(() -> {
+            // --- LÓGICA DE DELAY ---
+            if (stepData.getDelay() > 0) {
+                try {
+                    // Calculamos el tiempo de espera: % del paso * duración del paso
+                    long delayMillis = (long) (stepData.getDelay() * stepDurationMillis);
+
+                    // Limitamos para evitar errores si el delay es extremo
+                    if (delayMillis > 0) {
+                        Thread.sleep(delayMillis);
+                    }
+                } catch (InterruptedException e) {
+                    return; // Si el hilo se interrumpe, salimos
+                }
+            }
+
             int buffer = alGenBuffers();
 
             // --- PROCESAMIENTO DSP ---

@@ -8,6 +8,8 @@ public class StepData {
     private double release = 0.0;
     private double volume = 1.0; // Ganancia extra (0.0 a 1.0)
     private double durationFactor = 1.0; // 1.0 = 100% de la duración original
+    private double delay = 0.0; // 0.0 = sin retardo, 0.5 = mitad del paso
+
     public StepData() {
         this.active = false;
         this.semitoneOffset = 0;
@@ -57,4 +59,8 @@ public class StepData {
     public void setDurationFactor(double durationFactor) {
         this.durationFactor = durationFactor;
     }
+
+    public double getDelay() {return delay; }
+
+    public void setDelay(double delay) { this.delay = delay; }
 }

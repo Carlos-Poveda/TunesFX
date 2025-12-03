@@ -211,6 +211,8 @@ public class PrincipalController {
         } else {
             currentStep++;   // ...avanzamos normal
         }
+        double currentBPM = spinnerBPM.getValue();
+        double stepDuration = (60000.0 / currentBPM) / 4.0;
 
         // 4. Actualizar la UI y reproducir (El resto es igual que antes)
         for (ChannelRackRowController row : allRows) {
@@ -229,7 +231,7 @@ public class PrincipalController {
             if (stepData != null && stepData.isActive()) {
                 Sample sampleToPlay = row.getSample();
                 if (sampleToPlay != null) {
-                    SamplePlayer.playStep(sampleToPlay, stepData);
+                    SamplePlayer.playStep(sampleToPlay, stepData,stepDuration);
                 }
             }
         }
