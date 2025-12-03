@@ -87,3 +87,69 @@
 .context-menu .menu:hover .label {
     -fx-text-fill: white;
 }
+
+/* 1. Ocultar los botones de flecha (incrementar/decrementar) en el ScrollBar */
+.scroll-bar:horizontal .increment-button,
+.scroll-bar:horizontal .decrement-button,
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
+    -fx-padding: 0;           /* Eliminar el relleno */
+    -fx-pref-width: 0;        /* Asegurar que el ancho sea cero */
+    -fx-pref-height: 0;       /* Asegurar que la altura sea cero */
+    -fx-background-color: transparent; /* Ocultar cualquier fondo residual */
+    -fx-opacity: 0;           /* Asegurar que es completamente invisible */
+    -fx-scale-x: 0;           /* Reducir el tamaño a cero (método robusto) */
+    -fx-scale-y: 0;
+}
+
+/* 2. Ocultar el relleno de los botones (para limpieza total) */
+.scroll-bar:horizontal .increment-arrow,
+.scroll-bar:horizontal .decrement-arrow,
+.scroll-bar:vertical .increment-arrow,
+.scroll-bar:vertical .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: none; /* Eliminar la forma de la flecha */
+}
+
+/* Opcional: Estilizar la barra (track) y el pulgar (thumb) */
+
+/* El área donde se mueve el pulgar (track) */
+.scroll-bar .track {
+    -fx-background-color: #202020; /* Fondo oscuro */
+    -fx-background-radius: 4;
+}
+
+/* El pulgar (thumb) que el usuario arrastra */
+.scroll-bar .thumb {
+    -fx-background-color: #606060; /* Color del pulgar */
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+}
+
+/* Estilo al pasar el ratón por el pulgar */
+.scroll-bar .thumb:hover {
+    -fx-background-color: #808080;
+}
+
+/* Altura y ancho de la barra (el track completo, no solo el pulgar) */
+
+/* Scrollbar Vertical (cambiar el ancho) */
+.scroll-bar:vertical {
+    -fx-pref-width: 8px; /* Ancho deseado, por ejemplo, 8px */
+}
+
+/* Scrollbar Horizontal (cambiar la altura) */
+.scroll-bar:horizontal {
+    -fx-pref-height: 8px; /* Altura deseada, por ejemplo, 8px */
+}
+
+/* Opcional: Ajustar el tamaño del pulgar (thumb) si es necesario, aunque suele seguir el tamaño del track */
+.scroll-bar .thumb {
+    -fx-background-insets: 1; /* Para darle un pequeño margen al pulgar dentro del track */
+}
+
+/* Estiliza la esquina donde se cruzan las barras de desplazamiento */
+.scroll-pane .corner {
+    /* Usamos el mismo color oscuro de fondo que tu HBox o ventana principal */
+    -fx-background-color: #202020; /* O el color de fondo de tu interfaz */
+}

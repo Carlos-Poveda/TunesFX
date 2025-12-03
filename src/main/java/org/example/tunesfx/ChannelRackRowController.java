@@ -168,7 +168,6 @@ public class ChannelRackRowController {
         // Rango: 0.1 (10%) a 1.0 (100%)
         Slider durationSlider = new Slider(0.1, 1.0, data.getDurationFactor());
         Label durationLabel = new Label("Duration: " + (int)(data.getDurationFactor()*100) + "%");
-        durationLabel.setStyle("-fx-text-fill: black;");
 
         durationSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             data.setDurationFactor(newVal.doubleValue());
