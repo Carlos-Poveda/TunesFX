@@ -30,6 +30,8 @@ import java.io.IOException;
 
 public class PrincipalController {
     @FXML
+    private Button btnSalir;
+    @FXML
     private Button openSynthButton;
     @FXML
     private HBox panelRitmo;
@@ -61,7 +63,7 @@ public class PrincipalController {
     @FXML
     public void initialize() {
         SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(60, 300, 120, 1);
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(30, 300, 120, 1);
         spinnerBPM.setValueFactory(valueFactory);
         spinnerBPM.valueProperty().addListener((obs, oldVal, newVal) -> {
             updateSequencerRate(newVal);
@@ -305,5 +307,9 @@ public class PrincipalController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void salir(ActionEvent actionEvent) {
+        System.exit(0);
     }
 }

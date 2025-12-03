@@ -156,11 +156,48 @@
 
 .synth-button {
     /* Color base y redondez */
-    -fx-background-color: #111111; /* Color base azul vibrante */
+    -fx-background-color: #424242; /* Color base azul vibrante */
     -fx-background-radius: 15;      /* Radio para esquinas redondeadas */
     -fx-border-radius: 15;
     -fx-padding: 8 20 8 20;         /* Relleno interior para hacerlo más grande */
     -fx-text-fill: white;           /* Texto blanco */
     -fx-font-weight: bold;          /* Texto en negrita */
 
+}
+
+/* 1. Estilo General del Spinner (Contenedor) */
+.spinner {
+    -fx-background-color: #424242; /* Color de fondo oscuro (similar a tu panel) */
+    -fx-background-radius: 5;      /* Bordes ligeramente redondeados */
+    -fx-border-color: #555555;     /* Borde sutil */
+    -fx-border-radius: 5;
+}
+
+/* 2. Estilo del TextField Interno (donde se muestra el BPM) */
+.spinner .text-field {
+    /* Hacemos que el campo de texto sea transparente para que se vea el fondo oscuro del .spinner */
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;      /* Quitamos cualquier borde residual */
+    -fx-text-fill: white;               /* Texto del número en blanco */
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;              /* Centrar el número */
+}
+
+/* 3. Estilo de los Botones de Incremento/Decremento (Flechas) */
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: #333333; /* Fondo de los botones más oscuro que el spinner */
+    -fx-background-radius: 0;      /* Quitamos la redondez del fondo para que encaje */
+}
+
+/* 4. Estilo de las flechas (las formas gráficas) */
+.spinner .increment-arrow,
+.spinner .decrement-arrow {
+    -fx-background-color: #BBBBBB; /* Color de las flechas (gris claro) */
+}
+
+/* 5. Estilo de Hover y Press para los botones de flecha (para interacción visual) */
+.spinner .increment-arrow-button:hover,
+.spinner .decrement-arrow-button:hover {
+    -fx-background-color: #444444; /* Oscurecer un poco al pasar el ratón */
 }
