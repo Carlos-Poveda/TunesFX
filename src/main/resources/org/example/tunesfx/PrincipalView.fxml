@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="949.0" prefWidth="1908.0" style="-fx-background-color: #0F0F0F;" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.PrincipalController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="949.0" prefWidth="1908.0" style="-fx-background-color: #0F0F0F;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.PrincipalController">
    <children>
       <VBox layoutX="5.0" layoutY="76.0" prefHeight="730.0" prefWidth="719.0" spacing="10.0" style="-fx-background-color: #121212; -fx-border-color: #5d5d5d; -fx-border-width: 1;">
          <padding>
@@ -46,7 +46,7 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </HBox.margin>
                <font>
-                  <Font name="Symbol" size="20.0" />
+                  <Font name="Arial" size="20.0" />
                </font>
             </Label>
             <Spinner fx:id="spinnerBPM" />

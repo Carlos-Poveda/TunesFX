@@ -92,10 +92,10 @@ public class ChannelRackRowController {
 
     private void showMenu(Button btn, StepData data, double x, double y) {
         ContextMenu menu = new ContextMenu();
+        menu.getStyleClass().add("context-menu");
 
         // --- SECCIÓN 1: PITCH ---
         Menu pitchMenu = new Menu("Pitch / Tono");
-        pitchMenu.setStyle("-fx-text-fill: black;");
 
         MenuItem resetItem = new MenuItem("Reset (Original)");
         resetItem.setOnAction(e -> {
@@ -123,8 +123,6 @@ public class ChannelRackRowController {
         Slider attackSlider = new Slider(0, 0.5, data.getAttack()); // Máx 50% del sample
         attackSlider.setShowTickLabels(false);
         Label attackLabel = new Label("Attack: " + String.format("%.2f", data.getAttack()));
-        attackLabel.setStyle("-fx-text-fill: black;");
-
         attackSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             data.setAttack(newVal.doubleValue());
             attackLabel.setText("Attack: " + String.format("%.2f", newVal));
@@ -139,8 +137,6 @@ public class ChannelRackRowController {
         // --- SECCIÓN 3: RELEASE (Slider) ---
         Slider releaseSlider = new Slider(0, 0.5, data.getRelease()); // Máx 50% del sample
         Label releaseLabel = new Label("Release: " + String.format("%.2f", data.getRelease()));
-        releaseLabel.setStyle("-fx-text-fill: black;");
-
         releaseSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             data.setRelease(newVal.doubleValue());
             releaseLabel.setText("Release: " + String.format("%.2f", newVal));
@@ -155,8 +151,6 @@ public class ChannelRackRowController {
         // --- SECCIÓN 4: VOLUMEN (Slider) ---
         Slider volSlider = new Slider(0, 1.0, data.getVolume());
         Label volLabel = new Label("Volume: " + (int)(data.getVolume()*100) + "%");
-        volLabel.setStyle("-fx-text-fill: black;");
-
         volSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             data.setVolume(newVal.doubleValue());
             volLabel.setText("Vol: " + (int)(newVal.doubleValue()*100) + "%");
@@ -281,5 +275,50 @@ public class ChannelRackRowController {
             }
         }
         return -1; // Fila vacía
+    }
+
+    public void handleLabelClick(MouseEvent event) {
+        // Detectar Click Derecho (Secundario)
+        if (event.getButton() == MouseButton.SECONDARY) {
+            showRenameMenu(event.getScreenX(), event.getScreenY());
+        }
+    }
+
+    private void showRenameMenu(double x, double y) {
+        ContextMenu menu = new ContextMenu();
+        menu.getStyleClass().add("rename-menu");
+//        menu.setStyle("-fx-background-color: rgba(0,0,0,0.5);-fx-border-radius: 15;-fx-background-radius: 15;-fx-border-color: #333333;");
+        // Crear un TextField para escribir el nuevo nombre
+        TextField renameField = new TextField(trackNameLabel.getText());
+        renameField.setPromptText("New name");
+
+        // Crear un contenedor bonito con etiqueta
+        Label titleLabel = new Label("Rename track:");
+        titleLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
+
+        VBox container = new VBox(5, titleLabel, renameField);
+        container.setPadding(new Insets(10));
+
+        // Crear el item de menú personalizado
+        CustomMenuItem item = new CustomMenuItem(container);
+        item.setHideOnClick(false); // No cerrar al hacer clic dentro (para poder escribir)
+        item.setStyle("-fx-background-color: transparent;");
+        menu.getItems().add(item);
+
+        // Lógica al pulsar ENTER dentro del TextField
+        renameField.setOnAction(e -> {
+            String newName = renameField.getText();
+            if (newName != null && !newName.trim().isEmpty()) {
+                // Actualizar el Label principal
+                trackNameLabel.setText(newName.trim());
+                menu.hide(); // Cerrar el menú manualmente
+            }
+        });
+
+        // Mostrar el menú
+        menu.show(trackNameLabel, x, y);
+
+        // Poner el foco en el TextField automáticamente para escribir directo
+        renameField.requestFocus();
     }
 }

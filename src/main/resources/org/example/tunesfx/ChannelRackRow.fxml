@@ -13,7 +13,7 @@
         </HBox.margin>
     </Button>
 
-    <Label fx:id="trackNameLabel" minWidth="80.0" prefWidth="80" style="-fx-text-fill: white; -fx-font-weight: bold;" text="SAMPLE" />
+    <Label fx:id="trackNameLabel" minWidth="80.0" onMouseClicked="#handleLabelClick" prefWidth="80" style="-fx-text-fill: white; -fx-font-weight: bold;" text="Sample" />
 
     <Button fx:id="stepBtn1" mnemonicParsing="false" styleClass="step-button" />
     <Button fx:id="stepBtn2" mnemonicParsing="false" styleClass="step-button" />
