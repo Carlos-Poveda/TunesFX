@@ -9,6 +9,7 @@ public class StepData {
     private double volume = 1.0; // Ganancia extra (0.0 a 1.0)
     private double durationFactor = 1.0; // 1.0 = 100% de la duración original
     private double delay = 0.0; // 0.0 = sin retardo, 0.5 = mitad del paso
+    private double pan = 0.0; // -1.0 = Izquierda, 0.0 = Centro, 1.0 = Derecha
 
     public StepData() {
         this.active = false;
@@ -63,4 +64,8 @@ public class StepData {
     public double getDelay() {return delay; }
 
     public void setDelay(double delay) { this.delay = delay; }
+
+    public double getPan() { return pan; }
+
+    public void setPan(double pan) { this.pan = pan; }
 }

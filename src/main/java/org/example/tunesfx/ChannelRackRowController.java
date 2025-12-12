@@ -199,6 +199,26 @@ public class ChannelRackRowController {
         delayItem.setHideOnClick(false);
         delayItem.setStyle("-fx-background-color: transparent;");
         menu.getItems().add(delayItem);
+
+        // --- SECCIÓN 7: PANNING (Slider) ---
+        // Rango: -1.0 (L) a 1.0 (R)
+        Slider panSlider = new Slider(-1.0, 1.0, data.getPan());
+
+        // Etiqueta dinámica para saber si está Left, Right o Center
+        Label panLabel = new Label(formatPanLabel(data.getPan()));
+        panLabel.setStyle("-fx-text-fill: white;");
+
+        panSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            data.setPan(newVal.doubleValue());
+            panLabel.setText(formatPanLabel(newVal.doubleValue()));
+        });
+
+        VBox panBox = new VBox(panLabel, panSlider);
+        panBox.setPadding(new Insets(5));
+        CustomMenuItem panItem = new CustomMenuItem(panBox);
+        panItem.setHideOnClick(false);
+        panItem.setStyle("-fx-background-color: transparent;");
+        menu.getItems().add(panItem);
     }
 
     // Pequeña ayuda visual: poner un numerito en el botón si tiene pitch
@@ -333,6 +353,17 @@ public class ChannelRackRowController {
         });
         addSliderToMenu(menu, delayLabel, delaySlider);
 
+        // 2.7 PANNING GLOBAL
+        Slider panSlider = new Slider(-1.0, 1.0, referenceData.getPan());
+        Label panLabel = new Label("All Pan: " + formatPanLabel(referenceData.getPan()));
+        panLabel.setStyle("-fx-text-fill: white;");
+
+        panSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double val = newVal.doubleValue();
+            panLabel.setText("All Pan: " + formatPanLabel(val));
+            applyToAllSteps(d -> d.setPan(val));
+        });
+        addSliderToMenu(menu, panLabel, panSlider);
 
         menu.show(trackNameLabel, x, y);
         renameField.requestFocus();
@@ -445,5 +476,11 @@ public class ChannelRackRowController {
                 updateButtonText(btn, data);
             }
         }
+    }
+
+    private String formatPanLabel(double val) {
+        if (Math.abs(val) < 0.05) return "Center"; // Zona muerta en el centro
+        if (val < 0) return "L " + (int)(Math.abs(val) * 100) + "%";
+        return "R " + (int)(val * 100) + "%";
     }
 }

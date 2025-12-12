@@ -54,6 +54,14 @@ public class SamplePlayer {
             AL10.alBufferData(buffer, AL_FORMAT_MONO16, audioData, Sintetizador.AudioInfo.SAMPLE_RATE);
 
             int source = alGenSources();
+
+            // --- LÓGICA DE PANNING ---
+            // Movemos la fuente en el eje X según el valor de pan (-1.0 a 1.0)
+            // X = Pan, Y = 0, Z = 0
+            alSource3f(source, AL_POSITION, (float) stepData.getPan(), 0f, 0f);
+
+            alSourcef(source, AL_PITCH, stepData.getPitchMultiplier());
+
             alSourcei(source, AL_BUFFER, buffer);
             alSourcef(source, AL_PITCH, stepData.getPitchMultiplier()); // Usar pitch del stepData
 
