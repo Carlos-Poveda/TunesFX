@@ -97,7 +97,7 @@ public class ChannelRackRowController {
         menu.getStyleClass().add("context-menu");
 
         // --- SECCIÓN 1: PITCH ---
-        Menu pitchMenu = new Menu("Pitch / Tono");
+        Menu pitchMenu = new Menu("Pitch");
 
         MenuItem resetItem = new MenuItem("Reset (Original)");
         resetItem.setOnAction(e -> {
