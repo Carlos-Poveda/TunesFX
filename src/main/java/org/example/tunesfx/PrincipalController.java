@@ -6,11 +6,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
 
@@ -49,6 +51,7 @@ public class PrincipalController {
             SintetizadorController synthController = loader.getController();
 
             Stage synthStage = new Stage();
+            setWindowIcon(synthStage);
             Scene synthScene = new Scene(synthRoot);
 
             synthScene.setOnKeyPressed(synthController::handleKeyPressed);
@@ -56,6 +59,7 @@ public class PrincipalController {
             synthStage.setOnCloseRequest(e -> synthController.shutdown());
 
             synthStage.setTitle("Synth");
+//            synthStage.initStyle(StageStyle.UNDECORATED);
             synthStage.setScene(synthScene);
             synthStage.setResizable(false);
             synthStage.show();
@@ -75,7 +79,7 @@ public class PrincipalController {
                 ChannelRackController rackController = loader.getController();
 
                 rackStage = new Stage();
-
+                setWindowIcon(rackStage);
                 Scene rackScene = new Scene(rackRoot);
 
                 String css = this.getClass().getResource("styles.css").toExternalForm();
@@ -84,6 +88,7 @@ public class PrincipalController {
                 rackStage.setOnCloseRequest(e -> rackController.shutdown());
 
                 rackStage.setTitle("Channel Rack");
+//                rackStage.initStyle(StageStyle.UNDECORATED);
                 rackStage.setScene(rackScene);
                 rackStage.setResizable(false);
 
@@ -107,5 +112,16 @@ public class PrincipalController {
 
     public void salir(ActionEvent actionEvent) {
         System.exit(0);
+    }
+
+    private void setWindowIcon(Stage stage) {
+        try {
+            // Sustituye "icono.png" por el nombre real de tu archivo en resources
+            // Si está en una carpeta sería "/images/logo.png"
+            Image icon = new Image(getClass().getResourceAsStream("/images/logo.png"));
+            stage.getIcons().add(icon);
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono de la ventana.");
+        }
     }
 }

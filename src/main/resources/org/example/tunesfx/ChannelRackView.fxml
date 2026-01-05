@@ -13,9 +13,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<Pane prefHeight="800.0" prefWidth="750.0" style="-fx-background-color: #3D3D3D;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.ChannelRackController">
+<Pane prefHeight="549.0" prefWidth="664.0" style="-fx-background-color: #3D3D3D;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.ChannelRackController">
     <children>
-        <VBox alignment="TOP_CENTER" layoutX="14.0" layoutY="14.0" prefHeight="746.0" prefWidth="717.0" style="-fx-background-color: #262626; -fx-background-radius: 13; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
+        <VBox alignment="TOP_CENTER" layoutX="14.0" layoutY="14.0" prefHeight="520.0" prefWidth="635.0" style="-fx-background-color: #262626; -fx-background-radius: 13; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
             <padding>
                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
             </padding>
@@ -29,7 +29,7 @@
                     </effect>
                 </Label>
 
-                <VBox prefHeight="956.0" prefWidth="687.0" spacing="10">
+                <VBox prefHeight="474.0" prefWidth="651.0" spacing="10">
                     <children>
                         <HBox alignment="CENTER_LEFT" prefHeight="11.0" prefWidth="676.0" spacing="10" style="-fx-background-color: #262626; -fx-padding: 10;">
                             <children>
@@ -45,7 +45,7 @@
                                         <Glow />
                                     </effect>
                                 </Button>
-                                <Button fx:id="btnNuevaPista" mnemonicParsing="false" onAction="#addSample" prefHeight="38.0" prefWidth="121.0" style="-fx-text-fill: white; -fx-background-color: #424242;" text="NEW SAMPLE">
+                                <Button fx:id="btnNuevaPista" mnemonicParsing="false" onAction="#addSample" prefHeight="38.0" prefWidth="167.0" style="-fx-text-fill: white; -fx-background-color: #424242;" text="NEW SAMPLE">
                                     <font>
                                         <Font name="OCR A Extended" size="12.0" />
                                     </font>
@@ -53,9 +53,9 @@
                                         <Glow />
                                     </effect>
                                 </Button>
-                                <HBox alignment="CENTER" prefHeight="38.0" prefWidth="188.0" style="-fx-background-color: #424242; -fx-background-radius: 10;">
+                                <HBox alignment="CENTER" prefHeight="38.0" prefWidth="146.0" style="-fx-background-color: #424242; -fx-background-radius: 10;">
                                     <HBox.margin>
-                                        <Insets left="320.0" />
+                                        <Insets left="180.0" />
                                     </HBox.margin>
                                     <children>
                                         <Label prefHeight="38.0" prefWidth="22.0" text="BPM" textFill="WHITE">
@@ -78,7 +78,7 @@
                             </children>
                         </HBox>
 
-                        <ScrollPane fitToWidth="false" hbarPolicy="AS_NEEDED" maxHeight="1.7976931348623157E308" prefHeight="878.0" prefWidth="687.0" vbarPolicy="AS_NEEDED">
+                        <ScrollPane fitToWidth="false" hbarPolicy="AS_NEEDED" maxHeight="1.7976931348623157E308" prefHeight="402.0" prefWidth="582.0" vbarPolicy="AS_NEEDED">
                             <content>
                                 <VBox fx:id="rackContainer" spacing="5" />
                             </content>
