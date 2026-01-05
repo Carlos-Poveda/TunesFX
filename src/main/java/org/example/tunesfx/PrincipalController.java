@@ -19,6 +19,8 @@ public class PrincipalController {
     @FXML private Button btnSalir;
     @FXML private Button openSynthButton;
 
+    private Stage rackStage;
+
     @FXML
     public void initialize() {
         // Shortcuts del teclado
@@ -66,29 +68,34 @@ public class PrincipalController {
     // Abrir Channel Rack
     @FXML
     public void handleOpenChannelRack(ActionEvent actionEvent) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("ChannelRackView.fxml"));
-            Pane rackRoot = loader.load();
-            ChannelRackController rackController = loader.getController();
+        if (rackStage == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("ChannelRackView.fxml"));
+                Pane rackRoot = loader.load();
+                ChannelRackController rackController = loader.getController();
 
-            Stage rackStage = new Stage();
-            Scene rackScene = new Scene(rackRoot);
+                rackStage = new Stage();
+                Scene rackScene = new Scene(rackRoot);
 
-            String css = this.getClass().getResource("styles.css").toExternalForm();
-            rackScene.getStylesheets().add(css);
+                String css = this.getClass().getResource("styles.css").toExternalForm();
+                rackScene.getStylesheets().add(css);
 
-            rackStage.setOnCloseRequest(e -> rackController.shutdown());
+                rackStage.setOnCloseRequest(e -> rackController.shutdown());
 
-            rackStage.setTitle("Channel Rack");
-            rackStage.setScene(rackScene);
-            rackStage.setResizable(false);
-            rackStage.show();
+                rackStage.setTitle("Channel Rack");
+                rackStage.setScene(rackScene);
+                rackStage.setResizable(false);
+                rackStage.show();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            System.err.println("No se pudo encontrar el archivo CSS. Revisa el nombre.");
-            e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e) {
+                System.err.println("No se pudo encontrar el archivo CSS. Revisa el nombre.");
+                e.printStackTrace();
+            }
+        } else {
+            rackStage.toFront();
+            rackStage.requestFocus();
         }
     }
 
