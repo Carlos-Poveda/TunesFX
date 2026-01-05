@@ -1,10 +1,14 @@
 package org.example.tunesfx;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -17,8 +21,22 @@ public class PrincipalController {
 
     @FXML
     public void initialize() {
-        // Ya no necesitamos lógica compleja aquí
-    }
+        // Shortcuts del teclado
+        Platform.runLater(() -> {
+            Scene scene = openSynthButton.getScene();
+
+            // Atajo: CTRL + S para el Sintetizador
+            scene.getAccelerators().put(
+                    new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_ANY),
+                    () -> handleOpenSynth(null)
+            );
+
+            // Atajo: CTRL + R para el Channel Rack
+            scene.getAccelerators().put(
+                    new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_ANY),
+                    () -> handleOpenChannelRack(null)
+            );
+        });    }
 
     // Abrir Sintetizador
     @FXML
