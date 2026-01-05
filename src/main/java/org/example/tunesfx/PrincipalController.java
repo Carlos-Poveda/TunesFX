@@ -75,6 +75,7 @@ public class PrincipalController {
                 ChannelRackController rackController = loader.getController();
 
                 rackStage = new Stage();
+
                 Scene rackScene = new Scene(rackRoot);
 
                 String css = this.getClass().getResource("styles.css").toExternalForm();
@@ -85,6 +86,11 @@ public class PrincipalController {
                 rackStage.setTitle("Channel Rack");
                 rackStage.setScene(rackScene);
                 rackStage.setResizable(false);
+
+                rackStage.setOnCloseRequest(e -> {
+                    rackController.shutdown();
+                    rackStage = null;
+                });
                 rackStage.show();
 
             } catch (IOException e) {
