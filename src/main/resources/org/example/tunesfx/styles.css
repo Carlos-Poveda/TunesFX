@@ -159,7 +159,7 @@
     -fx-background-color: #424242; /* Color base azul vibrante */
     -fx-background-radius: 3;      /* Radio para esquinas redondeadas */
     -fx-border-radius: 3;
-    -fx-padding: 8 20 8 20;         /* Relleno interior para hacerlo más grande */
+    -fx-padding: 5 5 5 5;         /* Relleno interior para hacerlo más grande */
     -fx-text-fill: white;           /* Texto blanco */
     -fx-font-weight: bold;          /* Texto en negrita */
 
