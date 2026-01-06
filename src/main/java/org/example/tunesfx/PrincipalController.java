@@ -6,25 +6,44 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.example.tunesfx.utils.GlobalState;
 
 import java.io.IOException;
 
 public class PrincipalController {
+    @FXML private GridPane playlistGrid;
+    @FXML private ListView patternListView;
+    @FXML private ScrollPane playlistScrollPane;
     @FXML private Button openChannelRackButton;
     @FXML private Button btnSalir;
     @FXML private Button openSynthButton;
+    @FXML private HBox timelineHeader;
+    @FXML private VBox trackHeadersContainer;
+    @FXML private Pane playlistGridContent;
 
     private Stage rackStage;
+    private final int SNAP_X = 40; // Ancho de cada celda (puedes ajustarlo)
+    private final int TRACK_HEIGHT = 60; // Alto de cada pista
 
     @FXML
     public void initialize() {
+        GlobalState.setPrincipalController(this);
+
         // Shortcuts del teclado
         Platform.runLater(() -> {
             Scene scene = openSynthButton.getScene();
@@ -40,7 +59,9 @@ public class PrincipalController {
                     new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_ANY),
                     () -> handleOpenChannelRack(null)
             );
-        });    }
+        });
+    setupPlaylist();
+    }
 
     // Abrir Sintetizador
     @FXML
@@ -107,6 +128,43 @@ public class PrincipalController {
         } else {
             rackStage.toFront();
             rackStage.requestFocus();
+        }
+    }
+
+    public void addPatternFromSample(String patternName) {
+        if (!patternListView.getItems().contains(patternName)) {
+            patternListView.getItems().add(patternName);
+        }
+    }
+
+    private void setupPlaylist() {
+        // 1. Crear los Números de Compás (Timeline)
+        for (int i = 1; i <= 50; i++) { // Por ejemplo, 50 compases
+            Label measureLabel = new Label(String.valueOf(i));
+            measureLabel.setMinWidth(SNAP_X);
+            measureLabel.setStyle("-fx-text-fill: #888888; -fx-alignment: center; -fx-border-color: #121212; -fx-border-width: 0 1 0 0;");
+            timelineHeader.getChildren().add(measureLabel);
+        }
+
+        // 2. Crear los nombres de las pistas (Track Headers)
+        for (int i = 1; i <= 20; i++) { // 20 pistas iniciales
+            Label trackLabel = new Label(" Track " + i);
+            trackLabel.setMinHeight(TRACK_HEIGHT);
+            trackLabel.setPrefWidth(120);
+            trackLabel.setStyle("-fx-text-fill: #aaaaaa; -fx-border-color: #121212; -fx-border-width: 0 0 1 0; -fx-background-color: #2D2D2D;");
+            trackHeadersContainer.getChildren().add(trackLabel);
+
+            // 3. Dibujar líneas horizontales en el Grid para separar pistas
+            Line line = new Line(0, i * TRACK_HEIGHT, 2000, i * TRACK_HEIGHT);
+            line.setStroke(Color.web("#121212"));
+            playlistGridContent.getChildren().add(line);
+        }
+
+        // 4. Dibujar líneas verticales (Rejilla de tiempo)
+        for (int i = 0; i <= 2000; i += SNAP_X) {
+            Line vLine = new Line(i, 0, i, 2000);
+            vLine.setStroke(Color.web("#222222", 0.5)); // Color suave para la rejilla
+            playlistGridContent.getChildren().add(vLine);
         }
     }
 

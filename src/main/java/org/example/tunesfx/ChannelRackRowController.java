@@ -5,9 +5,11 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.example.tunesfx.audio.Sample;
 import org.example.tunesfx.audio.StepData;
+import org.example.tunesfx.utils.GlobalState;
 
 import java.util.Arrays;
 import java.util.List;
@@ -274,6 +276,50 @@ public class ChannelRackRowController {
         // Obtenemos los datos del primer paso para poner los valores iniciales de los sliders
         StepData referenceData = (StepData) stepBtn1.getUserData();
 
+        // ============================================================
+        // --- ACCIONES DE GESTIÓN (Enviar a Playlist, Borrar) ---
+        // ============================================================
+
+        // 1. Botón Enviar a Playlist
+        MenuItem sendToPlaylistItem = new MenuItem("Send to Playlist as Pattern");
+
+        sendToPlaylistItem.setOnAction(e -> {
+            // Prioridad: Si hay algo escrito en el TextField de renombrar, usamos eso.
+            // Si no, usamos el texto actual del Label.
+            String nameToSend = renameField.getText().trim();
+            if (nameToSend.isEmpty()) {
+                nameToSend = trackNameLabel.getText();
+            } else {
+                // Aprovechamos para actualizar el label si el usuario escribió algo y no dio Enter
+                trackNameLabel.setText(nameToSend);
+            }
+
+            // Enviamos a la ventana principal usando el puente
+            PrincipalController pc = GlobalState.getPrincipalController();
+            if (pc != null) {
+                pc.addPatternFromSample(nameToSend);
+                menu.hide(); // Cerramos el menú tras enviar
+            } else {
+                System.err.println("Error: No se encontró la ventana principal.");
+            }
+        });
+
+        menu.getItems().add(sendToPlaylistItem);
+
+        // 2. Botón Borrar Pista (Muy útil tenerlo aquí)
+        MenuItem deleteItem = new MenuItem("Delete Channel");
+        deleteItem.setStyle("-fx-text-fill: #ff6666;"); // Un toque rojo para indicar peligro
+        deleteItem.setOnAction(e -> {
+            // Aquí llamas a tu método de borrado existente
+            handleDeleteRow();
+        });
+
+        // Añadimos las acciones al menú
+        menu.getItems().addAll(sendToPlaylistItem, deleteItem);
+
+        // Separador antes de empezar con los sliders de sonido
+        menu.getItems().add(new SeparatorMenuItem());
+
         // --- PARTE 2: CONTROLES GLOBALES ---
 
         // 2.1 PITCH GLOBAL
@@ -404,7 +450,7 @@ public class ChannelRackRowController {
         if (deleteCallback != null) {
             deleteCallback.run();
         } else {
-            System.err.println("Error: La función de borrado no fue configurada.");
+            System.err.println("Error al borrar la fila.");
         }
     }
 

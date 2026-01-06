@@ -3,17 +3,19 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.effect.Glow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.layout.GridPane?>
 <BorderPane prefHeight="902.0" prefWidth="1339.0" style="-fx-background-color: #3D3D3D;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.PrincipalController">
 
    <top>
@@ -79,31 +81,97 @@
    </top>
 
    <left>
-      <VBox prefWidth="250.0" style="-fx-background-color: #262626; -fx-background-radius: 13; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
+      <VBox alignment="TOP_CENTER" prefWidth="250.0" style="-fx-background-color: #262626; -fx-background-radius: 13; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" top="10.0" />
          </BorderPane.margin>
+         <children>
+            <Label text="Library" textFill="#8a8a00">
+               <font>
+                  <Font name="OCR A Extended" size="15.0" />
+               </font>
+               <effect>
+                  <Glow />
+               </effect>
+            </Label>
+         </children>
       </VBox>
    </left>
 
    <center>
-      <VBox alignment="CENTER" prefHeight="507.0" prefWidth="950.0" spacing="20.0" style="-fx-background-color: #262626; -fx-background-radius: 13;" BorderPane.alignment="CENTER">
+      <VBox alignment="TOP_CENTER" style="-fx-background-color: #262626; -fx-background-radius: 13;" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </BorderPane.margin>
          <children>
-            <ScrollPane>
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-              </content>
+            <Label text="Playlist" textFill="#8a8a00">
+               <font>
+                  <Font name="OCR A Extended" size="15.0" />
+               </font>
+               <effect>
+                  <Glow />
+               </effect>
                <VBox.margin>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  <Insets bottom="5.0" top="10.0" />
                </VBox.margin>
-            </ScrollPane>
-         </children></VBox>
+            </Label>
+
+            <javafx.scene.control.SplitPane dividerPositions="0.2" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+               <items>
+
+                  <VBox minWidth="150.0" spacing="5.0" style="-fx-background-color: #1E1E1E;">
+                     <children>
+                        <Label text="Patterns" textFill="#8a8a00">
+                           <font>
+                              <Font name="OCR A Extended" size="10.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="5.0" top="5.0" />
+                           </VBox.margin>
+                        </Label>
+                        <javafx.scene.control.ListView fx:id="patternListView" style="-fx-background-color: #262626; -fx-control-inner-background: #262626;" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+
+                  <javafx.scene.control.ScrollPane fx:id="playlistScrollPane" fitToHeight="true" fitToWidth="true" style="-fx-background: #1A1A1A; -fx-background-color: transparent;">
+                     <content>
+                        <GridPane fx:id="playlistGrid" style="-fx-background-color: #1A1A1A;">
+                           <columnConstraints>
+                              <javafx.scene.layout.ColumnConstraints minWidth="100.0" prefWidth="120.0" />
+                              <javafx.scene.layout.ColumnConstraints hgrow="ALWAYS" minWidth="2000.0" />
+                           </columnConstraints>
+
+                           <rowConstraints>
+                              <javafx.scene.layout.RowConstraints minHeight="30.0" prefHeight="30.0" />
+                              <javafx.scene.layout.RowConstraints vgrow="ALWAYS" />
+                           </rowConstraints>
+
+                           <children>
+                              <Pane style="-fx-background-color: #2D2D2D; -fx-border-color: #121212;" />
+
+                              <HBox fx:id="timelineHeader" GridPane.columnIndex="1" prefHeight="30.0" style="-fx-background-color: #2D2D2D; -fx-border-color: #121212;">
+                              </HBox>
+
+                              <VBox fx:id="trackHeadersContainer" GridPane.rowIndex="1" style="-fx-background-color: #262626;">
+                              </VBox>
+
+                              <Pane fx:id="playlistGridContent" GridPane.columnIndex="1" GridPane.rowIndex="1" prefHeight="2000.0" prefWidth="2000.0">
+                                 <children>
+                                 </children>
+                              </Pane>
+                           </children>
+                        </GridPane>
+                     </content>
+                  </javafx.scene.control.ScrollPane>
+
+               </items>
+            </javafx.scene.control.SplitPane>
+
+         </children>
+      </VBox>
    </center>
 
 </BorderPane>
