@@ -60,7 +60,9 @@ public class PrincipalController {
                     () -> handleOpenChannelRack(null)
             );
         });
-    setupPlaylist();
+
+        // LLamar al método para pintar la playlist
+        setupPlaylist();
     }
 
     // Abrir Sintetizador

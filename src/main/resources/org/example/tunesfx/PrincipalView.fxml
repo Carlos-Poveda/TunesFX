@@ -10,12 +10,14 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.layout.GridPane?>
 <BorderPane prefHeight="902.0" prefWidth="1339.0" style="-fx-background-color: #3D3D3D;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.PrincipalController">
 
    <top>
@@ -122,7 +124,7 @@
             <javafx.scene.control.SplitPane dividerPositions="0.2" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                <items>
 
-                  <VBox minWidth="150.0" spacing="5.0" style="-fx-background-color: #1E1E1E;">
+                  <VBox alignment="TOP_CENTER" minWidth="150.0" spacing="5.0">
                      <children>
                         <Label text="Patterns" textFill="#8a8a00">
                            <font>
@@ -152,13 +154,13 @@
                            <children>
                               <Pane style="-fx-background-color: #2D2D2D; -fx-border-color: #121212;" />
 
-                              <HBox fx:id="timelineHeader" GridPane.columnIndex="1" prefHeight="30.0" style="-fx-background-color: #2D2D2D; -fx-border-color: #121212;">
+                              <HBox fx:id="timelineHeader" prefHeight="30.0" style="-fx-background-color: #2D2D2D; -fx-border-color: #121212;" GridPane.columnIndex="1">
                               </HBox>
 
-                              <VBox fx:id="trackHeadersContainer" GridPane.rowIndex="1" style="-fx-background-color: #262626;">
+                              <VBox fx:id="trackHeadersContainer" style="-fx-background-color: #262626;" GridPane.rowIndex="1">
                               </VBox>
 
-                              <Pane fx:id="playlistGridContent" GridPane.columnIndex="1" GridPane.rowIndex="1" prefHeight="2000.0" prefWidth="2000.0">
+                              <Pane fx:id="playlistGridContent" prefHeight="2000.0" prefWidth="2000.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <children>
                                  </children>
                               </Pane>
