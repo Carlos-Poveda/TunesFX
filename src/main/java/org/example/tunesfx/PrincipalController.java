@@ -1,5 +1,8 @@
 package org.example.tunesfx;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -20,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import org.example.tunesfx.utils.GlobalState;
 
 import java.io.IOException;
@@ -42,6 +46,9 @@ public class PrincipalController {
 
     private Stage rackStage;
     private List<PlaylistItem> songData = new ArrayList<>();
+    private Line playheadLine; // La línea visual del cursor
+    private Timeline songTimeline; // El "reloj" maestro de la Playlist
+    private double currentPlayheadX = 0; // Posición X actual del cursor
 
     // Variables para el diseño de la rejilla
     private final int CELL_WIDTH = 40;   // Ancho de cada celda de tiempo (1 compás o beat)
@@ -84,9 +91,7 @@ public class PrincipalController {
         // LLamar al método para pintar la playlist
         setupPlaylist();
         enablePatternPainting();
-
-        btnPlaySong.setOnAction(e -> handlePlaySong());
-        btnStopSong.setOnAction(e -> handleStopSong());
+        initializeSongTimeline();
     }
 
     // Abrir Sintetizador
@@ -219,6 +224,14 @@ public class PrincipalController {
             hLine.setStroke(Color.web("#1A1A1A")); // Color de separación de pistas
             playlistGridContent.getChildren().add(hLine);
         }
+
+        playheadLine = new Line(0, 0, 0, totalHeight);
+        playheadLine.setStroke(Color.RED); // Color clásico de playhead
+        playheadLine.setStrokeWidth(2);
+        playheadLine.setOpacity(0.8);
+        playheadLine.setMouseTransparent(true); // Para que no interfiera con los clics en la rejilla
+
+        playlistGridContent.getChildren().add(playheadLine);
     }
 
     private void enablePatternPainting() {
@@ -298,13 +311,70 @@ public class PrincipalController {
         playlistGridContent.getChildren().add(clipContainer);
     }
 
+    @FXML
     private void handlePlaySong() {
-        System.out.println("Reproduciendo Playlist a " + GlobalState.getBpm() + " BPM");
-        // Aquí implementaremos el Timeline maestro en el siguiente paso
+        if (songTimeline == null) initializeSongTimeline();
+
+        if (songTimeline.getStatus() == Animation.Status.RUNNING) {
+            songTimeline.pause();
+//            btnPlaySong.setStyle("-fx-background-color: #424242;"); // Color normal
+        } else {
+            songTimeline.play();
+//            btnPlaySong.setStyle("-fx-background-color: #2ecc71;"); // Color verde activo
+        }
     }
 
+    @FXML
     private void handleStopSong() {
-        System.out.println("Parar Playlist");
+        if (songTimeline != null) {
+            songTimeline.stop();
+            currentPlayheadX = 0;
+            playheadLine.setStartX(0);
+            playheadLine.setEndX(0);
+            btnPlaySong.setStyle("-fx-background-color: #424242;");
+        }
+    }
+
+    private void initializeSongTimeline() {
+        // Definimos la resolución: Queremos que el cursor se actualice suavemente.
+        // Una actualización cada 20ms (50 FPS) es suficiente.
+        songTimeline = new Timeline(new KeyFrame(Duration.millis(20), e -> {
+            updatePlayhead();
+        }));
+        songTimeline.setCycleCount(Animation.INDEFINITE);
+    }
+
+    private void updatePlayhead() {
+        double bpm = GlobalState.getBpm();
+
+        // CÁLCULO DE VELOCIDAD:
+        // 1 compás = CELL_WIDTH (40px)
+        // Velocidad (px/seg) = (BPM / 60) * CELL_WIDTH
+        // Como el Timeline corre cada 20ms (1/50 seg), dividimos entre 50:
+        double pixelsPerTick = ((bpm / 60.0) * CELL_WIDTH) / 50.0;
+
+        currentPlayheadX += pixelsPerTick;
+
+        // Si llegamos al final de la rejilla, volvemos al principio (Loop)
+        if (currentPlayheadX >= NUM_BARS * CELL_WIDTH) {
+            currentPlayheadX = 0;
+        }
+
+        // Actualizar posición visual de la línea
+        playheadLine.setStartX(currentPlayheadX);
+        playheadLine.setEndX(currentPlayheadX);
+
+        // OPCIONAL: Auto-scroll. Si el cursor sale de la vista, mover el ScrollPane
+        ensurePlayheadVisible();
+    }
+
+    private void ensurePlayheadVisible() {
+        double viewportWidth = playlistScrollPane.getViewportBounds().getWidth();
+        double scrollHValue = playlistScrollPane.getHvalue();
+        double contentWidth = playlistGridContent.getWidth();
+
+        // Si quieres que la pantalla siga al cursor automáticamente,
+        // aquí calcularíamos el scrollHValue. Por ahora lo dejamos manual para no marear.
     }
 
     public void salir(ActionEvent actionEvent) {

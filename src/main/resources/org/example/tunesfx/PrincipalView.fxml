@@ -63,7 +63,7 @@
                </HBox.margin>
             </Button>
 
-                        <Button fx:id="btnPlaySong" prefHeight="14.0" prefWidth="36.0" styleClass="synth-button">
+                        <Button fx:id="btnPlaySong" onAction="#handlePlaySong" prefHeight="14.0" prefWidth="36.0" styleClass="synth-button">
                <graphic>
                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -75,7 +75,7 @@
                   <Insets left="10.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="btnStopSong" styleClass="synth-button">
+            <Button fx:id="btnStopSong" onAction="#handleStopSong" styleClass="synth-button">
                <graphic>
                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                      <image>
