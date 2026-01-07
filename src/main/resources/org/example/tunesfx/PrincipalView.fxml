@@ -5,6 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.effect.Glow?>
 <?import javafx.scene.image.Image?>
@@ -61,7 +63,47 @@
                </HBox.margin>
             </Button>
 
-            <javafx.scene.layout.Pane HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnPlaySong" prefHeight="14.0" prefWidth="36.0" styleClass="synth-button">
+               <graphic>
+                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../images/boton-de-play.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="btnStopSong" styleClass="synth-button">
+               <graphic>
+                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../images/detener.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
+            <Label text="BPM" textFill="#8a8a00">
+               <font>
+                  <Font name="OCR A Extended" size="18.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Label>
+            <Spinner fx:id="bpmSpinner" editable="true" prefWidth="70">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Spinner>
+
+            <javafx.scene.layout.Pane prefHeight="47.0" prefWidth="770.0" HBox.hgrow="ALWAYS" />
+
+            <Separator orientation="VERTICAL" />
 
             <Button fx:id="btnSalir" mnemonicParsing="false" onAction="#salir" style="-fx-background-color: #424242;">
                <graphic>

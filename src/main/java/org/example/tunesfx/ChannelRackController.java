@@ -20,6 +20,7 @@ import org.example.tunesfx.audio.SampleBank;
 import org.example.tunesfx.audio.SamplePlayer;
 import org.example.tunesfx.audio.StepData;
 import org.example.tunesfx.utils.AudioFileLoader;
+import org.example.tunesfx.utils.GlobalState;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
@@ -45,15 +46,13 @@ public class ChannelRackController {
 
     @FXML
     public void initialize() {
-        SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(30, 300, 120, 1);
-        spinnerBPM.setValueFactory(valueFactory);
-        spinnerBPM.valueProperty().addListener((obs, oldVal, newVal) -> {
-            updateSequencerRate(newVal);
+        // Ya no configuramos un ValueFactory local.
+        // En su lugar, escuchamos al GlobalState:
+        GlobalState.bpmProperty().addListener((obs, oldVal, newVal) -> {
+            updateSequencerRate(newVal.doubleValue());
         });
-        initializeSequencer();
 
-        // Suscribirse a eventos del SampleBank
+        initializeSequencer();
         SampleBank.getInstance().setOnSampleSaved(this::addNewRow);
     }
 
@@ -82,7 +81,9 @@ public class ChannelRackController {
     }
 
     private void initializeSequencer() {
-        double beatDurationMillis = 60000.0 / referenciaBPM;
+        // Usamos el valor inicial de GlobalState
+        double currentBpm = GlobalState.getBpm();
+        double beatDurationMillis = 60000.0 / 120.0; // Mantenemos 120 como base de escala
         double stepDurationMillis = beatDurationMillis / 4.0;
 
         sequencerTimeline = new Timeline();
@@ -90,12 +91,15 @@ public class ChannelRackController {
 
         KeyFrame keyFrame = new KeyFrame(Duration.millis(stepDurationMillis), e -> runSequencerStep());
         sequencerTimeline.getKeyFrames().add(keyFrame);
-        updateSequencerRate(spinnerBPM.getValue());
+
+        // Sincronizar velocidad inicial
+        updateSequencerRate(currentBpm);
     }
 
     private void updateSequencerRate(double newBPM) {
         if (sequencerTimeline == null) return;
-        double newRate = newBPM / referenciaBPM;
+        // El rate es relativo a la base de 120 BPM
+        double newRate = newBPM / 120.0;
         sequencerTimeline.setRate(newRate);
     }
 
@@ -136,7 +140,7 @@ public class ChannelRackController {
         if (currentStep >= loopLimit) currentStep = 0;
         else currentStep++;
 
-        double currentBPM = spinnerBPM.getValue();
+        double currentBPM = GlobalState.getBpm();
         double stepDuration = (60000.0 / currentBPM) / 4.0;
 
         for (ChannelRackRowController row : allRows) {

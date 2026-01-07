@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrincipalController {
+    @FXML private Spinner bpmSpinner;
+    @FXML private Button btnStopSong;
+    @FXML private Button btnPlaySong;
     @FXML private GridPane playlistGrid;
     @FXML private ListView patternListView;
     @FXML private ScrollPane playlistScrollPane;
@@ -51,6 +54,16 @@ public class PrincipalController {
     public void initialize() {
         GlobalState.setPrincipalController(this);
 
+        // Configurar el Spinner de BPM (30 a 300, inicial 120)
+        SpinnerValueFactory<Double> bpmFactory =
+                new SpinnerValueFactory.DoubleSpinnerValueFactory(30.0, 300.0, 120.0, 1.0);
+        bpmSpinner.setValueFactory(bpmFactory);
+
+        // Cuando el spinner cambie, actualizamos el GlobalState
+        bpmSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+            GlobalState.setBpm((Double) newVal);
+        });
+
         // Shortcuts del teclado
         Platform.runLater(() -> {
             Scene scene = openSynthButton.getScene();
@@ -71,6 +84,9 @@ public class PrincipalController {
         // LLamar al método para pintar la playlist
         setupPlaylist();
         enablePatternPainting();
+
+        btnPlaySong.setOnAction(e -> handlePlaySong());
+        btnStopSong.setOnAction(e -> handleStopSong());
     }
 
     // Abrir Sintetizador
@@ -236,6 +252,12 @@ public class PrincipalController {
     }
 
     private void createClip(String patternName, double x, double y) {
+        int startBar = (int) (x / CELL_WIDTH) + 1; // +1 porque los compases empiezan en 1
+        int trackIndex = (int) (y / TRACK_HEIGHT);
+
+        PlaylistItem item = new PlaylistItem(patternName, startBar, trackIndex);
+        songData.add(item);
+
         // Usamos un StackPane para poder poner texto encima de un rectángulo
         javafx.scene.layout.StackPane clipContainer = new javafx.scene.layout.StackPane();
 
@@ -258,21 +280,31 @@ public class PrincipalController {
         Label nameLabel = new Label(patternName);
         nameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 9px;");
         nameLabel.setMouseTransparent(true); // Para que el clic pase a través del texto
-
+        clipContainer.setUserData(item);
         clipContainer.getChildren().add(nameLabel);
-
         // --- LÓGICA DE BORRADO ---
         // Si hacemos clic derecho sobre el clip, se elimina
         clipContainer.setOnMouseClicked(e -> {
             if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
+                // Borrar de la vista
                 playlistGridContent.getChildren().remove(clipContainer);
-                // Aquí más adelante también borraríamos el dato lógico de la canción
-                e.consume(); // Evita que el evento llegue al grid de abajo
+                // Borrar de la memoria (usando el objeto guardado en UserData)
+                songData.remove((PlaylistItem) clipContainer.getUserData());
+                e.consume();
             }
         });
 
         // Añadir al lienzo
         playlistGridContent.getChildren().add(clipContainer);
+    }
+
+    private void handlePlaySong() {
+        System.out.println("Reproduciendo Playlist a " + GlobalState.getBpm() + " BPM");
+        // Aquí implementaremos el Timeline maestro en el siguiente paso
+    }
+
+    private void handleStopSong() {
+        System.out.println("Parar Playlist");
     }
 
     public void salir(ActionEvent actionEvent) {
