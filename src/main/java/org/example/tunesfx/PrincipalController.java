@@ -4,11 +4,10 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -24,6 +23,8 @@ import javafx.stage.StageStyle;
 import org.example.tunesfx.utils.GlobalState;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PrincipalController {
     @FXML private GridPane playlistGrid;
@@ -37,8 +38,14 @@ public class PrincipalController {
     @FXML private Pane playlistGridContent;
 
     private Stage rackStage;
-    private final int SNAP_X = 40; // Ancho de cada celda (puedes ajustarlo)
-    private final int TRACK_HEIGHT = 60; // Alto de cada pista
+    private List<PlaylistItem> songData = new ArrayList<>();
+
+    // Variables para el diseño de la rejilla
+    private final int CELL_WIDTH = 40;   // Ancho de cada celda de tiempo (1 compás o beat)
+    private final int TRACK_HEIGHT = 40; // Alto de cada pista
+    private final int NUM_TRACKS = 20;   // Pistas iniciales
+    private final int NUM_BARS = 100;    // Compases iniciales
+
 
     @FXML
     public void initialize() {
@@ -63,6 +70,7 @@ public class PrincipalController {
 
         // LLamar al método para pintar la playlist
         setupPlaylist();
+        enablePatternPainting();
     }
 
     // Abrir Sintetizador
@@ -140,34 +148,131 @@ public class PrincipalController {
     }
 
     private void setupPlaylist() {
-        // 1. Crear los Números de Compás (Timeline)
-        for (int i = 1; i <= 50; i++) { // Por ejemplo, 50 compases
-            Label measureLabel = new Label(String.valueOf(i));
-            measureLabel.setMinWidth(SNAP_X);
-            measureLabel.setStyle("-fx-text-fill: #888888; -fx-alignment: center; -fx-border-color: #121212; -fx-border-width: 0 1 0 0;");
-            timelineHeader.getChildren().add(measureLabel);
-        }
+        // Limpiamos por si acaso
+        timelineHeader.getChildren().clear();
+        trackHeadersContainer.getChildren().clear();
+        playlistGridContent.getChildren().clear();
 
-        // 2. Crear los nombres de las pistas (Track Headers)
-        for (int i = 1; i <= 20; i++) { // 20 pistas iniciales
-            Label trackLabel = new Label(" Track " + i);
-            trackLabel.setMinHeight(TRACK_HEIGHT);
-            trackLabel.setPrefWidth(120);
-            trackLabel.setStyle("-fx-text-fill: #aaaaaa; -fx-border-color: #121212; -fx-border-width: 0 0 1 0; -fx-background-color: #2D2D2D;");
-            trackHeadersContainer.getChildren().add(trackLabel);
+        // Ajustar el tamaño total del lienzo de la rejilla
+        double totalWidth = NUM_BARS * CELL_WIDTH;
+        double totalHeight = NUM_TRACKS * TRACK_HEIGHT;
+        playlistGridContent.setPrefSize(totalWidth, totalHeight);
 
-            // 3. Dibujar líneas horizontales en el Grid para separar pistas
-            Line line = new Line(0, i * TRACK_HEIGHT, 2000, i * TRACK_HEIGHT);
-            line.setStroke(Color.web("#121212"));
-            playlistGridContent.getChildren().add(line);
-        }
+        // --- 1. GENERAR TIMELINE (Eje X) ---
+        for (int i = 1; i <= NUM_BARS; i++) {
+            Label barLabel = new Label(String.valueOf(i));
+            barLabel.setPrefWidth(CELL_WIDTH);
+            barLabel.setMinWidth(CELL_WIDTH);
+            barLabel.setAlignment(Pos.CENTER);
+            // Estilo: Texto gris y borde derecho suave
+            barLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 10px; -fx-border-color: #333333; -fx-border-width: 0 1 0 0;");
 
-        // 4. Dibujar líneas verticales (Rejilla de tiempo)
-        for (int i = 0; i <= 2000; i += SNAP_X) {
-            Line vLine = new Line(i, 0, i, 2000);
-            vLine.setStroke(Color.web("#222222", 0.5)); // Color suave para la rejilla
+            timelineHeader.getChildren().add(barLabel);
+
+            // Línea vertical en la rejilla (para cada compás)
+            Line vLine = new Line(i * CELL_WIDTH, 0, i * CELL_WIDTH, totalHeight);
+            vLine.setStroke(Color.web("#2A2A2A")); // Color de la rejilla vertical
+            vLine.getStrokeDashArray().addAll(2d, 2d); // Opcional: línea punteada
             playlistGridContent.getChildren().add(vLine);
         }
+
+        // --- 2. GENERAR TRACK HEADERS (Eje Y) ---
+        for (int j = 0; j < NUM_TRACKS; j++) {
+            // Etiqueta del Track
+            Label trackLabel = new Label("Track " + (j + 1));
+            trackLabel.setPrefHeight(TRACK_HEIGHT);
+            trackLabel.setMinHeight(TRACK_HEIGHT);
+            trackLabel.setMaxWidth(Double.MAX_VALUE);
+            trackLabel.setPadding(new Insets(0, 0, 0, 10)); // Margen izquierdo
+            trackLabel.setAlignment(Pos.CENTER_LEFT);
+
+            // Estilo alterno para facilitar la lectura (como en Excel)
+            String bg = (j % 2 == 0) ? "#262626" : "#232323";
+            trackLabel.setStyle("-fx-text-fill: #aaaaaa; -fx-background-color: " + bg + "; -fx-border-color: #1A1A1A; -fx-border-width: 0 0 1 0;");
+
+            // Menú contextual para el track (Renombrar, Color, etc.)
+            ContextMenu trackMenu = new ContextMenu();
+            MenuItem renameItem = new MenuItem("Rename Track");
+            trackMenu.getItems().add(renameItem);
+            trackLabel.setContextMenu(trackMenu);
+
+            trackHeadersContainer.getChildren().add(trackLabel);
+
+            // Línea horizontal en la rejilla (separando pistas)
+            Line hLine = new Line(0, (j + 1) * TRACK_HEIGHT, totalWidth, (j + 1) * TRACK_HEIGHT);
+            hLine.setStroke(Color.web("#1A1A1A")); // Color de separación de pistas
+            playlistGridContent.getChildren().add(hLine);
+        }
+    }
+
+    private void enablePatternPainting() {
+        playlistGridContent.setOnMouseClicked(event -> {
+            // Solo pintamos con clic izquierdo
+            if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
+
+                // 1. Obtener el patrón seleccionado de la lista
+                String selectedPattern = (String) patternListView.getSelectionModel().getSelectedItem();
+
+                // Si no hay nada seleccionado en la lista, no hacemos nada
+                if (selectedPattern == null) {
+                    // Mostrar algo
+                    System.out.println("Selecciona primero un patrón de la lista de la izquierda.");
+                    return;
+                }
+
+                // 2. Calcular coordenadas ajustadas a la rejilla (Snap to Grid)
+                // Dividimos la coordenada del ratón por el ancho/alto de celda, convertimos a entero (truca decimales)
+                // y multiplicamos de nuevo.
+                int colIndex = (int) (event.getX() / CELL_WIDTH);
+                int rowIndex = (int) (event.getY() / TRACK_HEIGHT);
+
+                double snapX = colIndex * CELL_WIDTH;
+                double snapY = rowIndex * TRACK_HEIGHT;
+
+                // 3. Crear y añadir el Clip visual
+                createClip(selectedPattern, snapX, snapY);
+            }
+        });
+    }
+
+    private void createClip(String patternName, double x, double y) {
+        // Usamos un StackPane para poder poner texto encima de un rectángulo
+        javafx.scene.layout.StackPane clipContainer = new javafx.scene.layout.StackPane();
+
+        // Dimensiones del clip (por defecto 1 compás de ancho)
+        clipContainer.setPrefSize(CELL_WIDTH, TRACK_HEIGHT);
+        clipContainer.setLayoutX(x);
+        clipContainer.setLayoutY(y);
+
+        // Estilo visual del Clip (parecido a un bloque de audio)
+        // Fondo coloreado, bordes redondeados, borde suave
+        clipContainer.setStyle(
+                "-fx-background-color: #4a4a4a;" +
+                        "-fx-background-radius: 3;" +
+                        "-fx-border-color: #666666;" +
+                        "-fx-border-radius: 3;" +
+                        "-fx-border-width: 1;"
+        );
+
+        // Etiqueta con el nombre (solo si cabe, o truncado)
+        Label nameLabel = new Label(patternName);
+        nameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 9px;");
+        nameLabel.setMouseTransparent(true); // Para que el clic pase a través del texto
+
+        clipContainer.getChildren().add(nameLabel);
+
+        // --- LÓGICA DE BORRADO ---
+        // Si hacemos clic derecho sobre el clip, se elimina
+        clipContainer.setOnMouseClicked(e -> {
+            if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
+                playlistGridContent.getChildren().remove(clipContainer);
+                // Aquí más adelante también borraríamos el dato lógico de la canción
+                e.consume(); // Evita que el evento llegue al grid de abajo
+            }
+        });
+
+        // Añadir al lienzo
+        playlistGridContent.getChildren().add(clipContainer);
     }
 
     public void salir(ActionEvent actionEvent) {
