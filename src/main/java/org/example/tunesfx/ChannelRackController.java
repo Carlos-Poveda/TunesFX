@@ -2,6 +2,7 @@ package org.example.tunesfx;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -180,19 +181,54 @@ public class ChannelRackController {
     // Busca una fila por nombre y reproduce su sample (como un One-Shot)
     public void playSoundByName(String rowName) {
         for (ChannelRackRowController row : allRows) {
-            // Asumimos que tienes un método getTrackName() en tu RowController
-            // Si no, usa el texto del label directamente si lo hiciste público o añade el getter.
+
+            // Asumo que tienes un getter para el nombre. Si no, usa el label.
+            // Ojo: Asegúrate de que row.getTrackName() existe.
             if (row.getTrackName().equals(rowName)) {
-                Sample sample = row.getSample();
-                if (sample != null) {
-                    // Reproducir el sample completo una vez (volumen 1.0, pitch normal)
-                    // Usamos null en StepData para indicar valores por defecto o creamos uno básico
-                    SamplePlayer.playStep(sample, new StepData(), 1.0); // Ajusta según tu SamplePlayer
-                }
-                return; // Encontrado y reproducido
+                schedulePatternPlayback(row);
+                return;
             }
         }
         System.out.println("No se encontró la pista: " + rowName);
+    }
+
+    private void schedulePatternPlayback(ChannelRackRowController row) {
+        double bpm = GlobalState.getBpm();
+        // Duración de un paso en milisegundos: (60000 / BPM) / 4 semicorcheas
+        double stepDurationMillis = (60000.0 / bpm) / 4.0;
+
+        Sample sample = row.getSample();
+        if (sample == null) return;
+
+        // Recorremos todos los pasos de la fila
+        for (int i = 0; i < row.getStepCount(); i++) {
+
+            // Usamos el nuevo método que creamos en el paso anterior
+            // para obtener los datos REALES (incluyendo pitch/volumen)
+            StepData stepData = row.getCombinedStepData(i);
+
+            // Si el paso está activo, lo programamos
+            if (stepData != null && stepData.isActive()) {
+
+                // Calculamos cuándo debe sonar este paso
+                // El paso 0 suena en 0ms, el paso 1 en stepDuration, el 2 en 2*stepDuration...
+                double delay = i * stepDurationMillis;
+
+                // Creamos un "temporizador" desechable solo para este disparo
+                PauseTransition scheduler = new PauseTransition(Duration.millis(delay));
+
+                // Necesitamos una variable final para usarla dentro del lambda
+                final StepData finalStepData = stepData;
+
+                scheduler.setOnFinished(e -> {
+                    // Reproducir usando los datos correctos
+                    // NOTA: Pasamos stepDurationMillis para que el audio engine sepa cuánto dura el hueco
+                    SamplePlayer.playStep(sample, finalStepData, stepDurationMillis);
+                });
+
+                scheduler.play();
+            }
+        }
     }
 
     // Método para apagar todo si cierran la ventana

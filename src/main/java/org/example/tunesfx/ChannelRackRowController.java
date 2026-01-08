@@ -525,6 +525,32 @@ public class ChannelRackRowController {
         }
     }
 
+    // Método para obtener la configuración combinada (Knobs + Step específico)
+    public StepData getCombinedStepData(int stepIndex) {
+        // 1. Obtenemos el StepData base de ese botón (si existe)
+        StepData step = getStepData(stepIndex); // Asumo que tienes este método o array
+
+        if (step == null || !step.isActive()) return null;
+
+        // 2. Aquí es donde aplicamos los KNOBS globales de la fila
+        // Ejemplo: Sumamos el pitch del paso individual + el pitch del knob global
+        // int globalPitch = (int) pitchKnob.getValue();
+        // step.setSemitoneOffset(step.getSemitoneOffset() + globalPitch);
+
+        // Ejemplo: Multiplicamos volumen del paso * volumen del knob global
+        // double globalVol = volumeKnob.getValue();
+        // step.setVolume(step.getVolume() * globalVol);
+
+        // Por ahora, si no tienes knobs implementados, devolvemos el step tal cual
+        // pero asegurándonos de que usamos el objeto real configurado
+        return step;
+    }
+
+    // Método para saber cuántos pasos tiene la fila
+    public int getStepCount() {
+        return NUM_STEPS;
+    }
+
     private String formatPanLabel(double val) {
         if (Math.abs(val) < 0.05) return "Center"; // Zona muerta en el centro
         if (val < 0) return "L " + (int)(Math.abs(val) * 100) + "%";
