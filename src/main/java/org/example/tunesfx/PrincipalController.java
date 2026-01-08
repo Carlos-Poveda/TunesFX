@@ -56,6 +56,13 @@ public class PrincipalController {
     private final int NUM_TRACKS = 20;   // Pistas iniciales
     private final int NUM_BARS = 100;    // Compases iniciales
 
+    // Variables para la gestión del ratón en la Playlist
+    private double mouseAnchorX;
+    private double mouseAnchorY;
+    private double initialLayoutX;
+    private double initialLayoutY;
+    private boolean isResizing = false;
+    private final double RESIZE_MARGIN = 10.0; // Píxeles del borde derecho para redimensionar
 
     @FXML
     public void initialize() {
@@ -265,44 +272,145 @@ public class PrincipalController {
     }
 
     private void createClip(String patternName, double x, double y) {
-        int startBar = (int) (x / CELL_WIDTH) + 1; // +1 porque los compases empiezan en 1
+        // 1. Crear datos lógicos
+        int startBar = (int) (x / CELL_WIDTH) + 1;
         int trackIndex = (int) (y / TRACK_HEIGHT);
-
         PlaylistItem item = new PlaylistItem(patternName, startBar, trackIndex);
         songData.add(item);
 
-        // Usamos un StackPane para poder poner texto encima de un rectángulo
+        // 2. Crear contenedor visual
         javafx.scene.layout.StackPane clipContainer = new javafx.scene.layout.StackPane();
-
-        // Dimensiones del clip (por defecto 1 compás de ancho)
         clipContainer.setPrefSize(CELL_WIDTH, TRACK_HEIGHT);
         clipContainer.setLayoutX(x);
         clipContainer.setLayoutY(y);
 
-        // Estilo visual del Clip (parecido a un bloque de audio)
-        // Fondo coloreado, bordes redondeados, borde suave
+        // Guardamos la referencia al objeto de datos
+        clipContainer.setUserData(item);
+
+        // Estilo base
         clipContainer.setStyle(
                 "-fx-background-color: #4a4a4a;" +
-                        "-fx-background-radius: 3;" +
+                        "-fx-background-radius: 4;" +
                         "-fx-border-color: #666666;" +
-                        "-fx-border-radius: 3;" +
-                        "-fx-border-width: 1;"
+                        "-fx-border-width: 1;" +
+                        "-fx-cursor: hand;" // Cursor de mano por defecto
         );
 
-        // Etiqueta con el nombre (solo si cabe, o truncado)
+        // Etiqueta
         Label nameLabel = new Label(patternName);
-        nameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 9px;");
-        nameLabel.setMouseTransparent(true); // Para que el clic pase a través del texto
-        clipContainer.setUserData(item);
+        nameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold;");
+        nameLabel.setMouseTransparent(true);
         clipContainer.getChildren().add(nameLabel);
-        // --- LÓGICA DE BORRADO ---
-        // Si hacemos clic derecho sobre el clip, se elimina
-        clipContainer.setOnMouseClicked(e -> {
+
+        // =============================================================
+        // LÓGICA DE INTERACCIÓN (MOUSE EVENTS)
+        // =============================================================
+
+        // --- 1. MOUSE MOVED (Cambiar cursor) ---
+        clipContainer.setOnMouseMoved(e -> {
+            // Si estamos cerca del borde derecho, cambiamos cursor a redimensionar
+            if (e.getX() > clipContainer.getWidth() - RESIZE_MARGIN) {
+                clipContainer.setCursor(javafx.scene.Cursor.H_RESIZE);
+            } else {
+                clipContainer.setCursor(javafx.scene.Cursor.HAND);
+            }
+        });
+
+        // --- 2. MOUSE PRESSED (Iniciar acción) ---
+        clipContainer.setOnMousePressed(e -> {
+            if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
+                // Guardamos posición inicial
+                mouseAnchorX = e.getSceneX();
+                mouseAnchorY = e.getSceneY();
+                initialLayoutX = clipContainer.getLayoutX();
+                initialLayoutY = clipContainer.getLayoutY();
+
+                // Detectar si vamos a redimensionar o a mover
+                isResizing = (e.getX() > clipContainer.getWidth() - RESIZE_MARGIN);
+
+                // Traer al frente para que no quede detrás de otros bloques al mover
+                clipContainer.toFront();
+                e.consume();
+            }
+        });
+
+        // --- 3. MOUSE DRAGGED (Arrastrar) ---
+        clipContainer.setOnMouseDragged(e -> {
+            if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
+                if (isResizing) {
+                    // MODO REDIMENSIONAR
+                    // Calculamos nuevo ancho basado en la posición del ratón dentro del nodo
+                    double newWidth = e.getX();
+                    // Mínimo 1 celda de ancho
+                    if (newWidth < CELL_WIDTH) newWidth = CELL_WIDTH;
+                    clipContainer.setPrefWidth(newWidth);
+                } else {
+                    // MODO MOVER
+                    double dragX = e.getSceneX() - mouseAnchorX;
+                    double dragY = e.getSceneY() - mouseAnchorY;
+
+                    clipContainer.setLayoutX(initialLayoutX + dragX);
+                    clipContainer.setLayoutY(initialLayoutY + dragY);
+                }
+                e.consume();
+            }
+        });
+
+        // --- 4. MOUSE RELEASED (Soltar y Ajustar a Rejilla - SNAP) ---
+        clipContainer.setOnMouseReleased(e -> {
+            if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
+                if (isResizing) {
+                    // Ajustar ANCHO a la rejilla
+                    double currentWidth = clipContainer.getPrefWidth();
+                    // Redondear al múltiplo de CELL_WIDTH más cercano
+                    int cols = (int) Math.round(currentWidth / CELL_WIDTH);
+                    if (cols < 1) cols = 1; // Mínimo 1 compás
+
+                    double snappedWidth = cols * CELL_WIDTH;
+                    clipContainer.setPrefWidth(snappedWidth);
+
+                    // OPCIONAL: Aquí podrías guardar la duración en 'item' si tuvieras esa propiedad
+                    // item.setDurationBars(cols);
+
+                } else {
+                    // Ajustar POSICIÓN a la rejilla
+                    double rawX = clipContainer.getLayoutX();
+                    double rawY = clipContainer.getLayoutY();
+
+                    // Snap X (Tiempo)
+                    int colIndex = (int) Math.round(rawX / CELL_WIDTH);
+                    if (colIndex < 0) colIndex = 0;
+                    double snappedX = colIndex * CELL_WIDTH;
+
+                    // Snap Y (Track)
+                    int rowIndex = (int) Math.round(rawY / TRACK_HEIGHT);
+                    if (rowIndex < 0) rowIndex = 0;
+                    if (rowIndex >= NUM_TRACKS) rowIndex = NUM_TRACKS - 1;
+                    double snappedY = rowIndex * TRACK_HEIGHT;
+
+                    // Aplicar posición ajustada
+                    clipContainer.setLayoutX(snappedX);
+                    clipContainer.setLayoutY(snappedY);
+
+                    // ACTUALIZAR DATOS LÓGICOS
+                    // Importante para que el cursor de reproducción sepa dónde está ahora
+                    item.setStartBar(colIndex + 1);
+                    item.setTrackIndex(rowIndex);
+
+                    // Feedback visual de "encaje"
+                    System.out.println("Bloque movido a: Bar " + (colIndex + 1) + ", Track " + (rowIndex + 1));
+                }
+            }
+        });
+
+        // --- 5. CLICK DERECHO (Borrar) ---
+        // Usamos Filter para capturarlo antes que otros eventos si fuera necesario
+        clipContainer.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
                 // Borrar de la vista
                 playlistGridContent.getChildren().remove(clipContainer);
-                // Borrar de la memoria (usando el objeto guardado en UserData)
-                songData.remove((PlaylistItem) clipContainer.getUserData());
+                // Borrar de la memoria
+                songData.remove(item);
                 e.consume();
             }
         });
