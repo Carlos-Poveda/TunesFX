@@ -527,22 +527,8 @@ public class ChannelRackRowController {
 
     // Método para obtener la configuración combinada (Knobs + Step específico)
     public StepData getCombinedStepData(int stepIndex) {
-        // 1. Obtenemos el StepData base de ese botón (si existe)
-        StepData step = getStepData(stepIndex); // Asumo que tienes este método o array
-
+        StepData step = getStepData(stepIndex);
         if (step == null || !step.isActive()) return null;
-
-        // 2. Aquí es donde aplicamos los KNOBS globales de la fila
-        // Ejemplo: Sumamos el pitch del paso individual + el pitch del knob global
-        // int globalPitch = (int) pitchKnob.getValue();
-        // step.setSemitoneOffset(step.getSemitoneOffset() + globalPitch);
-
-        // Ejemplo: Multiplicamos volumen del paso * volumen del knob global
-        // double globalVol = volumeKnob.getValue();
-        // step.setVolume(step.getVolume() * globalVol);
-
-        // Por ahora, si no tienes knobs implementados, devolvemos el step tal cual
-        // pero asegurándonos de que usamos el objeto real configurado
         return step;
     }
 
