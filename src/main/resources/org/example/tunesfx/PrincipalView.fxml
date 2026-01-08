@@ -180,7 +180,7 @@
                      </children>
                   </VBox>
 
-                  <javafx.scene.control.ScrollPane fx:id="playlistScrollPane" fitToHeight="true" fitToWidth="true" style="-fx-background: #1A1A1A; -fx-background-color: transparent;">
+                  <javafx.scene.control.ScrollPane fx:id="playlistScrollPane" fitToHeight="true" fitToWidth="false" style="-fx-background: #1A1A1A; -fx-background-color: transparent;">
                      <content>
                         <GridPane fx:id="playlistGrid" style="-fx-background-color: #1A1A1A;">
                            <columnConstraints>

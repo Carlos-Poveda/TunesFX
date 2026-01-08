@@ -53,8 +53,8 @@ public class PrincipalController {
     // Variables para el diseño de la rejilla
     private final int CELL_WIDTH = 40;   // Ancho de cada celda de tiempo (1 compás o beat)
     private final int TRACK_HEIGHT = 40; // Alto de cada pista
-    private final int NUM_TRACKS = 20;   // Pistas iniciales
-    private final int NUM_BARS = 100;    // Compases iniciales
+    private final int NUM_TRACKS = 40;   // Pistas iniciales
+    private final int NUM_BARS = 400;    // Compases iniciales
 
     // Variables para la gestión del ratón en la Playlist
     private double mouseAnchorX;
@@ -184,6 +184,7 @@ public class PrincipalController {
         // Ajustar el tamaño total del lienzo de la rejilla
         double totalWidth = NUM_BARS * CELL_WIDTH;
         double totalHeight = NUM_TRACKS * TRACK_HEIGHT;
+        playlistGridContent.setMinWidth(totalWidth);
         playlistGridContent.setPrefSize(totalWidth, totalHeight);
 
         // --- 1. GENERAR TIMELINE (Eje X) ---
