@@ -530,4 +530,8 @@ public class ChannelRackRowController {
         if (val < 0) return "L " + (int)(Math.abs(val) * 100) + "%";
         return "R " + (int)(val * 100) + "%";
     }
+
+    public String getTrackName() {
+        return trackNameLabel.getText();
+    }
 }

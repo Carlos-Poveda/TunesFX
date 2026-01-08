@@ -9,7 +9,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -46,8 +45,8 @@ public class ChannelRackController {
 
     @FXML
     public void initialize() {
-        // Ya no configuramos un ValueFactory local.
-        // En su lugar, escuchamos al GlobalState:
+        GlobalState.setChannelRackController(this);
+
         GlobalState.bpmProperty().addListener((obs, oldVal, newVal) -> {
             updateSequencerRate(newVal.doubleValue());
         });
@@ -176,6 +175,24 @@ public class ChannelRackController {
             if (currentStep != -1) row.clearPlayhead(currentStep);
         }
         currentStep = -1;
+    }
+
+    // Busca una fila por nombre y reproduce su sample (como un One-Shot)
+    public void playSoundByName(String rowName) {
+        for (ChannelRackRowController row : allRows) {
+            // Asumimos que tienes un método getTrackName() en tu RowController
+            // Si no, usa el texto del label directamente si lo hiciste público o añade el getter.
+            if (row.getTrackName().equals(rowName)) {
+                Sample sample = row.getSample();
+                if (sample != null) {
+                    // Reproducir el sample completo una vez (volumen 1.0, pitch normal)
+                    // Usamos null en StepData para indicar valores por defecto o creamos uno básico
+                    SamplePlayer.playStep(sample, new StepData(), 1.0); // Ajusta según tu SamplePlayer
+                }
+                return; // Encontrado y reproducido
+            }
+        }
+        System.out.println("No se encontró la pista: " + rowName);
     }
 
     // Método para apagar todo si cierran la ventana

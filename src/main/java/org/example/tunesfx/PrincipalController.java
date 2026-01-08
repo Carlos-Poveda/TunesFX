@@ -22,7 +22,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.example.tunesfx.utils.GlobalState;
 
@@ -49,6 +48,7 @@ public class PrincipalController {
     private Line playheadLine; // La línea visual del cursor
     private Timeline songTimeline; // El "reloj" maestro de la Playlist
     private double currentPlayheadX = 0; // Posición X actual del cursor
+    private double previousPlayheadX = 0; // Para recordar dónde estábamos antes
 
     // Variables para el diseño de la rejilla
     private final int CELL_WIDTH = 40;   // Ancho de cada celda de tiempo (1 compás o beat)
@@ -329,6 +329,7 @@ public class PrincipalController {
         if (songTimeline != null) {
             songTimeline.stop();
             currentPlayheadX = 0;
+            previousPlayheadX = 0;
             playheadLine.setStartX(0);
             playheadLine.setEndX(0);
             btnPlaySong.setStyle("-fx-background-color: #424242;");
@@ -346,26 +347,55 @@ public class PrincipalController {
 
     private void updatePlayhead() {
         double bpm = GlobalState.getBpm();
+        // 1. Guardar posición ANTERIOR
+        double oldX = currentPlayheadX;
 
-        // CÁLCULO DE VELOCIDAD:
-        // 1 compás = CELL_WIDTH (40px)
-        // Velocidad (px/seg) = (BPM / 60) * CELL_WIDTH
-        // Como el Timeline corre cada 20ms (1/50 seg), dividimos entre 50:
+        // 2. Calcular NUEVA posición
+        // (BPM / 60) * CELL_WIDTH = Píxeles por segundo
+        // Dividimos entre 50 porque corremos a 50Hz (20ms)
         double pixelsPerTick = ((bpm / 60.0) * CELL_WIDTH) / 50.0;
 
         currentPlayheadX += pixelsPerTick;
 
-        // Si llegamos al final de la rejilla, volvemos al principio (Loop)
+        // 3. DETECCIÓN DE COLISIÓN (Trigger)
+        // Buscamos items que empiecen justo en el tramo que acabamos de recorrer [oldX, currentPlayheadX)
+        checkCollisions(oldX, currentPlayheadX);
+
+        // 4. Loop (Vuelta al principio)
         if (currentPlayheadX >= NUM_BARS * CELL_WIDTH) {
             currentPlayheadX = 0;
+            previousPlayheadX = 0; // Resetear para evitar disparos falsos
         }
 
-        // Actualizar posición visual de la línea
+        // 5. Actualizar visual
         playheadLine.setStartX(currentPlayheadX);
         playheadLine.setEndX(currentPlayheadX);
+    }
 
-        // OPCIONAL: Auto-scroll. Si el cursor sale de la vista, mover el ScrollPane
-        ensurePlayheadVisible();
+    private void checkCollisions(double oldX, double newX) {
+        // Recorremos todos los bloques de la canción
+        for (PlaylistItem item : songData) {
+            // Calculamos el píxel exacto donde empieza este bloque
+            // (startBar - 1) porque visualmente el compás 1 está en x=0
+            double itemStartX = (item.getStartBar() - 1) * CELL_WIDTH;
+
+            // ¿El inicio del bloque está dentro del tramo que hemos recorrido?
+            // Es decir: oldX <= inicio < newX
+            if (itemStartX >= oldX && itemStartX < newX) {
+                triggerPattern(item);
+            }
+        }
+    }
+
+    private void triggerPattern(PlaylistItem item) {
+        // Pedimos al Channel Rack que suene
+        ChannelRackController rack = GlobalState.getChannelRackController();
+        if (rack != null) {
+            // Efecto visual opcional: iluminar el bloque brevemente (si quieres)
+
+            // Sonido
+            rack.playSoundByName(item.getPatternName());
+        }
     }
 
     private void ensurePlayheadVisible() {

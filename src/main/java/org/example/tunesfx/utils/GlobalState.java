@@ -2,10 +2,12 @@ package org.example.tunesfx.utils;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import org.example.tunesfx.ChannelRackController;
 import org.example.tunesfx.PrincipalController;
 
 public class GlobalState {
     private static PrincipalController principalController;
+    private static ChannelRackController rackController;
     // Propiedad observable para el BPM
     private static final DoubleProperty bpm = new SimpleDoubleProperty(120.0);
 
@@ -27,5 +29,13 @@ public class GlobalState {
 
     public static void setBpm(double value) {
         bpm.set(value);
+    }
+
+    public static void setChannelRackController(ChannelRackController crc) {
+        rackController = crc;
+    }
+
+    public static ChannelRackController getChannelRackController() {
+        return rackController;
     }
 }
