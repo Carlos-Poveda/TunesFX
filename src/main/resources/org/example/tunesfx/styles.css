@@ -201,3 +201,55 @@
 .spinner .decrement-arrow-button:hover {
     -fx-background-color: #444444; /* Oscurecer un poco al pasar el ratón */
 }
+
+/* El contenedor del divisor */
+.split-pane > .split-pane-divider {
+    -fx-background-color: #444444; /* Color muy oscuro (casi negro) */
+    -fx-border-color: transparent;
+    -fx-padding: 0 2 0 2; /* Esto controla el GROSOR de la línea (2px) */
+}
+
+
+/* Ocultar el "grip" (los puntitos feos por defecto) */
+.split-pane > .split-pane-divider > .vertical-grabber,
+.split-pane > .split-pane-divider > .horizontal-grabber {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-shape: " "; /* Elimina la forma geométrica de los puntos */
+}
+
+/* Fondo del diálogo y del panel de contenido */
+.dialog-pane {
+    -fx-background-color: #2D2D2D;
+}
+
+/* Color del texto de las etiquetas del diálogo ("Nuevo nombre:") */
+.dialog-pane > .content.label {
+    -fx-text-fill: #aaaaaa;
+}
+
+/* El campo de texto dentro del diálogo */
+.dialog-pane .text-field {
+    -fx-background-color: #1A1A1A;
+    -fx-text-fill: white;
+    -fx-border-color: #444444;
+}
+
+/* Los botones del diálogo (Aceptar/Cancelar) */
+.dialog-pane .button {
+    -fx-background-color: #444444;
+    -fx-text-fill: white;
+}
+
+.dialog-pane .button:hover {
+    -fx-background-color: #555555;
+}
+
+.dialog-pane .label {
+    -fx-text-fill: #FFFFFF !important;
+}
+
+.dialog-pane > .content {
+    -fx-text-fill: #FFFFFF !important;
+}
+

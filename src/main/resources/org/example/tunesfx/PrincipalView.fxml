@@ -103,7 +103,7 @@
 
             <javafx.scene.layout.Pane prefHeight="47.0" prefWidth="770.0" HBox.hgrow="ALWAYS" />
 
-            <Separator orientation="VERTICAL" />
+            <Separator orientation="VERTICAL" style="visibility: false;" />
 
             <Button fx:id="btnSalir" mnemonicParsing="false" onAction="#salir" style="-fx-background-color: #424242;">
                <graphic>
@@ -163,10 +163,10 @@
                </VBox.margin>
             </Label>
 
-            <javafx.scene.control.SplitPane dividerPositions="0.15315315315315314" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+            <javafx.scene.control.SplitPane dividerPositions="0.12" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                <items>
 
-                  <VBox alignment="TOP_CENTER" minWidth="100.0" spacing="5.0">
+                  <VBox alignment="TOP_CENTER" minWidth="200.0" prefHeight="798.0" prefWidth="200.0" spacing="5.0" SplitPane.resizableWithParent="false">
                      <children>
                         <Label text="Patterns" textFill="#8a8a00">
                            <font>
@@ -176,7 +176,10 @@
                               <Insets left="5.0" top="5.0" />
                            </VBox.margin>
                         </Label>
-                        <javafx.scene.control.ListView fx:id="patternListView" style="-fx-background-color: #262626; -fx-control-inner-background: #262626;" VBox.vgrow="ALWAYS" />
+                        <javafx.scene.control.ListView fx:id="patternListView" prefHeight="758.0" prefWidth="200.0" style="-fx-background-color: #262626; -fx-control-inner-background: #262626;" VBox.vgrow="ALWAYS">
+                           <VBox.margin>
+                              <Insets bottom="5.0" />
+                           </VBox.margin></javafx.scene.control.ListView>
                      </children>
                   </VBox>
 

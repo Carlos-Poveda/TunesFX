@@ -216,15 +216,51 @@ public class PrincipalController {
             trackLabel.setPadding(new Insets(0, 0, 0, 10)); // Margen izquierdo
             trackLabel.setAlignment(Pos.CENTER_LEFT);
 
-            // Estilo alterno para facilitar la lectura (como en Excel)
+            // Estilo alterno para facilitar la lectura
             String bg = (j % 2 == 0) ? "#262626" : "#232323";
             trackLabel.setStyle("-fx-text-fill: #aaaaaa; -fx-background-color: " + bg + "; -fx-border-color: #1A1A1A; -fx-border-width: 0 0 1 0;");
 
-            // Menú contextual para el track (Renombrar, Color, etc.)
+            // Menú contextual para el track
             ContextMenu trackMenu = new ContextMenu();
-            MenuItem renameItem = new MenuItem("Rename Track");
+            MenuItem renameItem = new MenuItem("Renombrar Pista");
+
+            // Lógica para renombrar
+            renameItem.setOnAction(e -> {
+                // 1. Crear el diálogo pre-rellenado con el nombre actual
+                TextInputDialog dialog = new TextInputDialog(trackLabel.getText());
+                dialog.setTitle("Rename");
+                dialog.setHeaderText(null); // Quitamos la cabecera para que sea más limpio
+                dialog.setContentText("New name:");
+                dialog.setGraphic(null); // Quitamos el icono por defecto si no lo quieres
+
+                // 2. IMPORTANTE: Aplicar tu CSS al diálogo para que no salga blanco brillante
+                try {
+                    DialogPane dialogPane = dialog.getDialogPane();
+                    String css = this.getClass().getResource("styles.css").toExternalForm();
+                    dialogPane.getStylesheets().add(css);
+                    dialogPane.getStyleClass().add("my-dialog"); // Clase opcional si quieres personalizarlo más
+                } catch (Exception ex) {
+                    // Si falla el CSS, el diálogo funciona igual, solo que se verá estándar
+                }
+
+                // 3. Mostrar y esperar respuesta
+                dialog.showAndWait().ifPresent(newName -> {
+                    // Solo cambiamos si no está vacío
+                    if (!newName.trim().isEmpty()) {
+                        trackLabel.setText(newName);
+                    }
+                });
+            });
+
             trackMenu.getItems().add(renameItem);
             trackLabel.setContextMenu(trackMenu);
+
+            // OPCIONAL: Permitir renombrar también con DOBLE CLIC (muy común en DAWs)
+            trackLabel.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
+                    renameItem.fire(); // Dispara la misma acción que el menú
+                }
+            });
 
             trackHeadersContainer.getChildren().add(trackLabel);
 

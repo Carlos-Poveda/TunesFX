@@ -278,7 +278,7 @@ public class ChannelRackRowController {
         StepData referenceData = (StepData) stepBtn1.getUserData();
 
         // ============================================================
-        // --- ACCIONES DE GESTIÓN (Enviar a Playlist, Borrar) ---
+        // --- ACCIONES DE GESTIÓN (Enviar a Playlist) ---
         // ============================================================
 
         // 1. Botón Enviar a Playlist
@@ -306,17 +306,6 @@ public class ChannelRackRowController {
         });
 
         menu.getItems().add(sendToPlaylistItem);
-
-        // 2. Botón Borrar Pista (Muy útil tenerlo aquí)
-        MenuItem deleteItem = new MenuItem("Delete Channel");
-        deleteItem.setStyle("-fx-text-fill: #ff6666;"); // Un toque rojo para indicar peligro
-        deleteItem.setOnAction(e -> {
-            // Aquí llamas a tu método de borrado existente
-            handleDeleteRow();
-        });
-
-        // Añadimos las acciones al menú
-        menu.getItems().addAll(sendToPlaylistItem, deleteItem);
 
         // Separador antes de empezar con los sliders de sonido
         menu.getItems().add(new SeparatorMenuItem());
