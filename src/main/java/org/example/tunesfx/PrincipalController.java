@@ -99,6 +99,7 @@ public class PrincipalController {
         setupPlaylist();
         enablePatternPainting();
         initializeSongTimeline();
+        setupPatternListViewContextMenu();
     }
 
     // Abrir Sintetizador
@@ -500,20 +501,9 @@ public class PrincipalController {
         // Pedimos al Channel Rack que suene
         ChannelRackController rack = GlobalState.getChannelRackController();
         if (rack != null) {
-            // Efecto visual opcional: iluminar el bloque brevemente (si quieres)
-
             // Sonido
             rack.playSoundByName(item.getPatternName());
         }
-    }
-
-    private void ensurePlayheadVisible() {
-        double viewportWidth = playlistScrollPane.getViewportBounds().getWidth();
-        double scrollHValue = playlistScrollPane.getHvalue();
-        double contentWidth = playlistGridContent.getWidth();
-
-        // Si quieres que la pantalla siga al cursor automáticamente,
-        // aquí calcularíamos el scrollHValue. Por ahora lo dejamos manual para no marear.
     }
 
     public void salir(ActionEvent actionEvent) {
@@ -530,4 +520,38 @@ public class PrincipalController {
             System.err.println("No se pudo cargar el icono de la ventana.");
         }
     }
+
+    private void setupPatternListViewContextMenu() {
+        patternListView.setCellFactory(lv -> {
+            ListCell<String> cell = new ListCell<>();
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem deleteItem = new MenuItem("Eliminar Patrón");
+            deleteItem.setStyle("-fx-text-fill: #ff5555;");
+            deleteItem.setOnAction(event -> {
+                String itemToRemove = cell.getItem();
+                if (itemToRemove != null) {
+                    patternListView.getItems().remove(itemToRemove);
+                    System.out.println("Patrón eliminado: " + itemToRemove);
+                }
+            });
+
+            contextMenu.getItems().add(deleteItem);
+            cell.textProperty().bind(cell.itemProperty());
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+            return cell;
+        });
+    }
+
+    //    private void ensurePlayheadVisible() {
+//        double viewportWidth = playlistScrollPane.getViewportBounds().getWidth();
+//        double scrollHValue = playlistScrollPane.getHvalue();
+//        double contentWidth = playlistGridContent.getWidth();
+//
+//    }
 }
