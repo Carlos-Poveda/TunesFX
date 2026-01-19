@@ -4,6 +4,7 @@ module org.example.tunesfx {
     requires org.lwjgl.openal;
     requires java.datatransfer;
     requires java.desktop;
+    requires javafx.graphics;
 
     opens org.example.tunesfx to javafx.fxml, javafx.graphics;
     exports org.example.tunesfx;
@@ -11,4 +12,5 @@ module org.example.tunesfx {
     opens org.example.tunesfx.utils to javafx.fxml, javafx.graphics;
     exports org.example.tunesfx.audio;
     opens org.example.tunesfx.audio to javafx.fxml, javafx.graphics;
+    opens fonts to javafx.graphics;
 }

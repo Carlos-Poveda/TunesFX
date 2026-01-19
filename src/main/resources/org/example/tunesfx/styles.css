@@ -253,3 +253,34 @@
     -fx-text-fill: #FFFFFF !important;
 }
 
+
+@font-face {
+    src: url('../fonts/Iceberg-Regular.ttf');
+}
+
+/*@font-face {*/
+/*    src: url('../fonts/Handjet-VariableFont_ELGR,ELSH,wrght.ttf');*/
+/*}*/
+
+/* 1. La base */
+.root {
+    -fx-font-family: "Iceberg";
+}
+
+/* 2. Forzar a todos los componentes que heredan de Control
+   (Botones, Etiquetas, Campos de texto, Tablas, etc.) */
+.control, .label, .text {
+    -fx-font-family: "Iceberg";
+}
+
+/* 3. Forzar a los elementos de texto internos
+   (Especialmente útil para el texto dentro de los TextFields o TextArea) */
+.text-input, .text-field, .text-area {
+    -fx-font-family: "Iceberg";
+}
+
+/* 4. Si usas formas de texto puro (Text nodes) */
+Text {
+    -fx-font-family: "Iceberg";
+}
+
