@@ -48,7 +48,6 @@ public class Audio extends Thread {
 
                 AL.createCapabilities(ALC.createCapabilities(device));
                 openALInitialized = true;
-//                System.out.println("OpenAL inicializado por hilo: " + this.getName());
             }
         }
         source = alGenSources();
@@ -113,10 +112,7 @@ public class Audio extends Thread {
         triggerPlayBack();
     }
 
-    /**
-     * NUEVO MÉTODO ESTÁTICO:
-     * Se debe llamar cuando la aplicación se cierra.
-     */
+     // Llamar cuando la aplicación se cierra.
     public static void shutdownOpenAL() {
         if (openALInitialized) {
             alcDestroyContext(context);
@@ -125,7 +121,6 @@ public class Audio extends Thread {
 //            System.out.println("OpenAL apagado.");
         }
     }
-
 
     private void catchInternalException() {
         int err = alGetError();

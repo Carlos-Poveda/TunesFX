@@ -97,7 +97,6 @@ public class Oscilator extends HBox {
                 toneValueLabel.setText("x" + String.format("%.2f", getToneOffset()));
                 lastMouseY = currentMouseY;
                 if (change != 0 && updateCallback != null) {
-                    // ...
                     updateCallback.run(); // Probar a dejarlo sin if
                 }
             }
@@ -137,8 +136,7 @@ public class Oscilator extends HBox {
                 volumeParameter.setText(" " + volume + "%");
                 lastMouseYVolume = currentMouseY;
                 if (change != 0 && updateCallback != null) {
-                    // ...
-                    updateCallback.run(); // Probar sin if
+                    updateCallback.run();
                 }
             }
         });

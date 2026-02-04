@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.example.tunesfx.audio.Audio;
 
@@ -12,6 +13,10 @@ public class Principal extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        Font myFont = Font.loadFont(getClass().getResourceAsStream("/fonts/iceberg-regular.ttf"), 14);
+//        Font myFont = Font.loadFont(getClass().getResourceAsStream("/fonts/Handjet-VariableFont_ELGR,ELSH,wrght.ttf"), 14);
+
         // 1. Cargar el FXML de la vista principal
         FXMLLoader loader = new FXMLLoader(getClass().getResource("PrincipalView.fxml"));
         Pane root = loader.load();
