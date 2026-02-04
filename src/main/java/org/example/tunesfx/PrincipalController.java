@@ -23,11 +23,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.example.tunesfx.utils.AudioExporter;
 import org.example.tunesfx.utils.GlobalState;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class PrincipalController {
     @FXML private Spinner bpmSpinner;
@@ -224,28 +227,20 @@ public class PrincipalController {
             ContextMenu trackMenu = new ContextMenu();
             MenuItem renameItem = new MenuItem("Renombrar Pista");
 
-            // Lógica para renombrar
             renameItem.setOnAction(e -> {
-                // 1. Crear el diálogo pre-rellenado con el nombre actual
                 TextInputDialog dialog = new TextInputDialog(trackLabel.getText());
                 dialog.setTitle("Rename");
-                dialog.setHeaderText(null); // Quitamos la cabecera para que sea más limpio
+                dialog.setHeaderText(null);
                 dialog.setContentText("New name:");
-                dialog.setGraphic(null); // Quitamos el icono por defecto si no lo quieres
-
-                // 2. IMPORTANTE: Aplicar tu CSS al diálogo para que no salga blanco brillante
+                dialog.setGraphic(null);
                 try {
                     DialogPane dialogPane = dialog.getDialogPane();
                     String css = this.getClass().getResource("styles.css").toExternalForm();
                     dialogPane.getStylesheets().add(css);
-                    dialogPane.getStyleClass().add("my-dialog"); // Clase opcional si quieres personalizarlo más
+                    dialogPane.getStyleClass().add("my-dialog");
                 } catch (Exception ex) {
-                    // Si falla el CSS, el diálogo funciona igual, solo que se verá estándar
                 }
-
-                // 3. Mostrar y esperar respuesta
                 dialog.showAndWait().ifPresent(newName -> {
-                    // Solo cambiamos si no está vacío
                     if (!newName.trim().isEmpty()) {
                         trackLabel.setText(newName);
                     }
@@ -255,10 +250,10 @@ public class PrincipalController {
             trackMenu.getItems().add(renameItem);
             trackLabel.setContextMenu(trackMenu);
 
-            // OPCIONAL: Permitir renombrar también con DOBLE CLIC (muy común en DAWs)
+            // Permitir renombrar también con DOBLE CLIC
             trackLabel.setOnMouseClicked(e -> {
                 if (e.getClickCount() == 2 && e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
-                    renameItem.fire(); // Dispara la misma acción que el menú
+                    renameItem.fire();
                 }
             });
 
@@ -584,10 +579,71 @@ public class PrincipalController {
         });
     }
 
-    //    private void ensurePlayheadVisible() {
-//        double viewportWidth = playlistScrollPane.getViewportBounds().getWidth();
-//        double scrollHValue = playlistScrollPane.getHvalue();
-//        double contentWidth = playlistGridContent.getWidth();
-//
-//    }
+    @FXML
+    private void handleExportWav(ActionEvent event) {
+        // 1. Abrir diálogo para elegir dónde guardar
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Export song");
+        fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("Archivo WAV", "*.wav")
+        );
+        // Nombre por defecto
+        fileChooser.setInitialFileName("MiCancion.wav");
+
+        File file = fileChooser.showSaveDialog(btnPlaySong.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                // 2. Preparar el mapa de archivos (NombrePatrón -> Archivo.wav)
+                // Tienes que implementar este método auxiliar según cómo guardes tus sonidos
+                Map<String, File> soundMap = buildSoundMap();
+
+                double bpm = GlobalState.getBpm();
+
+                // 3. Ejecutar la exportación (en un hilo aparte para no congelar la app)
+                new Thread(() -> {
+                    try {
+                        AudioExporter.exportSong(file, songData, bpm, soundMap);
+
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Éxito");
+                            alert.setHeaderText("Exportación finalizada");
+                            alert.setContentText("Tu canción se ha guardado correctamente.");
+                            alert.show();
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Error");
+                            alert.setContentText("Hubo un fallo al exportar: " + e.getMessage());
+                            alert.show();
+                        });
+                    }
+                }).start();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Método auxiliar que DEBES ADAPTAR a tu ChannelRack
+    private Map<String, File> buildSoundMap() {
+        Map<String, File> map = new java.util.HashMap<>();
+
+        // EJEMPLO: Recorremos los patrones y buscamos su archivo
+        // Si tus patrones se llaman igual que los archivos .wav en una carpeta:
+        for (PlaylistItem item : songData) {
+            String name = item.getPatternName();
+            if (!map.containsKey(name)) {
+                // Ajusta esta ruta a donde tengas tus sonidos realmente
+                File f = new File("src/main/resources/samples/"+name+".wav");
+                System.out.println("Canción guardada en "+f.getAbsolutePath());
+                map.put(name, f);
+            }
+        }
+        return map;
+    }
 }
