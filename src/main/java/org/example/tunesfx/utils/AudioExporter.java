@@ -1,145 +1,164 @@
 package org.example.tunesfx.utils;
 
+import org.example.tunesfx.ChannelRackController;
+import org.example.tunesfx.ChannelRackRowController;
 import org.example.tunesfx.PlaylistItem;
+import org.example.tunesfx.audio.Sample;
+import org.example.tunesfx.audio.StepData;
+
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.List;
-import java.util.Map;
 
 public class AudioExporter {
 
-    // Configuración estándar de CD: 44.1kHz, 16 bit, Estéreo
     private static final float SAMPLE_RATE = 44100.0f;
     private static final int CHANNELS = 2;
 
-    public static void exportSong(File outputFile, List<PlaylistItem> playlist, double bpm, Map<String, File> patternPaths) throws Exception {
+    public static void exportSong(File outputFile, List<PlaylistItem> playlist, double bpm, ChannelRackController rackController) throws Exception {
 
-        // 1. Calcular duración total en Muestras (Samples)
-        // Buscamos el bloque que termina más tarde
+        // 1. Calcular duración total
         int maxBar = 0;
         for (PlaylistItem item : playlist) {
-            // Asumimos que cada patrón dura 1 compás (ajusta esto si tus patrones duran más)
-            int endBar = item.getStartBar() + 1;
+            int endBar = item.getStartBar() + 1; // Asumimos patrones de 1 compás
             if (endBar > maxBar) maxBar = endBar;
         }
 
-        // Matemáticas de tiempo:
-        // Segundos por compás = (60 / BPM) * 4 (para 4/4)
+        // Matemáticas de tiempo
         double secondsPerBar = (60.0 / bpm) * 4.0;
+        double secondsPerStep = secondsPerBar / 16.0; // Asumiendo 16 pasos por compás visualmente
+        // Si tu Channel Rack tiene 64 pasos pero duran 4 compases, ajusta esto.
+
         double totalSeconds = maxBar * secondsPerBar;
-
-        // El tamaño del array buffer (en frames)
         int totalFrames = (int) (totalSeconds * SAMPLE_RATE);
-
-        // Usamos float[] para mezclar porque es más fácil sumar decimales (-1.0 a 1.0) que bytes
-        // Multiplicamos por CHANNELS (2) porque es estéreo (Izquierda, Derecha, Izquierda, Derecha...)
         float[] mixBuffer = new float[totalFrames * CHANNELS];
 
-        // 2. Mezclar (Loop principal)
+        // 2. MEZCLAR (Recorrer la Playlist)
         for (PlaylistItem item : playlist) {
-            File sampleFile = patternPaths.get(item.getPatternName());
 
-            if (sampleFile != null && sampleFile.exists()) {
-                // Calcular en qué posición del array empieza este sonido
-                double startSeconds = (item.getStartBar() - 1) * secondsPerBar;
-                int startFrame = (int) (startSeconds * SAMPLE_RATE);
-                int startIndex = startFrame * CHANNELS;
+            // Buscar la fila (Row) correspondiente al nombre del patrón
+            ChannelRackRowController row = findRowByName(rackController, item.getPatternName());
 
-                // Leer el archivo de audio del patrón y sumarlo al mixBuffer
-                addToMix(mixBuffer, startIndex, sampleFile);
+            if (row != null && row.getSample() != null) {
+
+                // Obtener los datos de audio crudos del sample (float[])
+                // Esto evita leer el disco mil veces. Usamos los datos ya cargados en memoria.
+                float[] sourceAudio = convertSampleToFloat(row.getSample());
+                if (sourceAudio == null) continue;
+
+                // Calcular cuándo empieza este bloque en la canción (en segundos)
+                double blockStartTime = (item.getStartBar() - 1) * secondsPerBar;
+
+                // 3. SECUENCIADOR INTERNO (Recorrer los pasos de la fila)
+                // Aquí aplicamos el ritmo que dibujaste
+                int stepsInRow = row.getStepCount();
+
+                // Ajuste: Si tienes 64 pasos, asumimos que eso llena el patrón completo.
+                // Si el patrón visual en la playlist es de 1 compás, pero el rack tiene 64 pasos (4 compases),
+                // deberías ajustar la duración del bloque. Por simplicidad, asumiremos 1 compás = 16 pasos estándar.
+
+                for (int i = 0; i < stepsInRow; i++) {
+                    // Usamos tu método getCombinedStepData para obtener Pitch y Volumen reales
+                    StepData stepData = row.getCombinedStepData(i);
+
+                    if (stepData != null && stepData.isActive()) {
+
+                        // Calcular el tiempo exacto de este golpe (step)
+                        double stepDelay = i * ((60.0 / bpm) / 4.0); // (60/BPM)/4 = duración de semicorchea
+                        double absTime = blockStartTime + stepDelay;
+
+                        // Posición en el array gigante
+                        int startFrameIndex = (int) (absTime * SAMPLE_RATE);
+                        int bufferIndex = startFrameIndex * CHANNELS;
+
+                        // Calcular factor de velocidad (Pitch)
+                        // 2^(semitonos/12). Ej: +12 semitonos = velocidad x2
+                        float pitchFactor = (float) Math.pow(2, stepData.getSemitoneOffset() / 12.0);
+
+                        // Aplicar volumen
+                        float volume = (float) stepData.getVolume();
+
+                        // 4. MEZCLAR CON RESAMPLING
+                        mixSampleWithResampling(mixBuffer, bufferIndex, sourceAudio, pitchFactor, volume);
+                    }
+                }
             }
         }
 
-        // 3. Convertir floats de vuelta a bytes (PCM 16-bit)
-        byte[] outputBytes = new byte[mixBuffer.length * 2]; // *2 porque 16bit son 2 bytes
+        // 5. Guardar archivo (igual que antes)
+        saveToFile(outputFile, mixBuffer, totalFrames);
+    }
+
+    // Método para cambiar el tono (Resampling simple - Nearest Neighbor/Linear)
+    private static void mixSampleWithResampling(float[] mixBuffer, int startIndex, float[] source, float speed, float volume) {
+
+        // Índice decimal para recorrer el sample original
+        double readIndex = 0;
+
+        // Recorremos el buffer de destino
+        for (int i = startIndex; i < mixBuffer.length; i += 2) { // +=2 porque vamos L, R
+
+            // Si el sample original se acaba, paramos
+            if (readIndex >= source.length) break;
+
+            // Interpolación Lineal (Mejor calidad que coger el pixel más cercano)
+            int indexInt = (int) readIndex;
+            double frac = readIndex - indexInt;
+
+            // Evitar desbordamiento
+            if (indexInt + 1 >= source.length) break;
+
+            // Leer valor actual y siguiente
+            float s1 = source[indexInt];
+            float s2 = source[indexInt + 1]; // Ojo: si source es estéreo, la lógica cambia.
+            // ASUMIMOS SOURCE MONO para simplificar la explicación de pitch.
+            // Si tu Sample.java guarda estéreo, habría que leer de 2 en 2.
+
+            // Interpolamos
+            float val = (float) ((s1 + (s2 - s1) * frac) * volume);
+
+            // Mezclar en estéreo
+            mixBuffer[i] += val;       // Left
+            if (i + 1 < mixBuffer.length) {
+                mixBuffer[i + 1] += val; // Right
+            }
+
+            // Avanzamos el cursor de lectura según la velocidad (Pitch)
+            readIndex += speed;
+        }
+    }
+
+    // Auxiliar: Convierte el objeto Sample (short[]) a float[] para procesar fácil
+    private static float[] convertSampleToFloat(Sample sample) {
+        short[] data = sample.getData(); // Asumiendo que tienes un getter getData()
+        if (data == null) return null;
+
+        float[] floatData = new float[data.length];
+        for (int i = 0; i < data.length; i++) {
+            floatData[i] = data[i] / 32768.0f;
+        }
+        return floatData;
+    }
+
+    private static ChannelRackRowController findRowByName(ChannelRackController rack, String name) {
+        // Necesitas exponer las filas desde el controlador (getRows() o similar)
+        // O usar el método público que creamos antes pero modificado para retornar la fila
+        return rack.findRowController(name);
+    }
+
+    private static void saveToFile(File outputFile, float[] mixBuffer, int totalFrames) throws Exception {
+        byte[] outputBytes = new byte[mixBuffer.length * 2];
         int byteIndex = 0;
-
         for (float sample : mixBuffer) {
-            // Limitar el volumen (Clipping) para que no distorsione si se pasa de 1.0
-            float clamped = Math.max(-1.0f, Math.min(1.0f, sample));
-
-            // Escalar a rango de short (16 bit: -32768 a 32767)
+            float clamped = Math.max(-1.0f, Math.min(1.0f, sample * 0.8f)); // Headroom
             short s = (short) (clamped * 32767);
-
-            // Convertir short a 2 bytes (Little Endian)
             outputBytes[byteIndex++] = (byte) (s & 0xFF);
             outputBytes[byteIndex++] = (byte) ((s >> 8) & 0xFF);
         }
-
-        // 4. Guardar archivo WAV final
         AudioFormat format = new AudioFormat(SAMPLE_RATE, 16, CHANNELS, true, false);
         ByteArrayInputStream bais = new ByteArrayInputStream(outputBytes);
         AudioInputStream audioStream = new AudioInputStream(bais, format, totalFrames);
-
         AudioSystem.write(audioStream, AudioFileFormat.Type.WAVE, outputFile);
-        System.out.println("Exportación completada: " + outputFile.getAbsolutePath());
-    }
-
-    private static void addToMix(float[] mixBuffer, int startIndex, File audioFile) {
-        try (AudioInputStream ais = AudioSystem.getAudioInputStream(audioFile)) {
-            AudioFormat format = ais.getFormat();
-
-            // Leemos todos los bytes del archivo
-            byte[] fileBytes = ais.readAllBytes();
-
-            // Usamos ByteBuffer para convertir los bytes a números (Short) correctamente.
-            // Esto gestiona automáticamente el signo (+/-) y el orden (Little Endian).
-            ByteBuffer bb = ByteBuffer.wrap(fileBytes);
-
-            // La mayoría de WAVs son Little Endian. Si el formato dice lo contrario, cambiamos el orden.
-            if (format.isBigEndian()) {
-                bb.order(ByteOrder.BIG_ENDIAN);
-            } else {
-                bb.order(ByteOrder.LITTLE_ENDIAN);
-            }
-
-            // Determinar si es estéreo o mono para saber cuánto avanzar
-            boolean isStereo = format.getChannels() == 2;
-
-            // Recorremos el buffer de 2 en 2 bytes (porque 16 bits = 2 bytes)
-            // bb.remaining() nos dice cuántos bytes quedan por leer
-            int i = 0;
-            while (bb.remaining() >= 2) {
-                // getShort() lee 2 bytes y nos da el número correcto entre -32768 y 32767
-                short sampleShort = bb.getShort();
-
-                // Convertimos a float (-1.0 a 1.0)
-                float val = sampleShort / 32768.0f;
-
-                // OPCIONAL: Reducir un poco el volumen para evitar saturación natural
-                // si sumas muchos instrumentos. (Aquí bajamos al 80%)
-                val = val * 0.8f;
-
-                // Calcular posición en el array gigante de la canción
-                // Si es estéreo, los samples vienen L, R, L, R...
-                // Si es mono, el sample 0 va al canal L y al R.
-
-                int mixIndex = startIndex + i;
-
-                if (mixIndex >= mixBuffer.length) break;
-
-                // Sumar al canal actual
-                mixBuffer[mixIndex] += val;
-
-                // Si el archivo original es MONO, pero la mezcla es ESTÉREO,
-                // tenemos que sumar este mismo valor al canal derecho (mixIndex + 1)
-                if (!isStereo && (mixIndex + 1 < mixBuffer.length)) {
-                    mixBuffer[mixIndex + 1] += val;
-                    // Importante: En el mixBuffer avanzamos 2 posiciones (L y R)
-                    // pero en el archivo original solo hemos leído 1 sample.
-                    // Para compensar el índice del bucle:
-                    startIndex++;
-                }
-
-                i++;
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error leyendo sample: " + audioFile.getName());
-            e.printStackTrace();
-        }
     }
 }

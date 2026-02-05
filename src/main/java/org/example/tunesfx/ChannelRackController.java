@@ -235,4 +235,13 @@ public class ChannelRackController {
     public void shutdown() {
         stopSequencer();
     }
+
+    public ChannelRackRowController findRowController(String name) {
+        for (ChannelRackRowController row : allRows) {
+            if (row.getTrackName().equals(name)) {
+                return row;
+            }
+        }
+        return null;
+    }
 }

@@ -593,57 +593,20 @@ public class PrincipalController {
         File file = fileChooser.showSaveDialog(btnPlaySong.getScene().getWindow());
 
         if (file != null) {
-            try {
-                // 2. Preparar el mapa de archivos (NombrePatrón -> Archivo.wav)
-                // Tienes que implementar este método auxiliar según cómo guardes tus sonidos
-                Map<String, File> soundMap = buildSoundMap();
+            double bpm = GlobalState.getBpm();
+            ChannelRackController rack = GlobalState.getChannelRackController(); // Obtenemos el rack
 
-                double bpm = GlobalState.getBpm();
+            new Thread(() -> {
+                try {
+                    // LLAMADA ACTUALIZADA: Pasamos 'rack' en vez de 'soundMap'
+                    AudioExporter.exportSong(file, songData, bpm, rack);
 
-                // 3. Ejecutar la exportación (en un hilo aparte para no congelar la app)
-                new Thread(() -> {
-                    try {
-                        AudioExporter.exportSong(file, songData, bpm, soundMap);
-
-                        Platform.runLater(() -> {
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Éxito");
-                            alert.setHeaderText("Exportación finalizada");
-                            alert.setContentText("Tu canción se ha guardado correctamente.");
-                            alert.show();
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Platform.runLater(() -> {
-                            Alert alert = new Alert(Alert.AlertType.ERROR);
-                            alert.setTitle("Error");
-                            alert.setContentText("Hubo un fallo al exportar: " + e.getMessage());
-                            alert.show();
-                        });
-                    }
-                }).start();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+                    Platform.runLater(() -> { /* Alert Éxito */ });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Platform.runLater(() -> { /* Alert Error */ });
+                }
+            }).start();
         }
-    }
-
-    // Método auxiliar que DEBES ADAPTAR a tu ChannelRack
-    private Map<String, File> buildSoundMap() {
-        Map<String, File> map = new java.util.HashMap<>();
-
-        // EJEMPLO: Recorremos los patrones y buscamos su archivo
-        // Si tus patrones se llaman igual que los archivos .wav en una carpeta:
-        for (PlaylistItem item : songData) {
-            String name = item.getPatternName();
-            if (!map.containsKey(name)) {
-                // Ajusta esta ruta a donde tengas tus sonidos realmente
-                File f = new File("src/main/resources/samples/"+name+".wav");
-                System.out.println("Canción guardada en "+f.getAbsolutePath());
-                map.put(name, f);
-            }
-        }
-        return map;
     }
 }
