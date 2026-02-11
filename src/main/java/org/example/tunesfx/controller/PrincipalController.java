@@ -12,6 +12,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -70,12 +71,10 @@ public class PrincipalController {
     @FXML
     public void initialize() {
         GlobalState.setPrincipalController(this);
-
         // Configurar el Spinner de BPM (30 a 300, inicial 120)
         SpinnerValueFactory<Double> bpmFactory =
                 new SpinnerValueFactory.DoubleSpinnerValueFactory(30.0, 300.0, 120.0, 1.0);
         bpmSpinner.setValueFactory(bpmFactory);
-
         // Cuando el spinner cambie, actualizamos el GlobalState
         bpmSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
             GlobalState.setBpm((Double) newVal);
@@ -84,13 +83,11 @@ public class PrincipalController {
         // Shortcuts del teclado
         Platform.runLater(() -> {
             Scene scene = openSynthButton.getScene();
-
             // Atajo: CTRL + S para el Sintetizador
             scene.getAccelerators().put(
                     new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_ANY),
                     () -> handleOpenSynth(null)
             );
-
             // Atajo: CTRL + R para el Channel Rack
             scene.getAccelerators().put(
                     new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_ANY),
@@ -177,10 +174,8 @@ public class PrincipalController {
 
         if (songTimeline.getStatus() == Animation.Status.RUNNING) {
             songTimeline.pause();
-//            btnPlaySong.setStyle("-fx-background-color: #424242;"); // Color normal
         } else {
             songTimeline.play();
-//            btnPlaySong.setStyle("-fx-background-color: #2ecc71;"); // Color verde activo
         }
     }
 
@@ -207,13 +202,11 @@ public class PrincipalController {
         timelineHeader.getChildren().clear();
         trackHeadersContainer.getChildren().clear();
         playlistGridContent.getChildren().clear();
-
         // Ajustar el tamaño total del lienzo de la rejilla
         double totalWidth = NUM_BARS * CELL_WIDTH;
         double totalHeight = NUM_TRACKS * TRACK_HEIGHT;
         playlistGridContent.setMinWidth(totalWidth);
         playlistGridContent.setPrefSize(totalWidth, totalHeight);
-
         // --- 1. GENERAR TIMELINE (Eje X) ---
         for (int i = 1; i <= NUM_BARS; i++) {
             Label barLabel = new Label(String.valueOf(i));
@@ -222,9 +215,7 @@ public class PrincipalController {
             barLabel.setAlignment(Pos.CENTER);
             // Estilo: Texto gris y borde derecho suave
             barLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: 10px; -fx-border-color: #333333; -fx-border-width: 0 1 0 0;");
-
             timelineHeader.getChildren().add(barLabel);
-
             // Línea vertical en la rejilla (para cada compás)
             Line vLine = new Line(i * CELL_WIDTH, 0, i * CELL_WIDTH, totalHeight);
             vLine.setStroke(Color.web("#2A2A2A")); // Color de la rejilla vertical
@@ -241,11 +232,9 @@ public class PrincipalController {
             trackLabel.setMaxWidth(Double.MAX_VALUE);
             trackLabel.setPadding(new Insets(0, 0, 0, 10)); // Margen izquierdo
             trackLabel.setAlignment(Pos.CENTER_LEFT);
-
             // Estilo alterno para facilitar la lectura
             String bg = (j % 2 == 0) ? "#262626" : "#232323";
             trackLabel.setStyle("-fx-text-fill: #aaaaaa; -fx-background-color: " + bg + "; -fx-border-color: #1A1A1A; -fx-border-width: 0 0 1 0;");
-
             // Menú contextual para el track
             ContextMenu trackMenu = new ContextMenu();
             MenuItem renameItem = new MenuItem("Renombrar Pista");
@@ -272,22 +261,19 @@ public class PrincipalController {
 
             trackMenu.getItems().add(renameItem);
             trackLabel.setContextMenu(trackMenu);
-
             // Permitir renombrar también con DOBLE CLIC
             trackLabel.setOnMouseClicked(e -> {
                 if (e.getClickCount() == 2 && e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
                     renameItem.fire();
                 }
             });
-
             trackHeadersContainer.getChildren().add(trackLabel);
-
             // Línea horizontal en la rejilla (separando pistas)
             Line hLine = new Line(0, (j + 1) * TRACK_HEIGHT, totalWidth, (j + 1) * TRACK_HEIGHT);
             hLine.setStroke(Color.web("#1A1A1A")); // Color de separación de pistas
+
             playlistGridContent.getChildren().add(hLine);
         }
-
         playheadLine = new Line(0, 0, 0, totalHeight);
         playheadLine.setStroke(Color.RED); // Color clásico de playhead
         playheadLine.setStrokeWidth(2);
@@ -301,17 +287,14 @@ public class PrincipalController {
         playlistGridContent.setOnMouseClicked(event -> {
             // Solo pintamos con clic izquierdo
             if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
-
                 // 1. Obtener el patrón seleccionado de la lista
                 String selectedPattern = (String) patternListView.getSelectionModel().getSelectedItem();
-
                 // Si no hay nada seleccionado en la lista, no hacemos nada
                 if (selectedPattern == null) {
                     // Mostrar algo
                     System.out.println("Selecciona primero un patrón de la lista de la izquierda.");
                     return;
                 }
-
                 // 2. Calcular coordenadas ajustadas a la rejilla (Snap to Grid)
                 // Dividimos la coordenada del ratón por el ancho/alto de celda, convertimos a entero (truca decimales)
                 // y multiplicamos de nuevo.
@@ -339,11 +322,9 @@ public class PrincipalController {
         clipContainer.setPrefSize(CELL_WIDTH, TRACK_HEIGHT);
         clipContainer.setLayoutX(x);
         clipContainer.setLayoutY(y);
-
         // Guardamos la referencia al objeto de datos
         clipContainer.setUserData(item);
-
-        // Estilo base
+        // Estilo del bloque de sonido
         clipContainer.setStyle(
                 "-fx-background-color: #4a4a4a;" +
                         "-fx-background-radius: 4;" +
@@ -351,7 +332,6 @@ public class PrincipalController {
                         "-fx-border-width: 1;" +
                         "-fx-cursor: hand;" // Cursor de mano por defecto
         );
-
         // Etiqueta
         Label nameLabel = new Label(patternName);
         nameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold;");
@@ -371,7 +351,6 @@ public class PrincipalController {
                 clipContainer.setCursor(javafx.scene.Cursor.HAND);
             }
         });
-
         // --- 2. MOUSE PRESSED (Iniciar acción) ---
         clipContainer.setOnMousePressed(e -> {
             if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
@@ -380,16 +359,13 @@ public class PrincipalController {
                 mouseAnchorY = e.getSceneY();
                 initialLayoutX = clipContainer.getLayoutX();
                 initialLayoutY = clipContainer.getLayoutY();
-
                 // Detectar si vamos a redimensionar o a mover
                 isResizing = (e.getX() > clipContainer.getWidth() - RESIZE_MARGIN);
-
                 // Traer al frente para que no quede detrás de otros bloques al mover
                 clipContainer.toFront();
                 e.consume();
             }
         });
-
         // --- 3. MOUSE DRAGGED (Arrastrar) ---
         clipContainer.setOnMouseDragged(e -> {
             if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
@@ -411,7 +387,6 @@ public class PrincipalController {
                 e.consume();
             }
         });
-
         // --- 4. MOUSE RELEASED (Soltar y Ajustar a Rejilla - SNAP) ---
         clipContainer.setOnMouseReleased(e -> {
             if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
@@ -424,41 +399,34 @@ public class PrincipalController {
 
                     double snappedWidth = cols * CELL_WIDTH;
                     clipContainer.setPrefWidth(snappedWidth);
-
-                    // OPCIONAL: Aquí podrías guardar la duración en 'item' si tuvieras esa propiedad
+                    // OPCIONAL: Aquí se podría guardar la duración en 'item' si tuvieras esa propiedad
                     // item.setDurationBars(cols);
 
                 } else {
                     // Ajustar POSICIÓN a la rejilla
                     double rawX = clipContainer.getLayoutX();
                     double rawY = clipContainer.getLayoutY();
-
                     // Snap X (Tiempo)
                     int colIndex = (int) Math.round(rawX / CELL_WIDTH);
                     if (colIndex < 0) colIndex = 0;
                     double snappedX = colIndex * CELL_WIDTH;
-
                     // Snap Y (Track)
                     int rowIndex = (int) Math.round(rawY / TRACK_HEIGHT);
                     if (rowIndex < 0) rowIndex = 0;
                     if (rowIndex >= NUM_TRACKS) rowIndex = NUM_TRACKS - 1;
                     double snappedY = rowIndex * TRACK_HEIGHT;
-
                     // Aplicar posición ajustada
                     clipContainer.setLayoutX(snappedX);
                     clipContainer.setLayoutY(snappedY);
-
                     // ACTUALIZAR DATOS LÓGICOS
                     // Importante para que el cursor de reproducción sepa dónde está ahora
                     item.setStartBar(colIndex + 1);
                     item.setTrackIndex(rowIndex);
-
                     // Feedback visual de "encaje"
 //                    System.out.println("Bloque movido a: Bar " + (colIndex + 1) + ", Track " + (rowIndex + 1));
                 }
             }
         });
-
         // --- 5. CLICK DERECHO (Borrar) ---
         // Usamos Filter para capturarlo antes que otros eventos si fuera necesario
         clipContainer.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> {
@@ -470,7 +438,6 @@ public class PrincipalController {
                 e.consume();
             }
         });
-
         // Añadir al lienzo
         playlistGridContent.getChildren().add(clipContainer);
     }
@@ -488,24 +455,20 @@ public class PrincipalController {
         double bpm = GlobalState.getBpm();
         // 1. Guardar posición ANTERIOR
         double oldX = currentPlayheadX;
-
         // 2. Calcular NUEVA posición
         // (BPM / 60) * CELL_WIDTH = Píxeles por segundo
         // Dividimos entre 50 porque corremos a 50Hz (20ms)
         double pixelsPerTick = ((bpm / 60.0) * CELL_WIDTH) / 50.0;
 
         currentPlayheadX += pixelsPerTick;
-
         // 3. DETECCIÓN DE COLISIÓN (Trigger)
         // Buscamos items que empiecen justo en el tramo que acabamos de recorrer [oldX, currentPlayheadX)
         checkCollisions(oldX, currentPlayheadX);
-
         // 4. Loop (Vuelta al principio)
         if (currentPlayheadX >= NUM_BARS * CELL_WIDTH) {
             currentPlayheadX = 0;
             previousPlayheadX = 0; // Resetear para evitar disparos falsos
         }
-
         // 5. Actualizar visual
         playheadLine.setStartX(currentPlayheadX);
         playheadLine.setEndX(currentPlayheadX);
@@ -570,23 +533,34 @@ public class PrincipalController {
                 new javafx.stage.FileChooser.ExtensionFilter("Archivo WAV", "*.wav")
         );
         // Nombre por defecto
-        fileChooser.setInitialFileName("MiCancion.wav");
+        fileChooser.setInitialFileName("my_hydra_project.wav");
 
         File file = fileChooser.showSaveDialog(btnPlaySong.getScene().getWindow());
 
         if (file != null) {
             double bpm = GlobalState.getBpm();
             ChannelRackController rack = GlobalState.getChannelRackController(); // Obtenemos el rack
-
             new Thread(() -> {
                 try {
-                    // LLAMADA ACTUALIZADA: Pasamos 'rack' en vez de 'soundMap'
                     AudioExporter.exportSong(file, songData, bpm, rack);
-
-                    Platform.runLater(() -> { /* Alert Éxito */ });
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setContentText("Exported song to " + file.getAbsolutePath());
+                        alert.setHeaderText("Your song has been succesfully exported.");
+                        alert.setTitle("Successful export");
+                        alert.getDialogPane().setGraphic(null);
+                        alert.showAndWait();
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Platform.runLater(() -> { /* Alert Error */ });
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setContentText("An error has occurred while exporting your song");
+                        alert.setHeaderText("Exporting error.");
+                        alert.setTitle("Error");
+                        alert.getDialogPane().setGraphic(null);
+                        alert.showAndWait();
+                    });
                 }
             }).start();
         }
