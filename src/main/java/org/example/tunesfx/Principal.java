@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.example.tunesfx.audio.Audio;
 
 public class Principal extends Application {

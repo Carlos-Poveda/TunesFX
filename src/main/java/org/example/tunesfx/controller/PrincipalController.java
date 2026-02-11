@@ -37,7 +37,7 @@ public class PrincipalController {
     @FXML private Button btnStopSong;
     @FXML private Button btnPlaySong;
     @FXML private GridPane playlistGrid;
-    @FXML private ListView patternListView;
+    @FXML private ListView patternListView; // lista de patterns
     @FXML private ScrollPane playlistScrollPane;
     @FXML private Button openChannelRackButton;
     @FXML private Button btnSalir;
@@ -97,8 +97,6 @@ public class PrincipalController {
                     () -> handleOpenChannelRack(null)
             );
         });
-
-        // LLamar al método para pintar la playlist
         setupPlaylist();
         enablePatternPainting();
         initializeSongTimeline();
@@ -170,6 +168,31 @@ public class PrincipalController {
         } else {
             rackStage.toFront();
             rackStage.requestFocus();
+        }
+    }
+
+    @FXML
+    private void handlePlaySong() {
+        if (songTimeline == null) initializeSongTimeline();
+
+        if (songTimeline.getStatus() == Animation.Status.RUNNING) {
+            songTimeline.pause();
+//            btnPlaySong.setStyle("-fx-background-color: #424242;"); // Color normal
+        } else {
+            songTimeline.play();
+//            btnPlaySong.setStyle("-fx-background-color: #2ecc71;"); // Color verde activo
+        }
+    }
+
+    @FXML
+    private void handleStopSong() {
+        if (songTimeline != null) {
+            songTimeline.stop();
+            currentPlayheadX = 0;
+            previousPlayheadX = 0;
+            playheadLine.setStartX(0);
+            playheadLine.setEndX(0);
+            btnPlaySong.setStyle("-fx-background-color: #424242;");
         }
     }
 
@@ -431,7 +454,7 @@ public class PrincipalController {
                     item.setTrackIndex(rowIndex);
 
                     // Feedback visual de "encaje"
-                    System.out.println("Bloque movido a: Bar " + (colIndex + 1) + ", Track " + (rowIndex + 1));
+//                    System.out.println("Bloque movido a: Bar " + (colIndex + 1) + ", Track " + (rowIndex + 1));
                 }
             }
         });
@@ -450,31 +473,6 @@ public class PrincipalController {
 
         // Añadir al lienzo
         playlistGridContent.getChildren().add(clipContainer);
-    }
-
-    @FXML
-    private void handlePlaySong() {
-        if (songTimeline == null) initializeSongTimeline();
-
-        if (songTimeline.getStatus() == Animation.Status.RUNNING) {
-            songTimeline.pause();
-//            btnPlaySong.setStyle("-fx-background-color: #424242;"); // Color normal
-        } else {
-            songTimeline.play();
-//            btnPlaySong.setStyle("-fx-background-color: #2ecc71;"); // Color verde activo
-        }
-    }
-
-    @FXML
-    private void handleStopSong() {
-        if (songTimeline != null) {
-            songTimeline.stop();
-            currentPlayheadX = 0;
-            previousPlayheadX = 0;
-            playheadLine.setStartX(0);
-            playheadLine.setEndX(0);
-            btnPlaySong.setStyle("-fx-background-color: #424242;");
-        }
     }
 
     private void initializeSongTimeline() {
@@ -536,22 +534,7 @@ public class PrincipalController {
             rack.playSoundByName(item.getPatternName());
         }
     }
-
-    public void salir(ActionEvent actionEvent) {
-        System.exit(0);
-    }
-
-    private void setWindowIcon(Stage stage) {
-        try {
-            // Sustituye "icono.png" por el nombre real de tu archivo en resources
-            // Si está en una carpeta sería "/images/logo.png"
-            Image icon = new Image(getClass().getResourceAsStream("/images/logo.png"));
-            stage.getIcons().add(icon);
-        } catch (Exception e) {
-            System.err.println("No se pudo cargar el icono de la ventana.");
-        }
-    }
-
+    // Menú contextual de la lista de patterns
     private void setupPatternListViewContextMenu() {
         patternListView.setCellFactory(lv -> {
             ListCell<String> cell = new ListCell<>();
@@ -562,7 +545,6 @@ public class PrincipalController {
                 String itemToRemove = cell.getItem();
                 if (itemToRemove != null) {
                     patternListView.getItems().remove(itemToRemove);
-                    System.out.println("Patrón eliminado: " + itemToRemove);
                 }
             });
 
@@ -578,7 +560,7 @@ public class PrincipalController {
             return cell;
         });
     }
-
+    // Mét0do para exportar a wav
     @FXML
     private void handleExportWav(ActionEvent event) {
         // 1. Abrir diálogo para elegir dónde guardar
@@ -608,5 +590,18 @@ public class PrincipalController {
                 }
             }).start();
         }
+    }
+
+    private void setWindowIcon(Stage stage) {
+        try {
+            Image icon = new Image(getClass().getResourceAsStream("/images/logo.png"));
+            stage.getIcons().add(icon);
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono de la ventana.");
+        }
+    }
+
+    public void salir(ActionEvent actionEvent) {
+        System.exit(0);
     }
 }
