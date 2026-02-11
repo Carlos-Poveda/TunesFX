@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<Pane prefHeight="549.0" prefWidth="664.0" style="-fx-background-color: #3D3D3D;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.ChannelRackController">
+<Pane prefHeight="549.0" prefWidth="664.0" style="-fx-background-color: #3D3D3D;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.controller.ChannelRackController">
     <children>
         <VBox alignment="TOP_CENTER" layoutX="14.0" layoutY="14.0" prefHeight="520.0" prefWidth="635.0" style="-fx-background-color: #262626; -fx-background-radius: 13; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
             <padding>

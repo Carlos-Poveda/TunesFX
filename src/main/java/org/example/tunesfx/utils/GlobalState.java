@@ -2,8 +2,8 @@ package org.example.tunesfx.utils;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import org.example.tunesfx.ChannelRackController;
-import org.example.tunesfx.PrincipalController;
+import org.example.tunesfx.controller.ChannelRackController;
+import org.example.tunesfx.controller.PrincipalController;
 
 public class GlobalState {
     private static PrincipalController principalController;

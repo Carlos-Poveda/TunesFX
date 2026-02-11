@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox alignment="CENTER_LEFT" prefHeight="49.0" prefWidth="1475.0" spacing="5" style="-fx-background-color: #4a4a4a; -fx-border-color: #202020; -fx-border-width: 1;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.ChannelRackRowController">
+<HBox alignment="CENTER_LEFT" prefHeight="49.0" prefWidth="1475.0" spacing="5" style="-fx-background-color: #4a4a4a; -fx-border-color: #202020; -fx-border-width: 1;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.controller.ChannelRackRowController">
    <HBox alignment="CENTER" prefHeight="47.0" prefWidth="62.0" style="-fx-background-color: #082900; -fx-background-radius: 5;">
       <children>
       

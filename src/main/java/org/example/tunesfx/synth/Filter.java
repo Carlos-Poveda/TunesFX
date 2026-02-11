@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.synth;
 
 public class Filter {
     public enum Tipo {

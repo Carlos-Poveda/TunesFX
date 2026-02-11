@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.audio;
 
 public class PlaylistItem {
     private String patternName; // Qué suena

@@ -13,8 +13,7 @@ public class Principal extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        Font myFont = Font.loadFont(getClass().getResourceAsStream("/fonts/iceberg-regular.ttf"), 14);
+//        Font myFont = Font.loadFont(getClass().getResourceAsStream("/fonts/iceberg-regular.ttf"), 14);
 //        Font myFont = Font.loadFont(getClass().getResourceAsStream("/fonts/Handjet-VariableFont_ELGR,ELSH,wrght.ttf"), 14);
 
         // 1. Cargar el FXML de la vista principal

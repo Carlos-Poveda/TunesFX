@@ -1,17 +1,15 @@
-package org.example.tunesfx;
+package org.example.tunesfx.controller;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.example.tunesfx.audio.Sample;
 import org.example.tunesfx.audio.StepData;
 import org.example.tunesfx.utils.GlobalState;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

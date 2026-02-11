@@ -13,4 +13,9 @@ module org.example.tunesfx {
     exports org.example.tunesfx.audio;
     opens org.example.tunesfx.audio to javafx.fxml, javafx.graphics;
     opens fonts to javafx.graphics;
+    exports org.example.tunesfx.controller;
+    opens org.example.tunesfx.controller to javafx.fxml, javafx.graphics;
+    exports org.example.tunesfx.synth;
+    opens org.example.tunesfx.synth to javafx.fxml, javafx.graphics;
+
 }

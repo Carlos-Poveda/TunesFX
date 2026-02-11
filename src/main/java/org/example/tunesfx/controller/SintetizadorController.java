@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -8,10 +8,14 @@ import javafx.collections.FXCollections;
 
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import org.example.tunesfx.synth.Filter;
+import org.example.tunesfx.synth.Oscilator;
+import org.example.tunesfx.synth.Sintetizador;
+import org.example.tunesfx.synth.WaveViewer;
 import org.example.tunesfx.audio.Sample;
 import org.example.tunesfx.audio.SampleBank;
 import javafx.scene.control.*;
-import org.example.tunesfx.utils.LFO;
+import org.example.tunesfx.synth.LFO;
 
 public class SintetizadorController {
     @FXML
@@ -232,7 +236,7 @@ public class SintetizadorController {
         SampleBank.getInstance().setCurrentSample(newSample);
 
 //        System.out.println("Sample guardado (" + durationSeconds + "s) y notificación enviada.");
-        guardarSample.setText("Sample Saved");
+//        guardarSample.setText("Sample Saved");
     }
 
     /**

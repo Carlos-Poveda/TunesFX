@@ -1,6 +1,6 @@
 package org.example.tunesfx.audio;
 
-import org.example.tunesfx.Sintetizador;
+import org.example.tunesfx.synth.Sintetizador;
 import org.example.tunesfx.utils.OpenALException;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
@@ -118,7 +118,7 @@ public class Audio extends Thread {
             alcDestroyContext(context);
             alcCloseDevice(device);
             openALInitialized = false;
-//            System.out.println("OpenAL apagado.");
+            System.out.println("OpenAL apagado.");
         }
     }
 

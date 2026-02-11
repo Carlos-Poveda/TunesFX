@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.synth;
 
 import javafx.fxml.FXML; // Importar
 import javafx.fxml.FXMLLoader; // Importar
@@ -18,7 +18,7 @@ public class WaveViewer extends StackPane {
 
     public WaveViewer() {
         // Cargar el FXML
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("waveViewer.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/waveViewer.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.controller;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -23,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.example.tunesfx.audio.PlaylistItem;
 import org.example.tunesfx.utils.AudioExporter;
 import org.example.tunesfx.utils.GlobalState;
 
@@ -30,7 +31,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class PrincipalController {
     @FXML private Spinner bpmSpinner;
@@ -109,7 +109,7 @@ public class PrincipalController {
     @FXML
     private void handleOpenSynth(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("SintetizadorView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/SintetizadorView.fxml"));
             Pane synthRoot = loader.load();
             SintetizadorController synthController = loader.getController();
 
@@ -137,7 +137,7 @@ public class PrincipalController {
     public void handleOpenChannelRack(ActionEvent actionEvent) {
         if (rackStage == null) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("ChannelRackView.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/ChannelRackView.fxml"));
                 Pane rackRoot = loader.load();
                 ChannelRackController rackController = loader.getController();
 
@@ -145,7 +145,7 @@ public class PrincipalController {
                 setWindowIcon(rackStage);
                 Scene rackScene = new Scene(rackRoot);
 
-                String css = this.getClass().getResource("styles.css").toExternalForm();
+                String css = this.getClass().getResource("/org/example/tunesfx/styles.css").toExternalForm();
                 rackScene.getStylesheets().add(css);
 
                 rackStage.setOnCloseRequest(e -> rackController.shutdown());

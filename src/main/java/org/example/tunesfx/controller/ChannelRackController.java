@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.controller;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -107,7 +107,7 @@ public class ChannelRackController {
         Platform.runLater(() -> {
             if (sample == null) return;
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("ChannelRackRow.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/ChannelRackRow.fxml"));
                 HBox newRowNode = loader.load();
                 ChannelRackRowController rowController = loader.getController();
                 rowController.setSample(sample);

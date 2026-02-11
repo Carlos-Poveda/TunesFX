@@ -1,4 +1,4 @@
-package org.example.tunesfx;
+package org.example.tunesfx.synth;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -7,7 +7,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.Cursor;
-import org.example.tunesfx.utils.WaveTable;
 
 import java.io.IOException;
 
@@ -37,7 +36,7 @@ public class Oscilator extends HBox {
 
     public Oscilator() {
         // Cargar el FXML
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("oscilador.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/oscilador.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 
@@ -169,7 +168,7 @@ public class Oscilator extends HBox {
 
     public double[] getSampleWaveform(int numSamples) {
         double[] samples = new double[numSamples];
-        double frequency = 1.0 / (numSamples / (double)Sintetizador.AudioInfo.SAMPLE_RATE) * 3.0;
+        double frequency = 1.0 / (numSamples / (double) Sintetizador.AudioInfo.SAMPLE_RATE) * 3.0;
         int index = 0;
         int stepSize = (int)(WaveTable.SIZE * (frequency * Math.pow(2, getToneOffset())) / Sintetizador.AudioInfo.SAMPLE_RATE);
         for (int i = 0; i < numSamples; i++) {

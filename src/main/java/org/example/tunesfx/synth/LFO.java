@@ -1,6 +1,4 @@
-package org.example.tunesfx.utils;
-
-import org.example.tunesfx.Sintetizador;
+package org.example.tunesfx.synth;
 
 public class LFO {
     public enum Waveform {
@@ -33,26 +31,15 @@ public class LFO {
     }
 
     public double getNextSample() {
-        double sample = 0.0;
+        double sample = switch (waveform) {
+            case SINE -> Math.sin(2 * Math.PI * phase);
+            case TRIANGLE -> 2 * Math.abs(2 * phase - 1) - 1;
+            case SAW -> 2 * phase - 1;
+            case SQUARE -> (phase < 0.5) ? 1.0 : -1.0;
+            case RANDOM -> randomValue;
+        };
 
         // Generación de onda
-        switch (waveform) {
-            case SINE:
-                sample = Math.sin(2 * Math.PI * phase);
-                break;
-            case TRIANGLE:
-                sample = 2 * Math.abs(2 * phase - 1) - 1;
-                break;
-            case SAW:
-                sample = 2 * phase - 1;
-                break;
-            case SQUARE:
-                sample = (phase < 0.5) ? 1.0 : -1.0;
-                break;
-            case RANDOM:
-                sample = randomValue;
-                break;
-        }
 
         // Avanzar fase
         phase += rate / Sintetizador.AudioInfo.SAMPLE_RATE;

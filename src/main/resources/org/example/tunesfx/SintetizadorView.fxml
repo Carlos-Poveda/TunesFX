@@ -3,8 +3,8 @@
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.Label?>
 
-<?import org.example.tunesfx.Oscilator?>
-<?import org.example.tunesfx.WaveViewer?>
+<?import org.example.tunesfx.synth.Oscilator?>
+<?import org.example.tunesfx.synth.WaveViewer?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.control.Button?>
 
@@ -15,7 +15,7 @@
 <?import javafx.scene.control.Slider?>
 <Pane fx:id="rootPane" prefHeight="680.0" prefWidth="775.0" style="-fx-background-color: black;"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.tunesfx.SintetizadorController">
+      fx:controller="org.example.tunesfx.controller.SintetizadorController">
     <children>
 
         <Oscilator fx:id="oscilador1" layoutX="15.0" layoutY="10.0" />

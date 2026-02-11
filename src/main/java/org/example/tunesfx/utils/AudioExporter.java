@@ -1,8 +1,8 @@
 package org.example.tunesfx.utils;
 
-import org.example.tunesfx.ChannelRackController;
-import org.example.tunesfx.ChannelRackRowController;
-import org.example.tunesfx.PlaylistItem;
+import org.example.tunesfx.controller.ChannelRackController;
+import org.example.tunesfx.controller.ChannelRackRowController;
+import org.example.tunesfx.audio.PlaylistItem;
 import org.example.tunesfx.audio.Sample;
 import org.example.tunesfx.audio.StepData;
 

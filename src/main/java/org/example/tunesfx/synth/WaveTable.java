@@ -1,5 +1,5 @@
-package org.example.tunesfx.utils;
-import org.example.tunesfx.Sintetizador;
+package org.example.tunesfx.synth;
+import org.example.tunesfx.utils.Utils;
 
 public enum WaveTable {
     Sine,Square,Saw,Triangle;
