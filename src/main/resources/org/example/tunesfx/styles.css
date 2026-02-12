@@ -266,7 +266,7 @@
     -fx-font-size: 33px;
 }
 
-
+/* Estilos para la lista de patrones */
 .list-cell:filled:selected {
     -fx-background-color: #000000;
     -fx-text-fill: white;
