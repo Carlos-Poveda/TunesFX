@@ -12,7 +12,6 @@ import org.example.tunesfx.audio.Audio;
 import java.io.InputStream;
 
 public class Principal extends Application {
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         
@@ -21,7 +20,7 @@ public class Principal extends Application {
         if (fontStream != null) {
             Font myFont = Font.loadFont(fontStream, 14);
             if (myFont != null) {
-                System.out.println("Main Font loaded: " + myFont.getFamily());
+//                System.out.println("Main Font loaded: " + myFont.getFamily());
             } else {
                 System.err.println("Failed to create main font from stream.");
             }
@@ -35,7 +34,7 @@ public class Principal extends Application {
         if (titleFontStream != null) {
             Font titleFont = Font.loadFont(titleFontStream, 33); 
             if (titleFont != null) {
-                System.out.println("Title Font loaded: " + titleFont.getFamily());
+//                System.out.println("Title Font loaded: " + titleFont.getFamily());
             } else {
                 System.err.println("Failed to create title font from stream.");
             }
