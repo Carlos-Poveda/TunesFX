@@ -25,10 +25,7 @@
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="47.0" style="-fx-background-color: #262626; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
          <children>
-            <Label text="TUNESFX" textFill="#8a8a00">
-               <font>
-                  <Font name="OCR A Extended" size="33.0" />
-               </font>
+            <Label id="title" text="HYDRA" textFill="#8a8a00">
                <effect>
                   <Glow />
                </effect>
@@ -88,9 +85,6 @@
                </HBox.margin>
             </Button>
             <Label text="BPM" textFill="#8a8a00">
-               <font>
-                  <Font name="OCR A Extended" size="18.0" />
-               </font>
                <HBox.margin>
                   <Insets left="10.0" />
                </HBox.margin>
@@ -143,9 +137,6 @@
          </BorderPane.margin>
          <children>
             <Label text="Library" textFill="#8a8a00">
-               <font>
-                  <Font name="OCR A Extended" size="15.0" />
-               </font>
                <effect>
                   <Glow />
                </effect>
@@ -161,9 +152,6 @@
          </BorderPane.margin>
          <children>
             <Label text="Playlist" textFill="#8a8a00">
-               <font>
-                  <Font name="OCR A Extended" size="15.0" />
-               </font>
                <effect>
                   <Glow />
                </effect>
@@ -178,9 +166,6 @@
                   <VBox alignment="TOP_CENTER" minWidth="200.0" prefHeight="798.0" prefWidth="200.0" spacing="5.0" SplitPane.resizableWithParent="false">
                      <children>
                         <Label text="Patterns" textFill="#8a8a00">
-                           <font>
-                              <Font name="OCR A Extended" size="10.0" />
-                           </font>
                            <VBox.margin>
                               <Insets left="5.0" top="5.0" />
                            </VBox.margin>

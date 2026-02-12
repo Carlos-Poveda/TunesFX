@@ -10,12 +10,40 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.example.tunesfx.audio.Audio;
 
+import java.io.InputStream;
+
 public class Principal extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-//        Font myFont = Font.loadFont(getClass().getResourceAsStream("/fonts/iceberg-regular.ttf"), 14);
-//        Font myFont = Font.loadFont(getClass().getResourceAsStream("/fonts/Handjet-VariableFont_ELGR,ELSH,wrght.ttf"), 14);
+        
+        // Cargar fuente principal
+        InputStream fontStream = getClass().getResourceAsStream("/fonts/EncodeSansCondensed-Regular.ttf");
+        if (fontStream != null) {
+            Font myFont = Font.loadFont(fontStream, 14);
+            if (myFont != null) {
+                System.out.println("Main Font loaded: " + myFont.getFamily());
+            } else {
+                System.err.println("Failed to create main font from stream.");
+            }
+        } else {
+            System.err.println("Failed to find main font file.");
+        }
+
+        // Cargar fuente para el título (Plaster)
+        // Es necesario cargarla aquí para que el CSS pueda usarla
+        InputStream titleFontStream = getClass().getResourceAsStream("/fonts/UnifrakturMaguntia-Regular.ttf");
+        if (titleFontStream != null) {
+            Font titleFont = Font.loadFont(titleFontStream, 33); 
+            if (titleFont != null) {
+                System.out.println("Title Font loaded: " + titleFont.getFamily());
+            } else {
+                System.err.println("Failed to create title font from stream.");
+            }
+        } else {
+            System.err.println("Failed to find title font file: /fonts/UnifrakturMaguntia-Regular.ttf");
+        }
+
 
         // 1. Cargar el FXML de la vista principal
         FXMLLoader loader = new FXMLLoader(getClass().getResource("PrincipalView.fxml"));
@@ -29,11 +57,9 @@ public class Principal extends Application {
             if (applicationIcon.isError()) {
                 throw new Exception("La imagen del ícono no pudo ser cargada o es inválida.");
             }
-
             primaryStage.getIcons().add(applicationIcon);
 
         } catch (Exception e) {
-            // Es buena práctica actualizar el mensaje de error para reflejar el nombre del archivo
             System.err.println("Error al cargar el ícono: images/logo.png. Usando ícono por defecto.");
             e.printStackTrace();
         }
