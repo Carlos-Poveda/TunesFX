@@ -257,11 +257,27 @@
 
 /* 1. Estilo general para toda la aplicación */
 .root, .label, .button, .text-field, .text-area {
-    -fx-font-family: "Encode Sans Condensed";
+    -fx-font-family: "Roboto Mono";
 }
 
 /* 2. Estilo ESPECÍFICO para el título con !important para forzar prioridad */
 #title {
     -fx-font-family: "Sarina" !important;
     -fx-font-size: 33px;
+}
+
+
+.list-cell:filled:selected {
+    -fx-background-color: #000000;
+    -fx-text-fill: white;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #444444;
+    -fx-text-fill: white;
+}
+
+.list-cell:filled:focused {
+    -fx-background-color: #444444;
+    -fx-text-fill: white;
 }

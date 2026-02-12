@@ -17,7 +17,7 @@ public class Principal extends Application {
     public void start(Stage primaryStage) throws Exception {
         
         // Cargar fuente principal
-        InputStream fontStream = getClass().getResourceAsStream("/fonts/EncodeSansCondensed-Regular.ttf");
+        InputStream fontStream = getClass().getResourceAsStream("/fonts/RobotoMono-VariableFont_wght.ttf");
         if (fontStream != null) {
             Font myFont = Font.loadFont(fontStream, 14);
             if (myFont != null) {

@@ -291,8 +291,7 @@ public class PrincipalController {
                 String selectedPattern = (String) patternListView.getSelectionModel().getSelectedItem();
                 // Si no hay nada seleccionado en la lista, no hacemos nada
                 if (selectedPattern == null) {
-                    // Mostrar algo
-                    System.out.println("Selecciona primero un patrón de la lista de la izquierda.");
+//                    System.out.println("Selecciona primero un patrón de la lista de la izquierda.");
                     return;
                 }
                 // 2. Calcular coordenadas ajustadas a la rejilla (Snap to Grid)
