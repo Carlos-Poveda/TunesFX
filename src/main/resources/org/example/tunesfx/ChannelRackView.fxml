@@ -21,7 +21,7 @@
             <children>
                 <Label text="Channel rack" textFill="#ffffff">
                     <font>
-                        <Font name="OCR A Extended" size="15.0" />
+                        <Font name="OCR A Extended" size="12.0" />
                     </font>
                     <effect>
                         <Glow />

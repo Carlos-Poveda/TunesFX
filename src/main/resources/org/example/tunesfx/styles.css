@@ -258,12 +258,14 @@
 /* 1. Estilo general para toda la aplicación */
 .root, .label, .button, .text-field, .text-area {
     -fx-font-family: "Roboto Mono";
+    -fx-font-size: 11px;
 }
 
 /* 2. Estilo ESPECÍFICO para el título con !important para forzar prioridad */
 #title {
     -fx-font-family: "Sarina" !important;
-    -fx-font-size: 33px;
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(255, 255, 255, 0.13);
 }
 
 /* Estilos para la lista de patrones */
@@ -280,4 +282,30 @@
 .list-cell:filled:focused {
     -fx-background-color: #444444;
     -fx-text-fill: white;
+}
+
+/* Estilo base del TreeView */
+.tree-view {
+    -fx-background-color: #1A1A1A;
+    -fx-control-inner-background: #1A1A1A;
+    -fx-border-color: #444444;
+}
+
+/* Las celdas individuales */
+.tree-cell {
+    -fx-background-color: #1A1A1A;
+    -fx-text-fill: #cccccc;
+    -fx-padding: 3px 0 3px 0;
+}
+
+/* Cuando pasas el ratón por encima o seleccionas */
+.tree-cell:filled:selected,
+.tree-cell:filled:hover {
+    -fx-background-color: #444444;
+    -fx-text-fill: white;
+}
+
+/* Ocultar el recuadro azul de enfoque por defecto de JavaFX */
+.tree-view:focused {
+    -fx-background-color: #1A1A1A;
 }

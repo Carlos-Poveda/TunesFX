@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.HBox;
@@ -228,6 +229,33 @@ public class ChannelRackController {
 
                 scheduler.play();
             }
+        }
+    }
+
+    public void addTrackFromLibrary(String name, File audioFile) {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/ChannelRackRow.fxml")); // Asegúrate de que la ruta del FXML es correcta, a veces es views/ChannelRackRow.fxml
+        try {
+            Parent rowNode = loader.load();
+            ChannelRackRowController rowController = loader.getController();
+
+            // 1. Configurar nombre
+            rowController.setTrackName(name);
+
+            // 2. Cargar el sonido (Este método lo crearemos ahora en el RowController)
+            rowController.loadSample(audioFile);
+
+            // 3. Añadir al contenedor visual
+            rackContainer.getChildren().add(rowNode);
+
+            // 4. Registrar controlador
+            rowController.setOnDelete(() -> {
+                allRows.remove(rowController);
+                rackContainer.getChildren().remove(rowNode);
+            });
+            allRows.add(rowController);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

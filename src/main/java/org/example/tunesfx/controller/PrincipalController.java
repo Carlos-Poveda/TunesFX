@@ -16,6 +16,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrincipalController {
+    @FXML private TreeView libraryTreeView;
     @FXML private Spinner bpmSpinner;
     @FXML private Button btnStopSong;
     @FXML private Button btnPlaySong;
@@ -98,6 +100,7 @@ public class PrincipalController {
         enablePatternPainting();
         initializeSongTimeline();
         setupPatternListViewContextMenu();
+        setupLibrary();
     }
 
     // Abrir Sintetizador
@@ -562,6 +565,99 @@ public class PrincipalController {
                     });
                 }
             }).start();
+        }
+    }
+
+    // Librería de samples
+
+    private void setupLibrary() {
+        // 1. Ruta Raíz
+        File rootDir = new File("src/main/resources/samples");
+
+        // 2. Crear el nodo raíz del árbol (invisible si showRoot es false)
+        TreeItem<File> rootItem = new TreeItem<>(rootDir);
+        rootItem.setExpanded(true);
+
+        // 3. Llenar el árbol recursivamente
+        populateTree(rootDir, rootItem);
+
+        // 4. Asignar al componente visual
+        libraryTreeView.setRoot(rootItem);
+        libraryTreeView.setShowRoot(false); // Ocultamos la carpeta madre para que se vean directo los contenidos
+
+        // 5. PERSONALIZAR CÓMO SE VE CADA FILA (CellFactory)
+        // Esto es vital: le decimos cómo dibujar un File (solo queremos el nombre)
+        libraryTreeView.setCellFactory(tv -> new TreeCell<File>() {
+            @Override
+            protected void updateItem(File item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(item.getName()); // Mostramos solo el nombre (ej: "kick.wav")
+
+                    // Opcional: Añadir iconos simples si es carpeta o archivo
+                    // Si tienes imágenes, puedes usar: setGraphic(new ImageView(...));
+                    if (item.isDirectory()) {
+                        setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;"); // Carpetas en blanco negrita
+                    } else {
+                        setStyle("-fx-text-fill: #aaaaaa;"); // Archivos en gris
+                    }
+                }
+            }
+        });
+
+        // 6. Evento de Doble Clic
+        libraryTreeView.setOnMouseClicked(this::handleLibraryClick);
+    }
+
+    // MÉTODO RECURSIVO: La clave para leer subcarpetas infinitas
+    private void populateTree(File dir, TreeItem<File> parentItem) {
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                // Filtramos: Solo carpetas o archivos WAV
+                boolean isWav = file.isFile() && file.getName().toLowerCase().endsWith(".wav");
+                boolean isDir = file.isDirectory();
+
+                if (isWav || isDir) {
+                    TreeItem<File> item = new TreeItem<>(file);
+                    parentItem.getChildren().add(item);
+
+                    // SI ES UNA CARPETA, LLAMARSE A SÍ MISMO (RECURSIÓN)
+                    if (isDir) {
+                        populateTree(file, item);
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleLibraryClick(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            // Obtenemos el item seleccionado
+            TreeItem<File> selectedItem = (TreeItem<File>) libraryTreeView.getSelectionModel().getSelectedItem();
+
+            // Verificamos que sea un archivo de audio válido (no una carpeta)
+            if (selectedItem != null && selectedItem.getValue().isFile()) {
+                File selectedFile = selectedItem.getValue();
+                loadSampleToRack(selectedFile);
+            }
+        }
+    }
+
+    // Tu método loadSampleToRack modificado ligeramente para aceptar File directo
+    private void loadSampleToRack(File sampleFile) {
+        ChannelRackController rack = GlobalState.getChannelRackController();
+
+        if (rack != null) {
+            String fileName = sampleFile.getName();
+            String trackName = fileName.replace(".wav", "");
+
+            rack.addTrackFromLibrary(trackName, sampleFile);
+            System.out.println("Sample añadido: " + trackName);
         }
     }
 

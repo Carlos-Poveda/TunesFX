@@ -19,7 +19,8 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="902.0" prefWidth="1339.0" style="-fx-background-color: #3D3D3D;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.controller.PrincipalController">
+<?import javafx.scene.control.TreeView?>
+<BorderPane prefHeight="902.0" prefWidth="1339.0" style="-fx-background-color: #3D3D3D;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.controller.PrincipalController">
 
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="47.0" style="-fx-background-color: #262626; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
@@ -51,7 +52,7 @@
                </HBox.margin>
             </Button>
 
-                        <Button fx:id="btnPlaySong" onAction="#handlePlaySong" prefHeight="14.0" prefWidth="36.0" styleClass="synth-button">
+            <Button fx:id="btnPlaySong" onAction="#handlePlaySong" prefHeight="14.0" prefWidth="36.0" styleClass="synth-button">
                <graphic>
                   <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -85,14 +86,14 @@
                   <Insets left="10.0" />
                </HBox.margin>
             </Spinner>
-            <HBox alignment="CENTER" prefWidth="920.0" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER_RIGHT" prefWidth="920.0" HBox.hgrow="ALWAYS">
                <children>
                   <Label id="title" text="HYDRA" textFill="#ffffff">
                      <effect>
                         <Glow />
                      </effect>
                      <HBox.margin>
-                        <Insets right="200.0" />
+                        <Insets right="20.0" />
                      </HBox.margin>
                   </Label>
                </children>
@@ -127,9 +128,8 @@
          </children>
       </HBox>
    </top>
-
    <left>
-      <VBox alignment="TOP_CENTER" prefHeight="835.0" prefWidth="262.0" style="-fx-background-color: #262626; -fx-background-radius: 13; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
+      <VBox alignment="TOP_CENTER" prefHeight="835.0" prefWidth="262.0" spacing="10.0" style="-fx-background-color: #262626; -fx-background-radius: 13; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
@@ -137,11 +137,10 @@
             <Insets bottom="10.0" left="10.0" top="10.0" />
          </BorderPane.margin>
          <children>
-            <Label text="Library" textFill="#ffffff">
-               <effect>
-                  <Glow />
-               </effect>
-            </Label>
+            <Label text="Library" textFill="#ffffff" />
+            <TreeView fx:id="libraryTreeView"
+                      style="-fx-background-color: #1A1A1A; -fx-control-inner-background: #1A1A1A;"
+                      VBox.vgrow="ALWAYS" />
          </children>
       </VBox>
    </left>
@@ -153,9 +152,6 @@
          </BorderPane.margin>
          <children>
             <Label text="Playlist" textFill="#ffffff">
-               <effect>
-                  <Glow />
-               </effect>
                <VBox.margin>
                   <Insets bottom="5.0" top="10.0" />
                </VBox.margin>

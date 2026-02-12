@@ -8,8 +8,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import org.example.tunesfx.audio.Sample;
 import org.example.tunesfx.audio.StepData;
+import org.example.tunesfx.utils.AudioFileLoader;
 import org.example.tunesfx.utils.GlobalState;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,9 +37,6 @@ public class ChannelRackRowController {
     @FXML private Button stepBtn53, stepBtn54, stepBtn55, stepBtn56;
     @FXML private Button stepBtn57, stepBtn58, stepBtn59, stepBtn60;
     @FXML private Button stepBtn61, stepBtn62, stepBtn63, stepBtn64;
-
-
-
     // Lista para acceder a los botones por índice
     private List<Button> stepButtons;
 
@@ -60,12 +61,7 @@ public class ChannelRackRowController {
         );
 
         for (Button btn : stepButtons) {
-            // Asignar datos vacíos iniciales
             btn.setUserData(new StepData());
-
-            // IMPORTANTE: Eliminar el onAction del FXML si puedes,
-            // o dejarlo y usar este manejador de Mouse que es más potente.
-            // Vamos a usar un manejador de Ratón manual:
             btn.setOnMouseClicked(this::handleMouseClick);
         }
     }
@@ -275,9 +271,7 @@ public class ChannelRackRowController {
         // Obtenemos los datos del primer paso para poner los valores iniciales de los sliders
         StepData referenceData = (StepData) stepBtn1.getUserData();
 
-        // ============================================================
         // --- ACCIONES DE GESTIÓN (Enviar a Playlist) ---
-        // ============================================================
 
         // 1. Botón Enviar a Playlist
         MenuItem sendToPlaylistItem = new MenuItem("Send to Playlist as Pattern");
@@ -304,15 +298,12 @@ public class ChannelRackRowController {
         });
 
         menu.getItems().add(sendToPlaylistItem);
-
-        // Separador antes de empezar con los sliders de sonido
         menu.getItems().add(new SeparatorMenuItem());
 
         // --- PARTE 2: CONTROLES GLOBALES ---
 
         // 2.1 PITCH GLOBAL
         Menu pitchMenu = new Menu("Set All Pitch");
-        // (El estilo del texto lo maneja tu CSS .context-menu .menu-item > .label)
 
         MenuItem resetItem = new MenuItem("Reset All (C5)");
         resetItem.setOnAction(e -> applyToAllSteps(d -> d.setSemitoneOffset(0)));
@@ -326,7 +317,6 @@ public class ChannelRackRowController {
             pitchMenu.getItems().add(item);
         }
         menu.getItems().add(pitchMenu);
-
         // 2.2 ATTACK GLOBAL
         Slider attackSlider = new Slider(0, 0.5, referenceData.getAttack());
         Label attackLabel = new Label("All Attack: " + String.format("%.2f", referenceData.getAttack()));
@@ -338,7 +328,6 @@ public class ChannelRackRowController {
             applyToAllSteps(d -> d.setAttack(val));
         });
         addSliderToMenu(menu, attackLabel, attackSlider);
-
         // 2.3 RELEASE GLOBAL
         Slider releaseSlider = new Slider(0, 0.5, referenceData.getRelease());
         Label releaseLabel = new Label("All Release: " + String.format("%.2f", referenceData.getRelease()));
@@ -350,7 +339,6 @@ public class ChannelRackRowController {
             applyToAllSteps(d -> d.setRelease(val));
         });
         addSliderToMenu(menu, releaseLabel, releaseSlider);
-
         // 2.4 VOLUME GLOBAL
         Slider volSlider = new Slider(0, 1.0, referenceData.getVolume());
         Label volLabel = new Label("All Volume: " + (int)(referenceData.getVolume()*100) + "%");
@@ -362,7 +350,6 @@ public class ChannelRackRowController {
             applyToAllSteps(d -> d.setVolume(val));
         });
         addSliderToMenu(menu, volLabel, volSlider);
-
         // 2.5 DURATION GLOBAL
         Slider durSlider = new Slider(0.1, 1.0, referenceData.getDurationFactor());
         Label durLabel = new Label("All Duration: " + (int)(referenceData.getDurationFactor()*100) + "%");
@@ -374,7 +361,6 @@ public class ChannelRackRowController {
             applyToAllSteps(d -> d.setDurationFactor(val));
         });
         addSliderToMenu(menu, durLabel, durSlider);
-
         // 2.6 DELAY GLOBAL
         Slider delaySlider = new Slider(0.0, 1.0, referenceData.getDelay());
         Label delayLabel = new Label("All Delay: " + (int)(referenceData.getDelay()*100) + "%");
@@ -386,23 +372,19 @@ public class ChannelRackRowController {
             applyToAllSteps(d -> d.setDelay(val));
         });
         addSliderToMenu(menu, delayLabel, delaySlider);
-
         // 2.7 PANNING GLOBAL
         Slider panSlider = new Slider(-1.0, 1.0, referenceData.getPan());
         Label panLabel = new Label("All Pan: " + formatPanLabel(referenceData.getPan()));
         panLabel.setStyle("-fx-text-fill: white;");
-
         panSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             double val = newVal.doubleValue();
             panLabel.setText("All Pan: " + formatPanLabel(val));
             applyToAllSteps(d -> d.setPan(val));
         });
         addSliderToMenu(menu, panLabel, panSlider);
-
         menu.show(trackNameLabel, x, y);
         renameField.requestFocus();
     }
-
     // Pequeño helper para no repetir el código de añadir sliders al menú
     private void addSliderToMenu(ContextMenu menu, Label label, Slider slider) {
         VBox box = new VBox(label, slider);
@@ -412,7 +394,6 @@ public class ChannelRackRowController {
         item.setStyle("-fx-background-color: transparent;");
         menu.getItems().add(item);
     }
-
     /**
      * Método público para el PrincipalController.
      * Ya no miramos el estilo CSS, miramos el objeto de datos.
@@ -421,7 +402,6 @@ public class ChannelRackRowController {
         if (step < 0 || step >= stepButtons.size()) return null;
         return (StepData) stepButtons.get(step).getUserData();
     }
-
     /**
      * El PrincipalController usará esto para decirnos
      * QUÉ hacer cuando se pulse el botón de borrado.
@@ -429,7 +409,6 @@ public class ChannelRackRowController {
     public void setOnDelete(Runnable callback) {
         this.deleteCallback = callback;
     }
-
     /**
      * Se llama cuando se pulsa el botón 'X' de esta fila.
      */
@@ -441,7 +420,6 @@ public class ChannelRackRowController {
             System.err.println("Error al borrar la fila.");
         }
     }
-
     /**
      * El controlador principal llamará a esto para asignar un sample a esta fila.
      */
@@ -450,14 +428,12 @@ public class ChannelRackRowController {
         // Opcional: poner un nombre
         // this.trackNameLabel.setText("Sample " + sample.hashCode());
     }
-
     /**
      * Devuelve el sample asignado a esta fila.
      */
     public Sample getSample() {
         return mySample;
     }
-
     /**
      * Comprueba si un paso específico está "encendido".
      */
@@ -465,7 +441,6 @@ public class ChannelRackRowController {
         if (step < 0 || step >= stepButtons.size()) return false;
         return stepButtons.get(step).getStyleClass().contains("step-button-on");
     }
-
     /**
      * Resalta el botón del paso actual (playhead).
      */
@@ -473,7 +448,6 @@ public class ChannelRackRowController {
         if (step < 0 || step >= stepButtons.size()) return;
         stepButtons.get(step).getStyleClass().add("step-button-playhead");
     }
-
     /**
      * Limpia el resaltado del playhead del botón.
      */
@@ -481,7 +455,6 @@ public class ChannelRackRowController {
         if (step < 0 || step >= stepButtons.size()) return;
         stepButtons.get(step).getStyleClass().remove("step-button-playhead");
     }
-
     /**
      * Devuelve el índice del último paso activo en esta fila.
      * Si no hay ninguno, devuelve -1.
@@ -496,7 +469,6 @@ public class ChannelRackRowController {
         }
         return -1; // Fila vacía
     }
-
     /**
      * Helper para aplicar un cambio a TODOS los pasos de la fila.
      */
@@ -517,6 +489,32 @@ public class ChannelRackRowController {
         StepData step = getStepData(stepIndex);
         if (step == null || !step.isActive()) return null;
         return step;
+    }
+
+    public void setTrackName(String name) {
+        if (this.trackNameLabel != null) {
+            this.trackNameLabel.setText(name);
+        }
+    }
+
+    /**
+     * Carga un archivo WAV desde el disco y crea el objeto Sample.
+     */
+    public void loadSample(File file) {
+        if (file == null) return;
+
+        try {
+            // Usamos tu utilidad existente AudioFileLoader
+            short[] data = AudioFileLoader.loadSample(file);
+
+            // Creamos el sample y lo asignamos
+            Sample newSample = new Sample(data);
+            this.setSample(newSample);
+
+        } catch (IOException | UnsupportedAudioFileException e) {
+            System.err.println("Error al cargar el sample en la fila: " + file.getName());
+            e.printStackTrace();
+        }
     }
 
     // Método para saber cuántos pasos tiene la fila
