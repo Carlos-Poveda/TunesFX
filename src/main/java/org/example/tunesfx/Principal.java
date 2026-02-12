@@ -7,7 +7,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.example.tunesfx.audio.Audio;
 
 import java.io.InputStream;
@@ -30,9 +29,9 @@ public class Principal extends Application {
             System.err.println("Failed to find main font file.");
         }
 
-        // Cargar fuente para el título (Plaster)
+        // Cargar fuente para el título
         // Es necesario cargarla aquí para que el CSS pueda usarla
-        InputStream titleFontStream = getClass().getResourceAsStream("/fonts/UnifrakturMaguntia-Regular.ttf");
+        InputStream titleFontStream = getClass().getResourceAsStream("/fonts/Sarina-Regular.ttf");
         if (titleFontStream != null) {
             Font titleFont = Font.loadFont(titleFontStream, 33); 
             if (titleFont != null) {
@@ -41,7 +40,7 @@ public class Principal extends Application {
                 System.err.println("Failed to create title font from stream.");
             }
         } else {
-            System.err.println("Failed to find title font file: /fonts/UnifrakturMaguntia-Regular.ttf");
+            System.err.println("Failed to find title font file.");
         }
 
 
@@ -63,7 +62,7 @@ public class Principal extends Application {
             System.err.println("Error al cargar el ícono: images/logo.png. Usando ícono por defecto.");
             e.printStackTrace();
         }
-        primaryStage.setTitle("TunesFX");
+        primaryStage.setTitle("Hydra");
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();

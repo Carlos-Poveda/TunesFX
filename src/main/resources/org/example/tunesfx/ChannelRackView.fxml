@@ -19,7 +19,7 @@
                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
             </padding>
             <children>
-                <Label text="Channel rack" textFill="#aeae00">
+                <Label text="Channel rack" textFill="#ffffff">
                     <font>
                         <Font name="OCR A Extended" size="15.0" />
                     </font>

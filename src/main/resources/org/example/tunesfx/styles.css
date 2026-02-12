@@ -262,6 +262,6 @@
 
 /* 2. Estilo ESPECÍFICO para el título con !important para forzar prioridad */
 #title {
-    -fx-font-family: "UnifrakturMaguntia" !important;
+    -fx-font-family: "Sarina" !important;
     -fx-font-size: 33px;
 }
