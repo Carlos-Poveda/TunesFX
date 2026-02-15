@@ -288,56 +288,70 @@ public class PrincipalController {
 
     private void enablePatternPainting() {
         playlistGridContent.setOnMouseClicked(event -> {
-            // Solo pintamos con clic izquierdo
             if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
-                // 1. Obtener el patrón seleccionado de la lista
                 String selectedPattern = (String) patternListView.getSelectionModel().getSelectedItem();
-                // Si no hay nada seleccionado en la lista, no hacemos nada
-                if (selectedPattern == null) {
-//                    System.out.println("Selecciona primero un patrón de la lista de la izquierda.");
-                    return;
-                }
-                // 2. Calcular coordenadas ajustadas a la rejilla (Snap to Grid)
-                // Dividimos la coordenada del ratón por el ancho/alto de celda, convertimos a entero (truca decimales)
-                // y multiplicamos de nuevo.
-                int colIndex = (int) (event.getX() / CELL_WIDTH);
+                if (selectedPattern == null) return;
+
+                // Snap a compás completo (4 celdas)
+                int colIndex = (int) (event.getX() / (CELL_WIDTH * 4));
                 int rowIndex = (int) (event.getY() / TRACK_HEIGHT);
 
-                double snapX = colIndex * CELL_WIDTH;
+                double snapX = colIndex * (CELL_WIDTH * 4);
                 double snapY = rowIndex * TRACK_HEIGHT;
 
-                // 3. Crear y añadir el Clip visual
                 createClip(selectedPattern, snapX, snapY);
             }
         });
     }
 
     private void createClip(String patternName, double x, double y) {
-        // 1. Crear datos lógicos
-        int startBar = (int) (x / CELL_WIDTH) + 1;
+        // 1. LÓGICA DE CÁLCULO DE LONGITUD
+        int durationBars = 1;
+
+        if (GlobalState.getChannelRackController() != null) {
+            ChannelRackRowController row = GlobalState.getChannelRackController().findRowController(patternName);
+            if (row != null) {
+                int lastStep = row.getLastActiveStepIndex();
+                if (lastStep >= 0) {
+                    // Mantenemos el cálculo de cuántos compases ocupa (1-4)
+                    durationBars = (lastStep / 16) + 1;
+                }
+            }
+        }
+
+        // --- EL AJUSTE DE ESCALA ---
+        // Si durationBars es 1, queremos que ocupe 4 celdas (CELL_WIDTH * 4)
+        // para que llegue hasta el número "1" (o cubra el espacio del compás 1)
+        double initialWidth = durationBars * (CELL_WIDTH * 4);
+
+        // 2. Crear datos lógicos
+        // Nota: El startBar ahora debería calcularse dividiendo por (CELL_WIDTH * 4)
+        // si quieres que el "snap" sea por compases completos
+        int colIndex = (int) (x / (CELL_WIDTH * 4));
+        double snapX = colIndex * (CELL_WIDTH * 4);
+
         int trackIndex = (int) (y / TRACK_HEIGHT);
-        PlaylistItem item = new PlaylistItem(patternName, startBar, trackIndex);
+        PlaylistItem item = new PlaylistItem(patternName, colIndex + 1, trackIndex);
+        item.setDurationBars(durationBars);
         songData.add(item);
 
-        // 2. Crear contenedor visual
+        // 3. Crear contenedor visual
         javafx.scene.layout.StackPane clipContainer = new javafx.scene.layout.StackPane();
-        clipContainer.setPrefSize(CELL_WIDTH, TRACK_HEIGHT);
-        clipContainer.setLayoutX(x);
+
+        // Forzamos el ancho multiplicado por 4
+        clipContainer.setMinWidth(initialWidth);
+        clipContainer.setPrefWidth(initialWidth);
+        clipContainer.setMaxWidth(initialWidth);
+
+        clipContainer.setPrefHeight(TRACK_HEIGHT);
+        clipContainer.setLayoutX(snapX); // Usamos el snapX corregido
         clipContainer.setLayoutY(y);
-        // Guardamos la referencia al objeto de datos
         clipContainer.setUserData(item);
-        // Estilo del bloque de sonido
-        clipContainer.setStyle(
-                "-fx-background-color: #4a4a4a;" +
-                        "-fx-background-radius: 4;" +
-                        "-fx-border-color: #666666;" +
-                        "-fx-border-width: 1;" +
-                        "-fx-cursor: hand;" // Cursor de mano por defecto
-        );
-        // Etiqueta
+
+        // Estilo y label (igual que antes)
+        clipContainer.setStyle("-fx-background-color: #4a4a4a; -fx-background-radius: 4; -fx-border-color: #666666; -fx-border-width: 1;");
         Label nameLabel = new Label(patternName);
         nameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold;");
-        nameLabel.setMouseTransparent(true);
         clipContainer.getChildren().add(nameLabel);
 
         // =============================================================
@@ -375,6 +389,7 @@ public class PrincipalController {
                     // MODO REDIMENSIONAR
                     // Calculamos nuevo ancho basado en la posición del ratón dentro del nodo
                     double newWidth = e.getX();
+                    clipContainer.setMaxWidth(newWidth);
                     // Mínimo 1 celda de ancho
                     if (newWidth < CELL_WIDTH) newWidth = CELL_WIDTH;
                     clipContainer.setPrefWidth(newWidth);
@@ -392,40 +407,46 @@ public class PrincipalController {
         // --- 4. MOUSE RELEASED (Soltar y Ajustar a Rejilla - SNAP) ---
         clipContainer.setOnMouseReleased(e -> {
             if (e.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
-                if (isResizing) {
-                    // Ajustar ANCHO a la rejilla
-                    double currentWidth = clipContainer.getPrefWidth();
-                    // Redondear al múltiplo de CELL_WIDTH más cercano
-                    int cols = (int) Math.round(currentWidth / CELL_WIDTH);
-                    if (cols < 1) cols = 1; // Mínimo 1 compás
+                // Definimos cuánto mide un compás visualmente
+                double barWidth = CELL_WIDTH * 4;
 
-                    double snappedWidth = cols * CELL_WIDTH;
+                if (isResizing) {
+                    // Ajustar ANCHO a la rejilla de COMPASES
+                    double currentWidth = clipContainer.getPrefWidth();
+                    int numBars = (int) Math.round(currentWidth / barWidth);
+                    if (numBars < 1) numBars = 1; // Mínimo 1 compás
+
+                    double snappedWidth = numBars * barWidth;
                     clipContainer.setPrefWidth(snappedWidth);
-                    // OPCIONAL: Aquí se podría guardar la duración en 'item' si tuvieras esa propiedad
-                    // item.setDurationBars(cols);
+                    clipContainer.setMinWidth(snappedWidth);
+                    clipContainer.setMaxWidth(snappedWidth);
+
+                    // Actualizar lógica
+                    item.setDurationBars(numBars);
 
                 } else {
-                    // Ajustar POSICIÓN a la rejilla
+                    // Ajustar POSICIÓN a la rejilla de COMPASES
                     double rawX = clipContainer.getLayoutX();
                     double rawY = clipContainer.getLayoutY();
-                    // Snap X (Tiempo)
-                    int colIndex = (int) Math.round(rawX / CELL_WIDTH);
-                    if (colIndex < 0) colIndex = 0;
-                    double snappedX = colIndex * CELL_WIDTH;
+
+                    // Snap X (Usamos un nombre diferente para evitar el error de "already defined")
+                    int finalCol = (int) Math.round(rawX / barWidth);
+                    if (finalCol < 0) finalCol = 0;
+                    double snappedX = finalCol * barWidth;
+
                     // Snap Y (Track)
-                    int rowIndex = (int) Math.round(rawY / TRACK_HEIGHT);
-                    if (rowIndex < 0) rowIndex = 0;
-                    if (rowIndex >= NUM_TRACKS) rowIndex = NUM_TRACKS - 1;
-                    double snappedY = rowIndex * TRACK_HEIGHT;
+                    int finalRow = (int) Math.round(rawY / TRACK_HEIGHT);
+                    if (finalRow < 0) finalRow = 0;
+                    if (finalRow >= NUM_TRACKS) finalRow = NUM_TRACKS - 1;
+                    double snappedY = finalRow * TRACK_HEIGHT;
+
                     // Aplicar posición ajustada
                     clipContainer.setLayoutX(snappedX);
                     clipContainer.setLayoutY(snappedY);
+
                     // ACTUALIZAR DATOS LÓGICOS
-                    // Importante para que el cursor de reproducción sepa dónde está ahora
-                    item.setStartBar(colIndex + 1);
-                    item.setTrackIndex(rowIndex);
-                    // Feedback visual de "encaje"
-//                    System.out.println("Bloque movido a: Bar " + (colIndex + 1) + ", Track " + (rowIndex + 1));
+                    item.setStartBar(finalCol + 1);
+                    item.setTrackIndex(finalRow);
                 }
             }
         });
