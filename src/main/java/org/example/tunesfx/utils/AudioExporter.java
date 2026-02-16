@@ -68,8 +68,7 @@ public class AudioExporter {
                         float pitchFactor = (float) Math.pow(2, stepData.getSemitoneOffset() / 12.0);
                         float volume = (float) stepData.getVolume();
 
-                        mixSampleWithResampling(mixBuffer, bufferIndex, sourceAudio, pitchFactor, volume);
-                    }
+                        mixSampleWithResampling(mixBuffer, bufferIndex, sourceAudio, pitchFactor, stepData);                    }
                 }
             }
         }
@@ -77,18 +76,66 @@ public class AudioExporter {
         saveToFile(outputFile, mixBuffer, totalFrames);
     }
 
-    private static void mixSampleWithResampling(float[] mixBuffer, int startIndex, float[] source, float speed, float volume) {
+    private static void mixSampleWithResampling(float[] mixBuffer, int startIndex, float[] source, float speed, StepData stepData) {
+        // 1. Extraer los parámetros de tu diseño de sonido
+        float volume = (float) stepData.getVolume();
+        float pan = (float) stepData.getPan();
+        double attack = stepData.getAttack();   // De 0.0 a 0.5
+        double release = stepData.getRelease(); // De 0.0 a 0.5
+        double durationFactor = stepData.getDurationFactor(); // De 0.1 a 1.0
+
+        // 2. Lógica de Panning (Estéreo)
+        // -1.0 es Izquierda 100%, 0.0 es Centro, 1.0 es Derecha 100%
+        float leftPanGain = pan <= 0 ? 1.0f : 1.0f - pan;
+        float rightPanGain = pan >= 0 ? 1.0f : 1.0f + pan;
+
+        // 3. Lógica de Duración y Envolvente (Attack/Release)
+        int totalSourceSamples = source.length;
+        // Acortamos el sample en base a la duración elegida
+        int targetSamples = (int) (totalSourceSamples * durationFactor);
+
+        // Cuántos "píxeles" de audio tardará en hacer los fundidos
+        int attackSamples = (int) (targetSamples * attack);
+        int releaseSamples = (int) (targetSamples * release);
+
         double readIndex = 0;
+
+        // El salto es de 2 en 2 porque el buffer final es Estéreo (i = Izquierda, i+1 = Derecha)
         for (int i = startIndex; i < mixBuffer.length; i += 2) {
-            if (readIndex >= source.length || i >= mixBuffer.length) break;
+
+            // Si llegamos a la duración recortada, dejamos de pintar el sonido
+            if (readIndex >= targetSamples || i + 1 >= mixBuffer.length) {
+                break;
+            }
+
             int indexInt = (int) readIndex;
             double frac = readIndex - indexInt;
+
             if (indexInt + 1 >= source.length) break;
+
+            // Leer el audio original con interpolación (Pitch)
             float s1 = source[indexInt];
             float s2 = source[indexInt + 1];
-            float val = (float) ((s1 + (s2 - s1) * frac) * volume);
-            mixBuffer[i] += val;
-            if (i + 1 < mixBuffer.length) mixBuffer[i + 1] += val;
+            float rawSample = (float) (s1 + (s2 - s1) * frac);
+
+            // 4. Aplicar Envolvente Dinámica (Attack / Release)
+            float envelope = 1.0f; // Por defecto el volumen está al máximo
+
+            if (readIndex < attackSamples && attackSamples > 0) {
+                // Fase de Attack: El volumen va subiendo de 0 a 1
+                envelope = (float) (readIndex / attackSamples);
+            } else if (readIndex > targetSamples - releaseSamples && releaseSamples > 0) {
+                // Fase de Release: El volumen va bajando de 1 a 0
+                envelope = (float) ((targetSamples - readIndex) / releaseSamples);
+            }
+
+            // 5. Aplicar volumen general y la envolvente al sample crudo
+            float processedSample = rawSample * volume * envelope;
+
+            // 6. Escribir en el archivo (Separando Izquierda y Derecha)
+            mixBuffer[i] += processedSample * leftPanGain;       // Canal Izquierdo (L)
+            mixBuffer[i + 1] += processedSample * rightPanGain;  // Canal Derecho (R)
+
             readIndex += speed;
         }
     }
