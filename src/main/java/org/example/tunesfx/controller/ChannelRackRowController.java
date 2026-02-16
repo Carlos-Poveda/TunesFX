@@ -164,8 +164,8 @@ public class ChannelRackRowController {
         menu.show(btn, x, y);
 
         // --- SECCIÓN 5: DURACIÓN (Slider) ---
-        // Rango: 0.1 (10%) a 1.0 (100%)
-        Slider durationSlider = new Slider(0.1, 1.0, data.getDurationFactor());
+        // Rango: 0.01 (1%) a 1.0 (100%)
+        Slider durationSlider = new Slider(0.01, 1.0, data.getDurationFactor());
         Label durationLabel = new Label("Duration: " + (int)(data.getDurationFactor()*100) + "%");
 
         durationSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -351,7 +351,7 @@ public class ChannelRackRowController {
         });
         addSliderToMenu(menu, volLabel, volSlider);
         // 2.5 DURATION GLOBAL
-        Slider durSlider = new Slider(0.1, 1.0, referenceData.getDurationFactor());
+        Slider durSlider = new Slider(0.01, 1.0, referenceData.getDurationFactor());
         Label durLabel = new Label("All Duration: " + (int)(referenceData.getDurationFactor()*100) + "%");
         durLabel.setStyle("-fx-text-fill: white;");
 
