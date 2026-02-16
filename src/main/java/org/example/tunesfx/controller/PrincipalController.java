@@ -641,7 +641,6 @@ public class PrincipalController {
         libraryTreeView.setOnMouseClicked(this::handleLibraryClick);
     }
 
-    // MÉTODO RECURSIVO: La clave para leer subcarpetas infinitas
     private void populateTree(File dir, TreeItem<File> parentItem) {
         File[] files = dir.listFiles();
         if (files != null) {

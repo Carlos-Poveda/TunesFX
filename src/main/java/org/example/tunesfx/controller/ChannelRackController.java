@@ -241,7 +241,7 @@ public class ChannelRackController {
             // 1. Configurar nombre
             rowController.setTrackName(name);
 
-            // 2. Cargar el sonido (Este método lo crearemos ahora en el RowController)
+            // 2. Cargar el sonido
             rowController.loadSample(audioFile);
 
             // 3. Añadir al contenedor visual

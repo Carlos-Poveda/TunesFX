@@ -22,14 +22,10 @@ public class AudioExporter {
         // 1. Duración de un solo tiempo (una negra)
         double secondsPerBeat = 60.0 / bpm;
 
-        // 2. ¿Qué representa UNA COLUMNA de tu Grid en la Playlist?
-        // Si tu rejilla visual está dividida en BEATS (negras), usa: secondsPerBeat
-        // Si tu rejilla está dividida en COMPASES (4 negras), usa: secondsPerBeat * 4
-        // Dado tu error de 6 segundos, lo más probable es que cada columna sea un BEAT.
-        double secondsPerColumn = secondsPerBeat;
+        // 2. ¡NUEVA ESCALA! Tu rejilla ahora representa compases enteros (4 negras)
+        double secondsPerBar = secondsPerBeat * 4.0;
 
-        // 3. Duración de un paso (Step) del Channel Rack
-        // Normalmente 16 pasos = 1 compás (4 beats). Así que 1 paso = 0.25 beats.
+        // 3. Duración de un paso (Step) del Channel Rack (1 paso = 0.25 beats)
         double secondsPerStep = secondsPerBeat / 4.0;
 
         // --- CÁLCULO DE DURACIÓN TOTAL ---
@@ -37,8 +33,8 @@ public class AudioExporter {
         for (PlaylistItem item : playlist) {
             if (item.getStartBar() > maxColumn) maxColumn = item.getStartBar();
         }
-        // Añadimos un margen de 4 columnas para que no se corte el último sonido
-        double totalSeconds = (maxColumn + 4) * secondsPerColumn;
+        // Añadimos un margen de 2 compases (para que las colas de sonido no se corten abruptamente)
+        double totalSeconds = (maxColumn + 2) * secondsPerBar;
         int totalFrames = (int) (totalSeconds * SAMPLE_RATE);
         float[] mixBuffer = new float[totalFrames * CHANNELS];
 
@@ -50,8 +46,9 @@ public class AudioExporter {
                 float[] sourceAudio = convertSampleToFloat(row.getSample());
                 if (sourceAudio == null) continue;
 
-                // TIEMPO DE INICIO: Columna actual * Duración de una columna
-                double blockStartTime = item.getStartBar() * secondsPerColumn;
+                // ¡CAMBIO CLAVE AQUÍ!
+                // Restamos 1 al startBar porque el Compás 1 debe empezar en el segundo 0.0
+                double blockStartTime = (item.getStartBar() - 1) * secondsPerBar;
 
                 int stepsInRow = row.getStepCount();
 
@@ -61,6 +58,8 @@ public class AudioExporter {
                     if (stepData != null && stepData.isActive()) {
                         // El delay del step dentro del patrón
                         double stepDelay = i * secondsPerStep;
+
+                        // Tiempo absoluto donde debe sonar esta muestra de audio
                         double absTime = blockStartTime + stepDelay;
 
                         int startFrameIndex = (int) (absTime * SAMPLE_RATE);
