@@ -476,36 +476,43 @@ public class PrincipalController {
 
     private void updatePlayhead() {
         double bpm = GlobalState.getBpm();
-        // 1. Guardar posición ANTERIOR
         double oldX = currentPlayheadX;
-        // 2. Calcular NUEVA posición
-        // (BPM / 60) * CELL_WIDTH = Píxeles por segundo
-        // Dividimos entre 50 porque corremos a 50Hz (20ms)
+
+        // 1. La velocidad sigue igual.
+        // Si CELL_WIDTH (40px) es 1 Beat, a 120 BPM recorrerá 80 píxeles por segundo.
+        // Por lo tanto, tardará exactamente 2 segundos en recorrer 1 compás (160px). ¡Perfecto!
         double pixelsPerTick = ((bpm / 60.0) * CELL_WIDTH) / 50.0;
 
         currentPlayheadX += pixelsPerTick;
-        // 3. DETECCIÓN DE COLISIÓN (Trigger)
-        // Buscamos items que empiecen justo en el tramo que acabamos de recorrer [oldX, currentPlayheadX)
+
+        // 2. DETECCIÓN DE COLISIÓN (Trigger)
         checkCollisions(oldX, currentPlayheadX);
-        // 4. Loop (Vuelta al principio)
-        if (currentPlayheadX >= NUM_BARS * CELL_WIDTH) {
+
+        // 3. Loop (Vuelta al principio)
+        // ¡CAMBIO AQUÍ! El final del lienzo ahora es 4 veces más largo.
+        double totalWidth = NUM_BARS * (CELL_WIDTH * 4);
+        if (currentPlayheadX >= totalWidth) {
             currentPlayheadX = 0;
-            previousPlayheadX = 0; // Resetear para evitar disparos falsos
+            previousPlayheadX = 0;
         }
-        // 5. Actualizar visual
+
+        // 4. Actualizar visual
         playheadLine.setStartX(currentPlayheadX);
         playheadLine.setEndX(currentPlayheadX);
     }
 
     private void checkCollisions(double oldX, double newX) {
+        // Definimos visualmente cuánto mide el compás entero
+        double barWidth = CELL_WIDTH * 4;
+
         // Recorremos todos los bloques de la canción
         for (PlaylistItem item : songData) {
-            // Calculamos el píxel exacto donde empieza este bloque
-            // (startBar - 1) porque visualmente el compás 1 está en x=0
-            double itemStartX = (item.getStartBar() - 1) * CELL_WIDTH;
 
-            // ¿El inicio del bloque está dentro del tramo que hemos recorrido?
-            // Es decir: oldX <= inicio < newX
+            // ¡CAMBIO AQUÍ! Multiplicamos por barWidth
+            // Si startBar es 2, físicamente está en el píxel 160 (no en el 40)
+            double itemStartX = (item.getStartBar() - 1) * barWidth;
+
+            // ¿El inicio del bloque está dentro del tramo exacto que acabamos de recorrer?
             if (itemStartX >= oldX && itemStartX < newX) {
                 triggerPattern(item);
             }
@@ -669,7 +676,6 @@ public class PrincipalController {
         }
     }
 
-    // Tu método loadSampleToRack modificado ligeramente para aceptar File directo
     private void loadSampleToRack(File sampleFile) {
         ChannelRackController rack = GlobalState.getChannelRackController();
 
