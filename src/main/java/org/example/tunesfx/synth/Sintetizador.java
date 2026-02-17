@@ -200,10 +200,6 @@ public class Sintetizador {
         shouldGenerate = false;
     }
 
-    public void shutdownAudio() {
-        hiloAudio.close();
-    }
-
     // --- GETTERS & SETTERS (Con lógica para valores base) ---
 
     public Oscilator[] getOscillatorsFX() { return oscillators; }

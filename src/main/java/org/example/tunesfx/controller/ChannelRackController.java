@@ -162,11 +162,15 @@ public class ChannelRackController {
 
     @FXML
     private void handlePlayRitmo(ActionEvent event) {
-        if (isPlaying) stopSequencer();
+        if (isPlaying) {
+            stopSequencer();
+            btnEncenderRitmo.setStyle("-fx-background-color: #424242");
+        }
         else {
             if (allRows.isEmpty()) return;
             sequencerTimeline.play();
             isPlaying = true;
+            btnEncenderRitmo.setStyle("-fx-background-color: #797979");
         }
     }
 

@@ -1,5 +1,6 @@
 package org.example.tunesfx.controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -19,6 +20,8 @@ import java.util.List;
 
 public class ChannelRackRowController {
 
+    @FXML private Button playRowButtom;
+    @FXML private Button muteRowButtom;
     @FXML private Button deleteRowButton;
     @FXML private Label trackNameLabel;
     @FXML private Button stepBtn1, stepBtn2, stepBtn3, stepBtn4;
@@ -44,6 +47,7 @@ public class ChannelRackRowController {
     private Sample mySample;
 
     private Runnable deleteCallback;
+    private boolean mute = false;
 
     public static final int NUM_STEPS = 64;
 
@@ -530,5 +534,42 @@ public class ChannelRackRowController {
 
     public String getTrackName() {
         return trackNameLabel.getText();
+    }
+
+    public void handleMuteRow(ActionEvent actionEvent) {
+        if (mute) {
+            applyToAllSteps(d -> d.setVolume(1));
+            mute = false;
+            muteRowButtom.setStyle("-fx-text-fill: white; -fx-font-weight: bold;-fx-background-color: #041200");
+        } else {
+            applyToAllSteps(d -> d.setVolume(0));
+            mute = true;
+            muteRowButtom.setStyle("-fx-text-fill: black; -fx-font-weight: normal; -fx-background-color: #ffffff");
+        }
+    }
+
+    public void handlePlayRow(ActionEvent actionEvent) {
+        if (mySample == null || mySample.getData() == null) {
+            System.out.println("No hay sample cargado en esta fila.");
+            return;
+        }
+
+        // Usamos un hilo para no congelar la interfaz visual (UI Thread)
+        new Thread(() -> {
+            try {
+                // Opción A: Si tienes una clase SamplePlayer que acepta (short[] data, float pitch, float volume)
+                // Usamos un StepData por defecto para que suene al 100% y sin pitch
+                StepData previewData = new StepData();
+                previewData.setVolume(1.0);
+                previewData.setSemitoneOffset(0);
+
+                // Importante: Aquí debes llamar al método de reproducción de OpenAL que ya usas
+                // en el secuenciador principal.
+                org.example.tunesfx.audio.SamplePlayer.playStep(mySample, previewData,mySample.getData().length);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }
