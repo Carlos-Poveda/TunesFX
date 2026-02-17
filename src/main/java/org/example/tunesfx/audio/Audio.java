@@ -22,15 +22,8 @@ public class Audio extends Thread {
 
     public static final int BUFFER_SIZE = 512;
     static final int BUFFER_COUNT = 8;
-
     private final Supplier<short[]> bufferSupplier;
     private final int[] buffers = new int[BUFFER_COUNT];
-
-    // Recursos estáticos
-//    private static long device;
-//    private static long context;
-//    private static volatile boolean openALInitialized = false;
-
     private int source;
     private volatile boolean closed;
     private volatile boolean running;
@@ -41,8 +34,6 @@ public class Audio extends Thread {
     }
 
     private void initAudio() {
-        // Ya no necesitamos el bloque synchronized (Audio.class) ni alcCreateContext
-
         source = alGenSources();
         catchInternalException();
 
@@ -66,7 +57,7 @@ public class Audio extends Thread {
     }
 
     @Override
-    public void run() { // <-- Quitamos el synchronized global
+    public void run() {
         initAudio();
 
         while (!closed) {
@@ -85,7 +76,6 @@ public class Audio extends Thread {
                     reconnectAudio();
                     continue; // Volvemos al inicio del bucle tras recuperar
                 }
-
                 // Procesamiento de buffers normal
                 int processedBufs = alGetSourcei(source, AL_BUFFERS_PROCESSED);
                 for (int i = 0; i < processedBufs; ++i) {
@@ -125,7 +115,7 @@ public class Audio extends Thread {
             alcGetIntegerv(AudioEngine.getDevice(), EXTDisconnect.ALC_CONNECTED, connected);
             return connected[0] != ALC_FALSE;
         } catch (Exception e) {
-            return false; // Ante la duda, forzamos reinicio
+            return false;
         }
     }
 
@@ -133,8 +123,6 @@ public class Audio extends Thread {
     private void reconnectAudio() {
         initialized = false;
         cleanupResources();
-
-        // En lugar de apagar todo aquí, le pedimos al motor global que se reinicie
         AudioEngine.destroy();
         try {
             Thread.sleep(500);
@@ -158,26 +146,8 @@ public class Audio extends Thread {
 
     public synchronized void triggerPlayBack() {
         running = true;
-        notifyAll(); // Usar notifyAll es más seguro en hilos
-    }
-
-    public synchronized void close() {
-        closed = true;
-        running = true;
         notifyAll();
     }
-
-//    public static synchronized void shutdownOpenAL() {
-//        if (openALInitialized) {
-//            alcMakeContextCurrent(0L); // Importante: desvincular contexto primero
-//            if (context != 0L) alcDestroyContext(context);
-//            if (device != 0L) alcCloseDevice(device);
-//            openALInitialized = false;
-//            context = 0L;
-//            device = 0L;
-//            System.out.println("Contexto OpenAL destruido.");
-//        }
-//    }
 
     private void catchInternalException() {
         int err = alGetError();

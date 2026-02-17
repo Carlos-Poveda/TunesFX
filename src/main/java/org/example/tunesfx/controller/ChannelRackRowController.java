@@ -275,8 +275,6 @@ public class ChannelRackRowController {
         // Obtenemos los datos del primer paso para poner los valores iniciales de los sliders
         StepData referenceData = (StepData) stepBtn1.getUserData();
 
-        // --- ACCIONES DE GESTIÓN (Enviar a Playlist) ---
-
         // 1. Botón Enviar a Playlist
         MenuItem sendToPlaylistItem = new MenuItem("Send to Playlist as Pattern");
 
@@ -553,18 +551,11 @@ public class ChannelRackRowController {
             System.out.println("No hay sample cargado en esta fila.");
             return;
         }
-
-        // Usamos un hilo para no congelar la interfaz visual (UI Thread)
         new Thread(() -> {
             try {
-                // Opción A: Si tienes una clase SamplePlayer que acepta (short[] data, float pitch, float volume)
-                // Usamos un StepData por defecto para que suene al 100% y sin pitch
                 StepData previewData = new StepData();
                 previewData.setVolume(1.0);
                 previewData.setSemitoneOffset(0);
-
-                // Importante: Aquí debes llamar al método de reproducción de OpenAL que ya usas
-                // en el secuenciador principal.
                 org.example.tunesfx.audio.SamplePlayer.playStep(mySample, previewData,mySample.getData().length);
 
             } catch (Exception e) {

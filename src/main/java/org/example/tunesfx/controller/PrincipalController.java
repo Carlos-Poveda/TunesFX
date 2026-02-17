@@ -240,7 +240,7 @@ public class PrincipalController {
             trackLabel.setStyle("-fx-text-fill: #aaaaaa; -fx-background-color: " + bg + "; -fx-border-color: #1A1A1A; -fx-border-width: 0 0 1 0;");
             // Menú contextual para el track
             ContextMenu trackMenu = new ContextMenu();
-            MenuItem renameItem = new MenuItem("Renombrar Pista");
+            MenuItem renameItem = new MenuItem("Rename track");
 
             renameItem.setOnAction(e -> {
                 TextInputDialog dialog = new TextInputDialog(trackLabel.getText());
@@ -411,18 +411,21 @@ public class PrincipalController {
                 double barWidth = CELL_WIDTH * 4;
 
                 if (isResizing) {
-                    // Ajustar ANCHO a la rejilla de COMPASES
+                    // Ajustar ANCHO a la rejilla de BEATS en lugar de compases enteros
                     double currentWidth = clipContainer.getPrefWidth();
-                    int numBars = (int) Math.round(currentWidth / barWidth);
-                    if (numBars < 1) numBars = 1; // Mínimo 1 compás
 
-                    double snappedWidth = numBars * barWidth;
+                    // Calculamos cuántos "beats" (celdas individuales) ocupa
+                    int numBeats = (int) Math.round(currentWidth / CELL_WIDTH);
+                    if (numBeats < 1) numBeats = 1; // Mínimo 1 beat de ancho
+
+                    // Redimensionamos visualmente el clip
+                    double snappedWidth = numBeats * CELL_WIDTH;
                     clipContainer.setPrefWidth(snappedWidth);
                     clipContainer.setMinWidth(snappedWidth);
                     clipContainer.setMaxWidth(snappedWidth);
 
-                    // Actualizar lógica
-                    item.setDurationBars(numBars);
+                    // ACTUALIZAR LÓGICA: Si 4 beats son 1 compás, la duración es numBeats / 4.0
+                    item.setDurationBars(numBeats / 4.0);
 
                 } else {
                     // Ajustar POSICIÓN a la rejilla de COMPASES
@@ -508,14 +511,27 @@ public class PrincipalController {
         // Recorremos todos los bloques de la canción
         for (PlaylistItem item : songData) {
 
-            // ¡CAMBIO AQUÍ! Multiplicamos por barWidth
-            // Si startBar es 2, físicamente está en el píxel 160 (no en el 40)
             double itemStartX = (item.getStartBar() - 1) * barWidth;
+            // Calculamos dónde termina exactamente este bloque usando la duración precisa
+            double itemEndX = itemStartX + (item.getDurationBars() * barWidth);
 
-            // ¿El inicio del bloque está dentro del tramo exacto que acabamos de recorrer?
+            // ¿El playhead acaba de ENTRAR en el bloque? -> PLAY
             if (itemStartX >= oldX && itemStartX < newX) {
                 triggerPattern(item);
             }
+
+            // ¿El playhead acaba de SALIR del bloque? -> STOP
+            if (itemEndX >= oldX && itemEndX < newX) {
+                stopPattern(item);
+            }
+        }
+    }
+
+    // NUEVO MÉTODO PARA PARAR EL PATRÓN
+    private void stopPattern(PlaylistItem item) {
+        ChannelRackController rack = GlobalState.getChannelRackController();
+        if (rack != null) {
+            rack.stopSoundByName(item.getPatternName());
         }
     }
 
@@ -532,7 +548,7 @@ public class PrincipalController {
         patternListView.setCellFactory(lv -> {
             ListCell<String> cell = new ListCell<>();
             ContextMenu contextMenu = new ContextMenu();
-            MenuItem deleteItem = new MenuItem("Eliminar Patrón");
+            MenuItem deleteItem = new MenuItem("Delete pattern");
             deleteItem.setStyle("-fx-text-fill: #ff5555;");
             deleteItem.setOnAction(event -> {
                 String itemToRemove = cell.getItem();
@@ -553,7 +569,7 @@ public class PrincipalController {
             return cell;
         });
     }
-    // Mét0do para exportar a wav
+    // Método para exportar a wav
     @FXML
     private void handleExportWav(ActionEvent event) {
         // 1. Abrir diálogo para elegir dónde guardar
@@ -597,7 +613,6 @@ public class PrincipalController {
     }
 
     // Librería de samples
-
     private void setupLibrary() {
         // 1. Ruta Raíz
         File rootDir = new File("src/main/resources/samples");
