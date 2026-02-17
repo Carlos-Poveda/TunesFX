@@ -27,9 +27,9 @@ public class Audio extends Thread {
     private final int[] buffers = new int[BUFFER_COUNT];
 
     // Recursos estáticos
-    private static long device;
-    private static long context;
-    private static volatile boolean openALInitialized = false;
+//    private static long device;
+//    private static long context;
+//    private static volatile boolean openALInitialized = false;
 
     private int source;
     private volatile boolean closed;
@@ -41,17 +41,7 @@ public class Audio extends Thread {
     }
 
     private void initAudio() {
-        synchronized (Audio.class) {
-            if (!openALInitialized) {
-                // Abrimos el dispositivo por defecto actual
-                device = alcOpenDevice(alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER));
-                context = alcCreateContext(device, new int[1]);
-                alcMakeContextCurrent(context);
-
-                AL.createCapabilities(ALC.createCapabilities(device));
-                openALInitialized = true;
-            }
-        }
+        // Ya no necesitamos el bloque synchronized (Audio.class) ni alcCreateContext
 
         source = alGenSources();
         catchInternalException();
@@ -61,6 +51,7 @@ public class Audio extends Thread {
 
         for (int i = 0; i < BUFFER_COUNT; i++) {
             int buf = buffers[i];
+            // Cargamos buffers vacíos iniciales
             AL10.alBufferData(buf, AL_FORMAT_MONO16, new short[0], Sintetizador.AudioInfo.SAMPLE_RATE);
             alSourceQueueBuffers(source, buf);
         }
@@ -89,7 +80,7 @@ public class Audio extends Thread {
                 if (closed) break;
 
                 // --- 1. DETECTAR DESCONEXIÓN ACTIVAMENTE ---
-                if (openALInitialized && !isDeviceConnected()) {
+                if (AudioEngine.isInitialized() && !isDeviceConnected()) {
                     System.out.println("Dispositivo de audio desconectado. Reconectando...");
                     reconnectAudio();
                     continue; // Volvemos al inicio del bucle tras recuperar
@@ -131,7 +122,7 @@ public class Audio extends Thread {
     private boolean isDeviceConnected() {
         try {
             int[] connected = new int[1];
-            alcGetIntegerv(device, EXTDisconnect.ALC_CONNECTED, connected);
+            alcGetIntegerv(AudioEngine.getDevice(), EXTDisconnect.ALC_CONNECTED, connected);
             return connected[0] != ALC_FALSE;
         } catch (Exception e) {
             return false; // Ante la duda, forzamos reinicio
@@ -141,20 +132,17 @@ public class Audio extends Thread {
     // Realiza un reseteo completo en caliente (Hot Swap)
     private void reconnectAudio() {
         initialized = false;
-
-        // Limpiamos todo rastro del dispositivo roto
         cleanupResources();
-        shutdownOpenAL();
 
-        // Pausa clave: le damos tiempo al SO para que asigne
-        // los altavoces o auriculares nuevos como salida principal
+        // En lugar de apagar todo aquí, le pedimos al motor global que se reinicie
+        AudioEngine.destroy();
         try {
-            Thread.sleep(1000);
+            Thread.sleep(500);
         } catch (InterruptedException ignored) {}
+        AudioEngine.init();
 
-        // Volvemos a inicializar con la nueva salida
         initAudio();
-        System.out.println("Audio reconectado con éxito.");
+        System.out.println("Audio reconectado mediante AudioEngine.");
     }
 
     private void cleanupResources() {
@@ -179,17 +167,17 @@ public class Audio extends Thread {
         notifyAll();
     }
 
-    public static synchronized void shutdownOpenAL() {
-        if (openALInitialized) {
-            alcMakeContextCurrent(0L); // Importante: desvincular contexto primero
-            if (context != 0L) alcDestroyContext(context);
-            if (device != 0L) alcCloseDevice(device);
-            openALInitialized = false;
-            context = 0L;
-            device = 0L;
-            System.out.println("Contexto OpenAL destruido.");
-        }
-    }
+//    public static synchronized void shutdownOpenAL() {
+//        if (openALInitialized) {
+//            alcMakeContextCurrent(0L); // Importante: desvincular contexto primero
+//            if (context != 0L) alcDestroyContext(context);
+//            if (device != 0L) alcCloseDevice(device);
+//            openALInitialized = false;
+//            context = 0L;
+//            device = 0L;
+//            System.out.println("Contexto OpenAL destruido.");
+//        }
+//    }
 
     private void catchInternalException() {
         int err = alGetError();

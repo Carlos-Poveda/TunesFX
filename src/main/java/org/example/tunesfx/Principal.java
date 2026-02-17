@@ -8,13 +8,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.example.tunesfx.audio.Audio;
+import org.example.tunesfx.audio.AudioEngine;
 
 import java.io.InputStream;
 
 public class Principal extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        
+        AudioEngine.init();
         // Cargar fuente principal
         InputStream fontStream = getClass().getResourceAsStream("/fonts/RobotoMono-VariableFont_wght.ttf");
         if (fontStream != null) {
@@ -69,7 +70,7 @@ public class Principal extends Application {
 
     @Override
     public void stop() throws Exception {
-        Audio.shutdownOpenAL();
+        AudioEngine.destroy();
     }
 
     public static void main(String[] args) {

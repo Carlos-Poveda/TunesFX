@@ -261,6 +261,6 @@ public class SintetizadorController {
     }
 
     public void shutdown() {
-        logic.shutdownAudio();
+//        logic.shutdownAudio();
     }
 }

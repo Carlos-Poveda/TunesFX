@@ -2,7 +2,6 @@ package org.example.tunesfx;
 
 import javafx.application.Application;
 
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Launcher extends Application {
