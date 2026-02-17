@@ -44,6 +44,7 @@ public class ChannelRackController {
     private static final int NUM_STEPS = ChannelRackRowController.NUM_STEPS;
     private int currentStep = -1;
     private List<ChannelRackRowController> allRows = new ArrayList<>();
+    private java.util.Map<ChannelRackRowController, List<PauseTransition>> activeSchedulers = new java.util.HashMap<>();
 
     @FXML
     public void initialize() {
@@ -197,43 +198,59 @@ public class ChannelRackController {
         System.out.println("No se encontró la pista: " + rowName);
     }
 
+    // Busca una fila por nombre y detiene su reproducción
+    public void stopSoundByName(String rowName) {
+        for (ChannelRackRowController row : allRows) {
+            if (row.getTrackName().equals(rowName)) {
+                // Aquí llamaremos al método que cancela el audio
+                stopPatternPlayback(row);
+                return;
+            }
+        }
+    }
+
     private void schedulePatternPlayback(ChannelRackRowController row) {
         double bpm = GlobalState.getBpm();
-        // Duración de un paso en milisegundos: (60000 / BPM) / 4 semicorcheas
         double stepDurationMillis = (60000.0 / bpm) / 4.0;
-
         Sample sample = row.getSample();
         if (sample == null) return;
 
-        // Recorremos todos los pasos de la fila
+        // Preparamos la lista para esta fila
+        List<PauseTransition> rowTransitions = new ArrayList<>();
+        activeSchedulers.put(row, rowTransitions);
+
         for (int i = 0; i < row.getStepCount(); i++) {
-
-            // Usamos el nuevo método que creamos en el paso anterior
-            // para obtener los datos REALES (incluyendo pitch/volumen)
             StepData stepData = row.getCombinedStepData(i);
-
-            // Si el paso está activo, lo programamos
             if (stepData != null && stepData.isActive()) {
-
-                // Calculamos cuándo debe sonar este paso
-                // El paso 0 suena en 0ms, el paso 1 en stepDuration, el 2 en 2*stepDuration...
                 double delay = i * stepDurationMillis;
-
-                // Creamos un "temporizador" desechable solo para este disparo
                 PauseTransition scheduler = new PauseTransition(Duration.millis(delay));
 
-                // Necesitamos una variable final para usarla dentro del lambda
+                rowTransitions.add(scheduler); // <--- REGISTRAMOS
+
                 final StepData finalStepData = stepData;
-
                 scheduler.setOnFinished(e -> {
-                    // Reproducir usando los datos correctos
-                    // NOTA: Pasamos stepDurationMillis para que el audio engine sepa cuánto dura el hueco
                     SamplePlayer.playStep(sample, finalStepData, stepDurationMillis);
+                    rowTransitions.remove(scheduler); // Limpieza al terminar
                 });
-
                 scheduler.play();
             }
         }
+    }
+
+    private void stopPatternPlayback(ChannelRackRowController row) {
+        // 1. Cancelar todos los temporizadores pendientes (evita que suenen pasos futuros)
+        List<PauseTransition> transitions = activeSchedulers.get(row);
+        if (transitions != null) {
+            for (PauseTransition pt : transitions) {
+                pt.stop();
+            }
+            transitions.clear();
+            activeSchedulers.remove(row);
+        }
+
+        // 2. Detener el audio que esté sonando actualmente en esa fila
+        // Para esto, necesitamos que SamplePlayer sepa qué fuente detener.
+        SamplePlayer.stopSample(row.getSample());
     }
 
     public void addTrackFromLibrary(String name, File audioFile) {

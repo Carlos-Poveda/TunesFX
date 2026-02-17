@@ -114,6 +114,7 @@ public class PrincipalController {
             Stage synthStage = new Stage();
             setWindowIcon(synthStage);
             Scene synthScene = new Scene(synthRoot);
+            synthStage.setAlwaysOnTop(true);
 
             synthScene.setOnKeyPressed(synthController::handleKeyPressed);
             synthScene.setOnKeyReleased(synthController::handleKeyReleased);
@@ -123,6 +124,8 @@ public class PrincipalController {
 //            synthStage.initStyle(StageStyle.UNDECORATED);
             synthStage.setScene(synthScene);
             synthStage.setResizable(false);
+            synthStage.setX(1050);
+            synthStage.setY(255);
             synthStage.show();
 
         } catch (IOException e) {
@@ -142,6 +145,8 @@ public class PrincipalController {
                 rackStage = new Stage();
                 setWindowIcon(rackStage);
                 Scene rackScene = new Scene(rackRoot);
+                rackStage.setAlwaysOnTop(true);
+
 
                 String css = this.getClass().getResource("/org/example/tunesfx/styles.css").toExternalForm();
                 rackScene.getStylesheets().add(css);
@@ -152,6 +157,8 @@ public class PrincipalController {
 //                rackStage.initStyle(StageStyle.UNDECORATED);
                 rackStage.setScene(rackScene);
                 rackStage.setResizable(false);
+                rackStage.setY(150);
+                rackStage.setX(270);
 
                 rackStage.setOnCloseRequest(e -> {
                     rackController.shutdown();
