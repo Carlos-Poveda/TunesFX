@@ -684,6 +684,9 @@ public class PrincipalController {
 
             rack.addTrackFromLibrary(trackName, sampleFile);
             System.out.println("Sample añadido: " + trackName);
+        } else {
+            openChannelRackButton.fire();
+            loadSampleToRack(sampleFile);
         }
     }
 
