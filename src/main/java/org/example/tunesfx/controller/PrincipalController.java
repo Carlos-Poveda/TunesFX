@@ -12,7 +12,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -114,18 +113,17 @@ public class PrincipalController {
             Stage synthStage = new Stage();
             setWindowIcon(synthStage);
             Scene synthScene = new Scene(synthRoot);
-            synthStage.setAlwaysOnTop(true);
+//            synthStage.setAlwaysOnTop(true);
 
             synthScene.setOnKeyPressed(synthController::handleKeyPressed);
             synthScene.setOnKeyReleased(synthController::handleKeyReleased);
-            synthStage.setOnCloseRequest(e -> synthController.shutdown());
 
             synthStage.setTitle("Synth");
 //            synthStage.initStyle(StageStyle.UNDECORATED);
             synthStage.setScene(synthScene);
             synthStage.setResizable(false);
-            synthStage.setX(1050);
-            synthStage.setY(255);
+//            synthStage.setX(1050);
+//            synthStage.setY(255);
             synthStage.show();
 
         } catch (IOException e) {
@@ -534,7 +532,7 @@ public class PrincipalController {
         }
     }
 
-    // NUEVO MÉTODO PARA PARAR EL PATRÓN
+    // MÉTODO PARA PARAR EL PATRÓN
     private void stopPattern(PlaylistItem item) {
         ChannelRackController rack = GlobalState.getChannelRackController();
         if (rack != null) {
@@ -705,7 +703,7 @@ public class PrincipalController {
             String trackName = fileName.replace(".wav", "");
 
             rack.addTrackFromLibrary(trackName, sampleFile);
-            System.out.println("Sample añadido: " + trackName);
+//            System.out.println("Sample añadido: " + trackName);
         } else {
             openChannelRackButton.fire();
             loadSampleToRack(sampleFile);
