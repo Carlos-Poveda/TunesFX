@@ -22,7 +22,7 @@ public class AudioExporter {
         // 1. Duración de un solo tiempo (una negra)
         double secondsPerBeat = 60.0 / bpm;
 
-        // 2. ¡NUEVA ESCALA! Tu rejilla ahora representa compases enteros (4 negras)
+        // 2. La rejilla representa compases enteros (4 negras)
         double secondsPerBar = secondsPerBeat * 4.0;
 
         // 3. Duración de un paso (Step) del Channel Rack (1 paso = 0.25 beats)
@@ -46,9 +46,12 @@ public class AudioExporter {
                 float[] sourceAudio = convertSampleToFloat(row.getSample());
                 if (sourceAudio == null) continue;
 
-                // ¡CAMBIO CLAVE AQUÍ!
-                // Restamos 1 al startBar porque el Compás 1 debe empezar en el segundo 0.0
                 double blockStartTime = (item.getStartBar() - 1) * secondsPerBar;
+
+                // Calculamos cuándo termina visualmente este bloque
+                double blockEndTime = blockStartTime + (item.getDurationBars() * secondsPerBar);
+                // Convertimos ese tiempo de fin a índices del array (multiplicado por 2 por el Estéreo)
+                int blockEndFrameIndex = (int) (blockEndTime * SAMPLE_RATE) * CHANNELS;
 
                 int stepsInRow = row.getStepCount();
 
@@ -56,11 +59,13 @@ public class AudioExporter {
                     StepData stepData = row.getCombinedStepData(i);
 
                     if (stepData != null && stepData.isActive()) {
-                        // El delay del step dentro del patrón
                         double stepDelay = i * secondsPerStep;
-
-                        // Tiempo absoluto donde debe sonar esta muestra de audio
                         double absTime = blockStartTime + stepDelay;
+
+                        // Si este paso empieza DESPUÉS de que el bloque haya terminado, lo ignoramos por completo.
+                        if (absTime >= blockEndTime) {
+                            continue;
+                        }
 
                         int startFrameIndex = (int) (absTime * SAMPLE_RATE);
                         int bufferIndex = startFrameIndex * CHANNELS;
@@ -68,7 +73,9 @@ public class AudioExporter {
                         float pitchFactor = (float) Math.pow(2, stepData.getSemitoneOffset() / 12.0);
                         float volume = (float) stepData.getVolume();
 
-                        mixSampleWithResampling(mixBuffer, bufferIndex, sourceAudio, pitchFactor, stepData);                    }
+                        // Le pasamos el límite exacto al mezclador
+                        mixSampleWithResampling(mixBuffer, bufferIndex, sourceAudio, pitchFactor, stepData, blockEndFrameIndex);
+                    }
                 }
             }
         }
@@ -76,7 +83,7 @@ public class AudioExporter {
         saveToFile(outputFile, mixBuffer, totalFrames);
     }
 
-    private static void mixSampleWithResampling(float[] mixBuffer, int startIndex, float[] source, float speed, StepData stepData) {
+    private static void mixSampleWithResampling(float[] mixBuffer, int startIndex, float[] source, float speed, StepData stepData, int blockEndFrameIndex) {
         // 1. Extraer los parámetros de tu diseño de sonido
         float volume = (float) stepData.getVolume();
         float pan = (float) stepData.getPan();
@@ -102,6 +109,11 @@ public class AudioExporter {
 
         // El salto es de 2 en 2 porque el buffer final es Estéreo (i = Izquierda, i+1 = Derecha)
         for (int i = startIndex; i < mixBuffer.length; i += 2) {
+
+            // NUEVO: Guillotina. Si el índice actual supera el final del bloque visual, paramos de escribir.
+            if (i >= blockEndFrameIndex) {
+                break;
+            }
 
             // Si llegamos a la duración recortada, dejamos de pintar el sonido
             if (readIndex >= targetSamples || i + 1 >= mixBuffer.length) {
