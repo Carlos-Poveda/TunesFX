@@ -1,98 +1,150 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Spinner?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Pane?>
 
+<?import org.example.tunesfx.controller.PianoComponent?>
 <?import org.example.tunesfx.synth.Oscilator?>
 <?import org.example.tunesfx.synth.WaveViewer?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.control.Button?>
 
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Slider?>
-<Pane fx:id="rootPane" prefHeight="680.0" prefWidth="775.0" style="-fx-background-color: black;"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.tunesfx.controller.SintetizadorController">
-    <children>
+<BorderPane fx:id="rootPane" prefHeight="800.0" prefWidth="1280.0" styleClass="synth-background" stylesheets="@styles.css"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.tunesfx.controller.SintetizadorController">
 
-        <Oscilator fx:id="oscilador1" layoutX="15.0" layoutY="10.0" />
-        <Oscilator fx:id="oscilador2" layoutX="15.0" layoutY="75.0" />
-        <Oscilator fx:id="oscilador3" layoutX="15.0" layoutY="140.0" />
-        <Oscilator fx:id="oscilador4" layoutX="15.0" layoutY="205.0" />
-        <Oscilator fx:id="oscilador5" layoutX="15.0" layoutY="270.0" />
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-padding: 10 20; -fx-background-color: #15161a;">
+            <Label text="VITALITY SYNTH // PRO EDITION" textFill="WHITE" style="-fx-font-weight: 900; -fx-font-size: 16px;"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <HBox spacing="10" alignment="CENTER">
+                <Spinner fx:id="sampleLengthSpinner" editable="true" prefWidth="70.0" styleClass="synth-combo"/>
+                <Button fx:id="guardarSample" text="EXPORT WAV" styleClass="save-btn"/>
+                <Button text="PIANO ROLL" onAction="#handleOpenPianoRoll" styleClass="save-btn" style="-fx-background-color: #d500f9;"/>
+            </HBox>
+        </HBox>
+    </top>
 
-        <WaveViewer fx:id="waveViewer" layoutX="440.0" layoutY="10.0" />
+    <center>
+        <GridPane hgap="15" vgap="15" style="-fx-padding: 20;">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="28"/> <ColumnConstraints percentWidth="38"/> <ColumnConstraints percentWidth="34"/> </columnConstraints>
+            <rowConstraints>
+                <RowConstraints percentHeight="50"/> <RowConstraints percentHeight="50"/> </rowConstraints>
 
+            <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.rowSpan="2" styleClass="module-panel">
+                <Label text="OSCILLATORS" styleClass="module-header, accent-bar-orange"/>
+                <Oscilator fx:id="oscilador1" />
+                <Oscilator fx:id="oscilador2" />
+                <Oscilator fx:id="oscilador3" />
+                <Oscilator fx:id="oscilador4" />
+                <Oscilator fx:id="oscilador5" />
+            </VBox>
 
+            <VBox styleClass="module-panel" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <Label text="SPECTRAL WAVEFORM" styleClass="module-header, accent-bar-cyan"/>
+                <WaveViewer fx:id="waveViewer" VBox.vgrow="ALWAYS"/>
+            </VBox>
 
-        <!-- Panel de Filtro -->
-        <VBox layoutX="210.0" layoutY="335.0" spacing="10" style="-fx-background-color: #000; -fx-border-color: #fff; -fx-border-width: 1; -fx-padding: 10;" prefWidth="220">
-            <Label text="FILTER" textFill="white" style="-fx-font-weight: bold;"/>
+            <VBox styleClass="module-panel" spacing="10" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="DELAY FX" styleClass="module-header, accent-bar-cyan" HBox.hgrow="ALWAYS"/>
+                    <ToggleButton fx:id="delayToggleButton" text="ON" styleClass="synth-toggle"/>
+                </HBox>
 
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <ToggleButton fx:id="filterToggleButton" text="On/Off" textFill="white" style="-fx-background-color: #333;"/>
-                <ComboBox fx:id="filterTypeCombo" prefWidth="120"/>
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+                    <VBox GridPane.columnIndex="0"><Label text="TIME" styleClass="osc-label"/><Slider fx:id="delayTimeSlider" styleClass="synth-slider, slider-cyan"/><Label fx:id="delayTimeLabel" text="0.5s" styleClass="osc-value"/></VBox>
+                    <VBox GridPane.columnIndex="1"><Label text="FEEDBACK" styleClass="osc-label"/><Slider fx:id="delayFeedbackSlider" styleClass="synth-slider, slider-cyan"/><Label fx:id="delayFeedbackLabel" text="50%" styleClass="osc-value"/></VBox>
+                    <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2"><Label text="DRY/WET MIX" styleClass="osc-label"/><Slider fx:id="delayMixSlider" styleClass="synth-slider, slider-cyan"/><Label fx:id="delayMixLabel" text="40%" styleClass="osc-value"/></VBox>
+                </GridPane>
+            </VBox>
+
+            <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
+
+                <VBox styleClass="module-panel" HBox.hgrow="ALWAYS" spacing="8">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="FILTER" styleClass="module-header, accent-bar-purple" HBox.hgrow="ALWAYS"/>
+                        <ToggleButton fx:id="filterToggleButton" text="ON" styleClass="synth-toggle"/>
+                    </HBox>
+
+                    <ComboBox fx:id="filterPresetsCombo" promptText="Preset" maxWidth="Infinity" styleClass="synth-combo"/>
+
+                    <VBox spacing="2">
+                        <Label text="MODE" styleClass="osc-label"/>
+                        <ComboBox fx:id="filterTypeCombo" maxWidth="Infinity" styleClass="synth-combo"/>
+                    </VBox>
+
+                    <HBox spacing="15" alignment="CENTER" VBox.vgrow="ALWAYS">
+                        <VBox alignment="CENTER" spacing="2">
+                            <Label fx:id="filterCutoffLabel" text="1000 Hz" styleClass="osc-value"/>
+                            <Slider fx:id="filterCutoffSlider" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="synth-slider, slider-vertical"/>
+                            <Label text="CUTOFF" styleClass="osc-label"/>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="2">
+                            <Label fx:id="filterResonanceLabel" text="0.5" styleClass="osc-value"/>
+                            <Slider fx:id="filterResonanceSlider" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="synth-slider, slider-vertical"/>
+                            <Label text="RES" styleClass="osc-label"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <VBox styleClass="module-panel" HBox.hgrow="ALWAYS" spacing="8">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="LFO 1" styleClass="module-header, accent-bar-green" HBox.hgrow="ALWAYS"/>
+                        <ToggleButton fx:id="lfoToggleButton" text="ON" styleClass="synth-toggle"/>
+                    </HBox>
+
+                    <ComboBox fx:id="lfoPresetsCombo" promptText="Preset" maxWidth="Infinity" styleClass="synth-combo"/>
+
+                    <HBox spacing="5">
+                        <VBox spacing="2" HBox.hgrow="ALWAYS"><Label text="SHAPE" styleClass="osc-label"/><ComboBox fx:id="lfoWaveformCombo" maxWidth="Infinity" styleClass="synth-combo"/></VBox>
+                        <VBox spacing="2" HBox.hgrow="ALWAYS"><Label text="DEST" styleClass="osc-label"/><ComboBox fx:id="lfoTargetCombo" maxWidth="Infinity" styleClass="synth-combo"/></VBox>
+                    </HBox>
+
+                    <HBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS">
+                        <VBox alignment="CENTER" spacing="2">
+                            <Label fx:id="lfoRateLabel" text="1.0 Hz" styleClass="osc-value"/>
+                            <Slider fx:id="lfoRateSlider" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="synth-slider, slider-vertical"/>
+                            <Label text="RATE" styleClass="osc-label"/>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="2">
+                            <Label fx:id="lfoAmountLabel" text="0.5" styleClass="osc-value"/>
+                            <Slider fx:id="lfoAmountSlider" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="synth-slider, slider-vertical"/>
+                            <Label text="AMT" styleClass="osc-label"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
             </HBox>
 
-            <VBox spacing="5">
-                <Label text="Cutoff Frequency" textFill="white"/>
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Slider fx:id="filterCutoffSlider" prefWidth="150"/>
-                    <Label fx:id="filterCutoffLabel" text="1000 Hz" textFill="white" minWidth="60"/>
+            <VBox styleClass="module-panel" spacing="5" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                <Label text="ENVELOPE 1 (ADSR)" styleClass="module-header, accent-bar-cyan"/>
+                <HBox spacing="15" alignment="CENTER" VBox.vgrow="ALWAYS">
+                    <VBox alignment="CENTER" spacing="5" HBox.hgrow="ALWAYS"><Slider fx:id="adsrAttackSlider" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="synth-slider, slider-vertical"/><Label text="A" styleClass="osc-label"/></VBox>
+                    <VBox alignment="CENTER" spacing="5" HBox.hgrow="ALWAYS"><Slider fx:id="adsrDecaySlider" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="synth-slider, slider-vertical"/><Label text="D" styleClass="osc-label"/></VBox>
+                    <VBox alignment="CENTER" spacing="5" HBox.hgrow="ALWAYS"><Slider fx:id="adsrSustainSlider" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="synth-slider, slider-vertical"/><Label text="S" styleClass="osc-label"/></VBox>
+                    <VBox alignment="CENTER" spacing="5" HBox.hgrow="ALWAYS"><Slider fx:id="adsrReleaseSlider" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="synth-slider, slider-vertical"/><Label text="R" styleClass="osc-label"/></VBox>
                 </HBox>
             </VBox>
 
-            <VBox spacing="5">
-                <Label text="Resonance" textFill="white"/>
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Slider fx:id="filterResonanceSlider" prefWidth="150"/>
-                    <Label fx:id="filterResonanceLabel" text="0.50" textFill="white" minWidth="40"/>
-                </HBox>
-            </VBox>
-        </VBox>
+        </GridPane>
+    </center>
 
-        <!-- Panel de LFO -->
-        <VBox layoutX="15.0" layoutY="335.0" spacing="10" style="-fx-background-color: #000; -fx-border-color: #fff; -fx-border-width: 1; -fx-padding: 10;" prefWidth="190">
-            <Label text="LFO" textFill="white" style="-fx-font-weight: bold;"/>
+    <bottom>
+        <PianoComponent fx:id="pianoComponent" alignment="CENTER"/>
+    </bottom>
 
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <ToggleButton fx:id="lfoToggleButton" text="On/Off" textFill="white" style="-fx-background-color: #333;"/>
-            </HBox>
-
-            <VBox spacing="5">
-                <Label text="Waveform" textFill="white"/>
-                <ComboBox fx:id="lfoWaveformCombo" prefWidth="150"/>
-            </VBox>
-
-            <VBox spacing="5">
-                <Label text="Target" textFill="white"/>
-                <ComboBox fx:id="lfoTargetCombo" prefWidth="150"/>
-            </VBox>
-
-            <VBox spacing="5">
-                <Label text="Rate" textFill="white"/>
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Slider fx:id="lfoRateSlider" prefWidth="150"/>
-                    <Label fx:id="lfoRateLabel" text="1.0 Hz" textFill="white" minWidth="50"/>
-                </HBox>
-            </VBox>
-
-            <VBox spacing="5">
-                <Label text="Amount" textFill="white"/>
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Slider fx:id="lfoAmountSlider" prefWidth="150"/>
-                    <Label fx:id="lfoAmountLabel" text="0.50" textFill="white" minWidth="40"/>
-                </HBox>
-            </VBox>
-        </VBox>
-
-        <!-- Botón Guardar Sample -->
-        <Button fx:id="guardarSample" layoutX="450.0" layoutY="410.0" text="Save Sample"
-                style="-fx-background-color: #fff; -fx-text-fill: black;" prefWidth="120"/>
-        <Label layoutX="450.0" layoutY="370.0" text="Length (s):" textFill="WHITE"/>
-        <Spinner fx:id="sampleLengthSpinner" editable="true" layoutX="520.0" layoutY="370.0" prefWidth="80.0" />
-    </children>
-</Pane>
+</BorderPane>

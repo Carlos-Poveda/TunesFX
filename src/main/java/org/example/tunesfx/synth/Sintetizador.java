@@ -2,48 +2,36 @@ package org.example.tunesfx.synth;
 
 import org.example.tunesfx.audio.Audio;
 import org.example.tunesfx.utils.Utils;
-
 import java.util.HashMap;
 
 public class Sintetizador {
 
     private static final HashMap<Character,Double> KEY_FREQUENCIES = new HashMap<>();
-    private boolean shouldGenerate;
-    private static final int NUM_OSCILLATORS = 5;
+    private static final int MAX_VOICES = 16;
 
-    // --- Componentes ---
-    private Oscilator[] oscillators;
+    private Oscilator[] uiOscillators;
     private WaveViewer waveViewer;
-    private Filter filtro;
+    private Filter filtroGlobal;
     private LFO lfo;
+    private DelayUnit delay;
 
-    // --- Estados ---
-    private boolean filtroActivado = false; // Por defecto false para coincidir con UI
+    private final Voice[] voices = new Voice[MAX_VOICES];
+
+    // Estados
+    private boolean filtroActivado = false;
     private boolean lfoActivado = false;
 
-    // --- Variables para Modulación Estable (Evitar drift) ---
+    // ADSR Global
+    private double attack = 0.01, decay = 0.1, sustain = 0.7, release = 0.3;
+
+    // Modulación
     private double baseFilterCutoff = 1000.0;
     private double baseFilterResonance = 0.5;
-    private double lfoVolumeGain = 1.0; // Multiplicador de volumen (1.0 = normal)
-
-    // --- Rangos de Modulación ---
-    private static final double LFO_CUTOFF_RANGE = 3000.0;
-    private static final double LFO_RESONANCE_RANGE = 0.5;
-    private static final double LFO_VOLUME_RANGE = 0.8; // Modula el volumen un 80%
-
-    // --- OPTIMIZACIÓN: Control Rate ---
-    // Actualizamos parámetros de LFO/Filtro cada 64 muestras (aprox 1.4ms)
-    // para no sobrecargar la CPU recalculando senos/cosenos 44100 veces/seg.
-    private int controlCounter = 0;
-    private static final int CONTROL_RATE_SAMPLES = 64;
+    private double lfoVolumeGain = 1.0;
 
     private Runnable updateCallback;
 
-    // --- Hilo de Audio ---
     private final Audio hiloAudio = new Audio(() -> {
-        if (!shouldGenerate) {
-            return null;
-        }
         short[] s = new short[Audio.BUFFER_SIZE];
         for (int i = 0; i < Audio.BUFFER_SIZE; i++) {
             double d = nextSample();
@@ -62,211 +50,187 @@ public class Sintetizador {
     }
 
     public Sintetizador(Oscilator[] oscillators, WaveViewer waveViewer) {
-        this.oscillators = oscillators;
+        this.uiOscillators = oscillators;
         this.waveViewer = waveViewer;
-
-        this.filtro = new Filter();
+        this.filtroGlobal = new Filter();
         this.lfo = new LFO();
+        this.delay = new DelayUnit();
 
-        // Configura los osciladores en el waveViewer
-        this.waveViewer.setOscillators(this.oscillators);
-    }
-
-    // --- Callback UI ---
-    public void updateWaveviewer() {
-        if (updateCallback != null) {
-            updateCallback.run();
+        for (int i = 0; i < MAX_VOICES; i++) {
+            voices[i] = new Voice();
         }
-    }
-
-    public void setUpdateCallback(Runnable callback) {
-        this.updateCallback = callback;
-    }
-
-    // --- LÓGICA DE AUDIO PRINCIPAL ---
-
-    public void setFrequency(double frequency) {
-        for (Oscilator osc : oscillators) {
-            osc.setKeyFrequency(frequency);
-        }
+        this.waveViewer.setOscillators(this.uiOscillators);
     }
 
     public double nextSample() {
-        // 1. OPTIMIZACIÓN: Actualizar LFO y parámetros del filtro solo cada X muestras (Control Rate)
-        if (controlCounter++ >= CONTROL_RATE_SAMPLES) {
-            controlCounter = 0;
-            if (lfoActivado && lfo.getTarget() != LFO.Target.NONE) {
-                aplicarModulacionLFO();
-            } else {
-                // Si el LFO se apaga, asegurarnos de restaurar el volumen a 1.0
-                lfoVolumeGain = 1.0;
+        if (lfoActivado && lfo.getTarget() != LFO.Target.NONE) aplicarModulacionLFO();
+        else lfoVolumeGain = 1.0;
+
+        double mixedOutput = 0.0;
+        int activeCount = 0;
+
+        // Sumar voces
+        for (Voice v : voices) {
+            if (v.isActive()) {
+                mixedOutput += v.getSample();
+                activeCount++;
             }
         }
 
-        // 2. Sumar osciladores
-        double totalSample = 0;
-        for (Oscilator osc : oscillators) {
-            totalSample += osc.getNextSample();
+        // --- CORRECCIÓN DE SATURACIÓN ---
+        // Si hay muchas voces, bajamos el volumen global antes del efecto
+        if (activeCount > 1) {
+            mixedOutput *= 0.6; // Reducir ganancia para dejar espacio a los acordes
         }
 
-        // 3. Mezclar
-        double muestraMezclada = totalSample / NUM_OSCILLATORS;
+        // Efectos
+        if (lfoActivado && lfo.getTarget() == LFO.Target.OSC_VOLUME) mixedOutput *= lfoVolumeGain;
+        if (filtroActivado) mixedOutput = filtroGlobal.procesar(mixedOutput);
+        mixedOutput = delay.process(mixedOutput);
 
-        // 4. Aplicar modulación de volumen (Tremolo) si existe
-        if (lfoActivado && lfo.getTarget() == LFO.Target.OSC_VOLUME) {
-            muestraMezclada *= lfoVolumeGain;
-        }
-
-        // 5. Aplicar Filtro (El procesamiento de audio es por muestra, pero los coeficientes se actualizaron arriba)
-        if (filtroActivado) {
-            muestraMezclada = filtro.procesar(muestraMezclada);
-        }
-
-        return muestraMezclada;
+        // Limitador Final (Hard Clipper suave)
+        // Esto evita que suene "roto" si pasa de 1.0
+        return Math.tanh(mixedOutput);
     }
 
     private void aplicarModulacionLFO() {
-        // Obtenemos un valor entre -Amount y +Amount
         double modValue = lfo.getModulationValue();
-
         switch (lfo.getTarget()) {
             case FILTER_CUTOFF:
-                // Modulamos sobre la base establecida por el slider
-                double modulatedCutoff = baseFilterCutoff + (modValue * LFO_CUTOFF_RANGE);
-                modulatedCutoff = Math.max(20, Math.min(20000, modulatedCutoff));
-                filtro.setFrecuenciaCorte(modulatedCutoff);
+                double modCutoff = baseFilterCutoff + (modValue * 3000);
+                filtroGlobal.setFrecuenciaCorte(Math.max(20, Math.min(20000, modCutoff)));
                 break;
-
             case FILTER_RESONANCE:
-                // Modulamos sobre la base establecida por el slider
-                double modulatedResonance = baseFilterResonance + (modValue * LFO_RESONANCE_RANGE);
-                modulatedResonance = Math.max(0.1, Math.min(1.0, modulatedResonance));
-                filtro.setResonancia(modulatedResonance);
+                filtroGlobal.setResonancia(Math.max(0, Math.min(1, baseFilterResonance + (modValue * 0.5))));
                 break;
-
             case OSC_VOLUME:
-                // Efecto Tremolo: oscila el volumen alrededor de 1.0
-                // (1.0 - rango) a 1.0
-                // Hacemos que sea unipolar (0 a 1) o bipolar dependiendo del gusto.
-                // Aquí simplemente restamos ganancia según el LFO.
-                double volMod = (modValue * LFO_VOLUME_RANGE);
-                // Aseguramos que el volumen esté entre 0.0 y 1.0
-                lfoVolumeGain = Math.max(0.0, Math.min(1.0, 1.0 - Math.abs(volMod)));
+                lfoVolumeGain = Math.max(0, Math.min(1, 1.0 - Math.abs(modValue)));
                 break;
-
             case PITCH:
-                // Placeholder: Requeriría cambiar setFrequency en tiempo real en los osciladores.
-                // Podrías implementarlo llamando a setFrequency(baseFreq + mod)
+                for (Voice v : voices) if (v.isActive()) v.modulatePitch(modValue);
                 break;
-
-            case NONE:
-                break;
+            default: break;
         }
     }
 
-    /**
-     * Genera un bloque de audio para guardar (WAV)
-     */
-    public short[] generateSample(int numSamples) {
-        for (Oscilator osc : oscillators) {
-            osc.resetPhase();
-        }
-        // Reseteamos filtro y LFO para que la grabación empiece limpia
-        filtro.reset();
-        lfo.reset();
+    public void noteOn(double frequency) {
+        if (hiloAudio.isInitialized() && !hiloAudio.isRunning()) hiloAudio.triggerPlayBack();
+        Voice freeVoice = getFreeVoice();
+        if (freeVoice != null) freeVoice.trigger(frequency);
+    }
 
+    public void noteOff(double frequency) {
+        for (Voice v : voices) {
+            // Comparación con epsilon para evitar errores de punto flotante
+            if (v.isActive() && Math.abs(v.frequency - frequency) < 0.01) {
+                v.release();
+                // No hacemos break porque podría haber dos notas iguales (unison extremo)
+            }
+        }
+    }
+
+    public void allNotesOff() { for (Voice v : voices) v.forceStop(); }
+
+    private Voice getFreeVoice() {
+        for (Voice v : voices) if (!v.isActive()) return v;
+        for (Voice v : voices) if (v.adsr.getState() == ADSR.State.RELEASE) return v;
+        return voices[0];
+    }
+
+    private class Voice {
+        private final ADSR adsr = new ADSR();
+        private double frequency;
+        private boolean active = false;
+        private double[] oscPhases = new double[5];
+
+        public void trigger(double freq) {
+            this.frequency = freq;
+            this.active = true;
+            adsr.setAttackTime(attack); adsr.setDecayTime(decay);
+            adsr.setSustainLevel(sustain); adsr.setReleaseTime(release);
+            adsr.noteOn();
+        }
+
+        public void release() { adsr.noteOff(); }
+        public void forceStop() { active = false; adsr.noteOff(); }
+        public void modulatePitch(double lfoVal) { /* Pendiente: Vibrato */ }
+
+        public double getSample() {
+            if (!active) return 0.0;
+
+            double envelope = adsr.getNextLevel();
+            // Si el ADSR terminó, apagamos la voz para ahorrar CPU
+            if (envelope <= 0.0001 && adsr.getState() == ADSR.State.IDLE) {
+                active = false;
+                return 0.0;
+            }
+
+            double voiceMix = 0.0;
+            for (int i = 0; i < uiOscillators.length; i++) {
+                Oscilator uiOsc = uiOscillators[i];
+
+                // Calcular frecuencia real incluyendo el semitone offset del oscilador
+                int semiOffset = (int) uiOsc.getToneOffsetInt();
+                double oscFreq = this.frequency * Math.pow(2.0, semiOffset / 12.0);
+
+                double phaseIncrement = oscFreq * 2.0 * Math.PI / AudioInfo.SAMPLE_RATE;
+                oscPhases[i] += phaseIncrement;
+                if (oscPhases[i] > 2.0 * Math.PI) oscPhases[i] -= 2.0 * Math.PI;
+
+                voiceMix += uiOsc.computeSample(oscPhases[i]);
+            }
+
+            // Normalizamos por número de osciladores
+            return (voiceMix / uiOscillators.length) * envelope;
+        }
+        public boolean isActive() { return active; }
+    }
+
+    // --- DELEGADOS Y SETTERS ---
+    public void onKeyPressed(char keyChar) {
+        if (!KEY_FREQUENCIES.containsKey(keyChar)) return;
+        // Solo disparar si no está ya sonando esa frecuencia (opcional, para evitar ametralladora)
+        // Pero en polifonía, a veces queremos re-disparar. Lo dejamos así.
+        noteOn(KEY_FREQUENCIES.get(keyChar));
+    }
+    public void onKeyReleased(char keyChar) { if (!KEY_FREQUENCIES.containsKey(keyChar)) return;
+        double freq = KEY_FREQUENCIES.get(keyChar);
+        noteOff(freq); }
+
+    public void setFrequency(double freq) { } // Deprecated en poly
+
+    public short[] generateSample(int numSamples) {
+        allNotesOff(); filtroGlobal.reset(); lfo.reset(); delay.reset();
+        noteOn(261.63); // C4
         short[] s = new short[numSamples];
         for (int i = 0; i < numSamples; i++) {
+            if (i == numSamples - (int)(AudioInfo.SAMPLE_RATE * 0.2)) noteOff(261.63);
             double d = nextSample();
             s[i] = (short) (Short.MAX_VALUE * d);
         }
         return s;
     }
 
-    // --- MANEJO DE TECLADO ---
-
-    public void onKeyPressed(char keyChar) {
-        if (!KEY_FREQUENCIES.containsKey(keyChar)) {
-            return;
-        }
-        if (hiloAudio.isInitialized() && !hiloAudio.isRunning()) {
-            setFrequency(KEY_FREQUENCIES.get(keyChar));
-            shouldGenerate = true;
-            hiloAudio.triggerPlayBack();
-        }
-    }
-
-    public void onKeyReleased() {
-        shouldGenerate = false;
-    }
-
-    // --- GETTERS & SETTERS (Con lógica para valores base) ---
-
-    public Oscilator[] getOscillatorsFX() { return oscillators; }
-    public WaveViewer getWaveViewerFX() { return waveViewer; }
-
-    // FILTRO
-    public void setFiltroActivado(boolean activado) {
-        this.filtroActivado = activado;
-        if (!activado) filtro.reset();
-    }
-    public boolean isFiltroActivado() { return filtroActivado; }
-
-    public void setTipoFiltro(Filter.Tipo tipo) { filtro.setTipo(tipo); }
-    public Filter.Tipo getTipoFiltro() { return filtro.getTipo(); }
-
-    public void setFrecuenciaCorteFiltro(double frecuencia) {
-        this.baseFilterCutoff = frecuencia; // Guardamos la base
-        // Si el LFO no está controlando esto, actualizamos el filtro directamente
-        if (!lfoActivado || lfo.getTarget() != LFO.Target.FILTER_CUTOFF) {
-            filtro.setFrecuenciaCorte(frecuencia);
-        }
-    }
-    public double getFrecuenciaCorteFiltro() { return baseFilterCutoff; } // UI lee la base
-
-    public void setResonanciaFiltro(double resonancia) {
-        this.baseFilterResonance = resonancia; // Guardamos la base
-        if (!lfoActivado || lfo.getTarget() != LFO.Target.FILTER_RESONANCE) {
-            filtro.setResonancia(resonancia);
-        }
-    }
-    public double getResonanciaFiltro() { return baseFilterResonance; } // UI lee la base
-
-    // LFO
-    public void setLFOActivado(boolean activado) {
-        this.lfoActivado = activado;
-        if (!activado) {
-            lfo.reset();
-            // Restaurar valores base al apagar LFO
-            filtro.setFrecuenciaCorte(baseFilterCutoff);
-            filtro.setResonancia(baseFilterResonance);
-            lfoVolumeGain = 1.0;
-        }
-    }
-    public boolean isLFOActivado() { return lfoActivado; }
-
-    public void setLFWaveform(LFO.Waveform waveform) { lfo.setWaveform(waveform); }
-    public LFO.Waveform getLFWaveform() { return lfo.getWaveform(); }
-
-    public void setLFORate(double rate) { lfo.setRate(rate); }
-    public double getLFORate() { return lfo.getRate(); }
-
-    public void setLFOAmount(double amount) { lfo.setAmount(amount); }
-    public double getLFOAmount() { return lfo.getAmount(); }
-
-    public void setLFOTarget(LFO.Target target) {
-        // Si cambiamos de target, restauramos los valores del target anterior
-        if (lfoActivado) {
-            filtro.setFrecuenciaCorte(baseFilterCutoff);
-            filtro.setResonancia(baseFilterResonance);
-            lfoVolumeGain = 1.0;
-        }
-        lfo.setTarget(target);
-    }
-    public LFO.Target getLFOTarget() { return lfo.getTarget(); }
-
-    // --- Info interna ---
-    public static class AudioInfo {
-        public static final int SAMPLE_RATE = 44100;
-    }
+    public void setUpdateCallback(Runnable callback) { this.updateCallback = callback; }
+    public void updateWaveviewer() { if (updateCallback != null) updateCallback.run(); }
+    public void setAttack(double v) { this.attack = v; }
+    public void setDecay(double v) { this.decay = v; }
+    public void setSustain(double v) { this.sustain = v; }
+    public void setRelease(double v) { this.release = v; }
+    public void setFiltroActivado(boolean v) { filtroActivado = v; if(!v) filtroGlobal.reset(); }
+    public void setTipoFiltro(Filter.Tipo t) { filtroGlobal.setTipo(t); }
+    public void setFrecuenciaCorteFiltro(double f) { baseFilterCutoff = f; filtroGlobal.setFrecuenciaCorte(f); }
+    public double getFrecuenciaCorteFiltro() { return baseFilterCutoff; }
+    public void setResonanciaFiltro(double r) { baseFilterResonance = r; filtroGlobal.setResonancia(r); }
+    public double getResonanciaFiltro() { return baseFilterResonance; }
+    public void setLFOActivado(boolean v) { lfoActivado = v; if(!v) lfo.reset(); }
+    public void setLFOTarget(LFO.Target t) { lfo.setTarget(t); }
+    public void setLFWaveform(LFO.Waveform w) { lfo.setWaveform(w); }
+    public void setLFORate(double r) { lfo.setRate(r); }
+    public void setLFOAmount(double a) { lfo.setAmount(a); }
+    public void setDelayActive(boolean v) { delay.setActive(v); }
+    public void setDelayTime(double v) { delay.setTime(v); }
+    public void setDelayFeedback(double v) { delay.setFeedback(v); }
+    public void setDelayMix(double v) { delay.setMix(v); }
+    public static class AudioInfo { public static final int SAMPLE_RATE = 44100; }
 }
