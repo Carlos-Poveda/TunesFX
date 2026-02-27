@@ -30,7 +30,8 @@ public class LFO {
         randomCounter = 0;
     }
 
-    public double getNextSample() {
+    // Pide el número de muestras que hemos saltado (Control Rate)
+    public double getNextSample(int samplesAdvanced) {
         double sample = switch (waveform) {
             case SINE -> Math.sin(2 * Math.PI * phase);
             case TRIANGLE -> 2 * Math.abs(2 * phase - 1) - 1;
@@ -39,31 +40,27 @@ public class LFO {
             case RANDOM -> randomValue;
         };
 
-        // Generación de onda
+        // AVANCE CORREGIDO: Multiplicamos por los samples saltados
+        phase += (rate * samplesAdvanced) / Sintetizador.AudioInfo.SAMPLE_RATE;
 
-        // Avanzar fase
-        phase += rate / Sintetizador.AudioInfo.SAMPLE_RATE;
-
-        // Cuando la fase completa un ciclo, generamos el nuevo valor random
         if (phase >= 1.0) {
             phase -= 1.0;
             if (waveform == Waveform.RANDOM) {
                 randomValue = Math.random() * 2 - 1;
             }
         }
-
         return sample * amount;
     }
 
-    public double getModulationValue() {
-        return getNextSample();
+    public double getModulationValue(int samplesAdvanced) {
+        return getNextSample(samplesAdvanced);
     }
 
     // Aplicar modulación a un valor base
-    public double applyModulation(double baseValue, double modulationRange) {
-        double mod = getModulationValue();
-        return baseValue + (mod * modulationRange);
-    }
+//    public double applyModulation(double baseValue, double modulationRange) {
+//        double mod = getModulationValue();
+//        return baseValue + (mod * modulationRange);
+//    }
 
     // Getters y Setters
     public Waveform getWaveform() { return waveform; }
