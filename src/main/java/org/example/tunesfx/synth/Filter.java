@@ -1,99 +1,125 @@
 package org.example.tunesfx.synth;
 
-/**
- * Emulación de Filtro Moog Ladder (4-pole, 24dB/oct).
- * Corregido para usar nombres de variables consistentes.
- */
 public class Filter {
     public enum Tipo {
-        LOW_PASS, HIGH_PASS, OFF
+        LOW_PASS, HIGH_PASS, BAND_PASS, OFF
     }
 
     private Tipo tipo = Tipo.OFF;
-    private double cutoff;
+    private double frecuenciaCorte;
+    private double resonancia; // Valor de 0.0 a 1.0 (mapeado internamente a Q)
 
-    // --- CORRECCIÓN: Nombre de variable unificado a español ---
-    private double resonancia;
+// Estado del filtro (History)
+    private double x1, x2, y1, y2;
 
-    // Variables de estado para los 4 polos del filtro Moog
-    private double stage1, stage2, stage3, stage4;
-    private double oldStage1, oldStage2, oldStage3;
+// Coeficientes
+    private double a0, a1, a2, b1, b2;
 
     public Filter() {
         setTipo(Tipo.OFF);
-        reset();
-    }
-
-    public void reset() {
-        stage1 = stage2 = stage3 = stage4 = 0.0;
-        oldStage1 = oldStage2 = oldStage3 = 0.0;
     }
 
     public void setTipo(Tipo tipo) {
         this.tipo = tipo;
-        if (this.cutoff == 0) this.cutoff = 20000.0; // Abierto por defecto
+// Valores por defecto seguros si se activa por primera vez
+        if (this.frecuenciaCorte == 0) this.frecuenciaCorte = 1000;
+        if (this.resonancia == 0) this.resonancia = 0.5;
+        calcularCoeficientes();
     }
 
-    public Tipo getTipo() { return tipo; }
-
     public void setFrecuenciaCorte(double frecuencia) {
-        // Limitamos para evitar explosiones matemáticas
-        this.cutoff = Math.max(20.0, Math.min(20000.0, frecuencia));
+// Limitamos entre 20Hz y 20kHz
+        this.frecuenciaCorte = Math.max(20.0, Math.min(20000.0, frecuencia));
+        calcularCoeficientes();
     }
 
     public void setResonancia(double resonancia) {
-        // En el filtro Moog, la resonancia interna va de 0 a 4.0 (auto-oscilación)
-        // Recibimos 0.0-1.0 desde el slider y lo mapeamos a 0.0-3.5
-        this.resonancia = resonancia * 3.5;
+// Limitamos entre 0 y 1 (desde la UI)
+        this.resonancia = Math.max(0.0, Math.min(1.0, resonancia));
+        calcularCoeficientes();
     }
 
-    // Getter para la UI (devuelve el valor normalizado 0-1 aproximado para el slider)
-    public double getResonancia() {
-        return this.resonancia / 3.5;
-    }
+    private void calcularCoeficientes() {
+        if (tipo == Tipo.OFF) return;
 
-    public double getFrecuenciaCorte() {
-        return this.cutoff;
-    }
+        double sampleRate = Sintetizador.AudioInfo.SAMPLE_RATE;
+        double w0 = 2 * Math.PI * frecuenciaCorte / sampleRate;
+        double cosW0 = Math.cos(w0);
+        double sinW0 = Math.sin(w0);
 
-    /**
-     * Procesamiento de audio estilo Moog.
-     */
-    public double procesar(double input) {
-        if (tipo == Tipo.OFF) return input;
+// Mapear la resonancia (0.0 - 1.0) a un valor Q útil.
+// Q = 0.707 es plano. Q > 1 empieza a resonar. Q = 5 o 10 es muy resonante.
+// Fórmula: Q va de 0.707 a 10.0
+        double q = 0.707 + (resonancia * 9.0);
 
-        // 1. Calcular coeficientes basados en Cutoff y Sample Rate
-        double f = (2.0 * cutoff) / Sintetizador.AudioInfo.SAMPLE_RATE;
+        double alpha = sinW0 / (2 * q);
 
-        // Coeficientes de aproximación (k y p)
-        double k = 3.6 * f - 1.6 * f * f - 1;
-        double p = (k + 1) * 0.5;
+// Variables temporales para coeficientes normalizados
+        double b0_tmp = 0, b1_tmp = 0, b2_tmp = 0, a0_tmp = 0, a1_tmp = 0, a2_tmp = 0;
 
-        // Escalar la resonancia (feedback)
-        double scale = Math.exp((1.0 - p) * 1.386249);
+        switch (tipo) {
+            case LOW_PASS:
+                b0_tmp = (1 - cosW0) / 2;
+                b1_tmp = 1 - cosW0;
+                b2_tmp = (1 - cosW0) / 2;
+                a0_tmp = 1 + alpha;
+                a1_tmp = -2 * cosW0;
+                a2_tmp = 1 - alpha;
+                break;
 
-        // --- AQUÍ DABA EL ERROR ANTES, AHORA ESTÁ CORREGIDO ---
-        double r = this.resonancia * scale;
+            case HIGH_PASS:
+                b0_tmp = (1 + cosW0) / 2;
+                b1_tmp = -(1 + cosW0);
+                b2_tmp = (1 + cosW0) / 2;
+                a0_tmp = 1 + alpha;
+                a1_tmp = -2 * cosW0;
+                a2_tmp = 1 - alpha;
+                break;
 
-        // 2. Loop de Feedback (La magia del Moog)
-        double x = input - r * stage4;
+            case BAND_PASS:
+                b0_tmp = alpha;
+                b1_tmp = 0;
+                b2_tmp = -alpha;
+                a0_tmp = 1 + alpha;
+                a1_tmp = -2 * cosW0;
+                a2_tmp = 1 - alpha;
+                break;
 
-        // 3. Procesar los 4 polos en cascada (Ladder)
-        double t1 = x;  // Entrada etapa 1
-
-        stage1 += f * (Math.tanh(t1) - Math.tanh(stage1));
-        stage2 += f * (Math.tanh(stage1) - Math.tanh(stage2));
-        stage3 += f * (Math.tanh(stage2) - Math.tanh(stage3));
-        stage4 += f * (Math.tanh(stage3) - Math.tanh(stage4));
-
-        // 4. Salida
-        double output = stage4;
-
-        // Si queremos High Pass, restamos la salida Low Pass de la entrada original
-        if (tipo == Tipo.HIGH_PASS) {
-            output = input - stage4;
+            default:
+                return;
         }
 
-        return output;
+// Normalizar los coeficientes dividiendo todo por a0
+// (Esto es crucial para que el filtro sea estable)
+        this.a0 = b0_tmp / a0_tmp;
+        this.a1 = b1_tmp / a0_tmp;
+        this.a2 = b2_tmp / a0_tmp;
+        this.b1 = a1_tmp / a0_tmp;
+        this.b2 = a2_tmp / a0_tmp;
     }
+
+    public double procesar(double entrada) {
+        if (tipo == Tipo.OFF) return entrada;
+
+// Fórmula estándar Biquad (Forma Directa I)
+// y[n] = b0*x[n] + b1*x[n-1] + b2*x[n-2] - a1*y[n-1] - a2*y[n-2]
+        double salida = (a0 * entrada) + (a1 * x1) + (a2 * x2) - (b1 * y1) - (b2 * y2);
+
+// Mover el historial (shift buffers)
+        x2 = x1;
+        x1 = entrada;
+        y2 = y1;
+        y1 = salida;
+
+        return salida;
+    }
+
+    public void reset() {
+        x1 = x2 = y1 = y2 = 0;
+    }
+
+// Getters
+    public Tipo getTipo() { return tipo; }
+    public double getFrecuenciaCorte() { return frecuenciaCorte; }
+    public double getResonancia() { return resonancia; }
 }

@@ -27,11 +27,13 @@ public class Sintetizador {
     private double baseFilterCutoff = 1000.0;
     private double baseFilterResonance = 0.5;
     private double lfoVolumeGain = 1.0; // Multiplicador de volumen (1.0 = normal)
+    private double currentBaseFrequency = 440.0;
 
     // --- Rangos de Modulación ---
     private static final double LFO_CUTOFF_RANGE = 3000.0;
     private static final double LFO_RESONANCE_RANGE = 0.5;
     private static final double LFO_VOLUME_RANGE = 0.8; // Modula el volumen un 80%
+    private static final double LFO_PITCH_RANGE = 12.0; // Modulación máxima de Pitch. 12.0 = 12 semitonos (1 octava hacia arriba/abajo)
 
     // --- OPTIMIZACIÓN: Control Rate ---
     // Actualizamos parámetros de LFO/Filtro cada 64 muestras (aprox 1.4ms)
@@ -157,8 +159,19 @@ public class Sintetizador {
                 break;
 
             case PITCH:
-                // Placeholder: Requeriría cambiar setFrequency en tiempo real en los osciladores.
-                // Podrías implementarlo llamando a setFrequency(baseFreq + mod)
+                // 1. Calculamos cuántos semitonos nos movemos (ej: +3.5 semitonos)
+                double pitchModSemitones = modValue * LFO_PITCH_RANGE;
+
+                // 2. Fórmula musical: Multiplicador de frecuencia = 2^(semitonos / 12)
+                double pitchMultiplier = Math.pow(2.0, pitchModSemitones / 12.0);
+
+                // 3. Calculamos la nueva frecuencia sobre la BASE, no sobre la anterior
+                double modulatedFreq = currentBaseFrequency * pitchMultiplier;
+
+                // 4. Se la mandamos a los osciladores
+                for (Oscilator osc : oscillators) {
+                    osc.setKeyFrequency(modulatedFreq);
+                }
                 break;
 
             case NONE:
@@ -188,11 +201,15 @@ public class Sintetizador {
     // --- MANEJO DE TECLADO ---
 
     public void onKeyPressed(char keyChar) {
-        if (!KEY_FREQUENCIES.containsKey(keyChar)) return;
+        if (!KEY_FREQUENCIES.containsKey(keyChar)) {
+            return;
+        }
+        // Guardamos la nota original pulsada
+        currentBaseFrequency = KEY_FREQUENCIES.get(keyChar);
+        setFrequency(currentBaseFrequency);
 
-        setFrequency(KEY_FREQUENCIES.get(keyChar));
         noteIsPressed = true;
-        adsr.noteOn(); // Iniciamos el Attack
+        adsr.noteOn(); // (Asumiendo que ya pusiste el código del ADSR)
 
         if (hiloAudio.isInitialized() && !hiloAudio.isRunning()) {
             hiloAudio.triggerPlayBack();
@@ -248,8 +265,11 @@ public class Sintetizador {
             filtro.setFrecuenciaCorte(baseFilterCutoff);
             filtro.setResonancia(baseFilterResonance);
             lfoVolumeGain = 1.0;
+
+            setFrequency(currentBaseFrequency);
         }
     }
+
     public boolean isLFOActivado() { return lfoActivado; }
 
     public void setLFWaveform(LFO.Waveform waveform) { lfo.setWaveform(waveform); }
@@ -267,9 +287,12 @@ public class Sintetizador {
             filtro.setFrecuenciaCorte(baseFilterCutoff);
             filtro.setResonancia(baseFilterResonance);
             lfoVolumeGain = 1.0;
+
+            setFrequency(currentBaseFrequency);
         }
         lfo.setTarget(target);
     }
+
     public LFO.Target getLFOTarget() { return lfo.getTarget(); }
 
     // --- Info interna ---

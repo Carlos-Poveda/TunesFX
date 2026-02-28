@@ -3,52 +3,32 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Slider?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 
-<fx:root type="javafx.scene.layout.HBox" spacing="15" alignment="CENTER_LEFT"
+<fx:root type="javafx.scene.layout.HBox" spacing="5"
          style="-fx-background-color: black; -fx-border-color: white; -fx-border-width: 1;"
          xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10" />
     </padding>
     <children>
-        <!-- Waveform Selection -->
-        <VBox spacing="5" alignment="CENTER_LEFT">
-            <Label text="Wave form:" textFill="WHITE"/>
-            <ComboBox fx:id="waveFormComboBox" focusTraversable="false" prefWidth="100"/>
-        </VBox>
-
-        <!-- Tone Control -->
-        <VBox spacing="5" alignment="CENTER_LEFT">
-            <Label text="Tone:" textFill="WHITE"/>
-            <Label fx:id="toneValueLabel" text="0 semi" textFill="CYAN" style="-fx-font-weight: bold; -fx-cursor: hand;"/>
-        </VBox>
-
-        <!-- Volume Control -->
-        <VBox spacing="5" alignment="CENTER_LEFT">
-            <Label text="Volume:" textFill="WHITE"/>
-            <Label fx:id="volumeParameter" text="100%" textFill="CYAN" style="-fx-font-weight: bold; -fx-cursor: hand;"/>
-        </VBox>
-
-        <!-- Unison Control (New) -->
-        <VBox spacing="5" alignment="CENTER_LEFT">
-            <HBox spacing="5">
-                <Label text="Unison:" textFill="WHITE"/>
-                <Label fx:id="unisonLabel" text="1x" textFill="CYAN"/>
-            </HBox>
-            <Slider fx:id="unisonSlider" min="1" max="7" value="1" blockIncrement="1" majorTickUnit="1" minorTickCount="0" snapToTicks="true" prefWidth="80"/>
-        </VBox>
-
-        <!-- Detune Control (New) -->
-        <VBox spacing="5" alignment="CENTER_LEFT">
-            <HBox spacing="5">
-                <Label text="Detune:" textFill="WHITE"/>
-                <Label fx:id="detuneLabel" text="0%" textFill="CYAN"/>
-            </HBox>
-            <Slider fx:id="detuneSlider" min="0" max="1" value="0" prefWidth="80"/>
-        </VBox>
-
+        <Label text="Wave form:" textFill="WHITE">
+            <HBox.margin>
+                <Insets left="15.0" />
+            </HBox.margin>
+        </Label>
+        <ComboBox fx:id="waveFormComboBox" focusTraversable="false" />
+        <Label text="Tone:" textFill="WHITE">
+            <HBox.margin>
+                <Insets left="15.0" />
+            </HBox.margin>
+        </Label>
+        <Label fx:id="toneValueLabel" text="x0.00" textFill="WHITE" />
+        <Label text="Volume: " textFill="WHITE">
+            <HBox.margin>
+                <Insets left="50.0" />
+            </HBox.margin>
+        </Label>
+        <Label fx:id="volumeParameter" text=" 100%" textFill="WHITE" />
     </children>
 </fx:root>

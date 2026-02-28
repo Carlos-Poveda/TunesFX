@@ -15,7 +15,7 @@ public class LFO {
     private double amount = 0.5; // 0.0 a 1.0
     private double phase = 0.0; // Fase actual 0.0 a 1.0
 
-    // Para waveform RANDOM
+// Para waveform RANDOM
     private double randomValue = 0.0;
     private int randomCounter = 0;
     private static final int RANDOM_UPDATE_RATE = 100; // Actualizar cada 100 muestras
@@ -52,17 +52,18 @@ public class LFO {
         return sample * amount;
     }
 
+    // Actualiza también este método:
     public double getModulationValue(int samplesAdvanced) {
         return getNextSample(samplesAdvanced);
     }
 
-    // Aplicar modulación a un valor base
+// Aplicar modulación a un valor base
 //    public double applyModulation(double baseValue, double modulationRange) {
 //        double mod = getModulationValue();
 //        return baseValue + (mod * modulationRange);
 //    }
 
-    // Getters y Setters
+// Getters y Setters
     public Waveform getWaveform() { return waveform; }
     public void setWaveform(Waveform waveform) {
         this.waveform = waveform;
