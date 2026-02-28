@@ -122,8 +122,8 @@ public class PrincipalController {
 //            synthStage.initStyle(StageStyle.UNDECORATED);
             synthStage.setScene(synthScene);
             synthStage.setResizable(false);
-//            synthStage.setX(1050);
-//            synthStage.setY(255);
+            synthStage.setX(1070);
+            synthStage.setY(285);
             synthStage.show();
 
         } catch (IOException e) {

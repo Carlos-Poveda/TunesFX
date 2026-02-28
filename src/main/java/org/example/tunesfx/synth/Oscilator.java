@@ -33,7 +33,7 @@ public class Oscilator extends HBox {
 
     public Oscilator() {
 // Cargar el FXML
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/oscilador.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/Oscilador.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         try {
