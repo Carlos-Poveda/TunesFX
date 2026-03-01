@@ -13,7 +13,7 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Slider?>
-<Pane fx:id="rootPane" prefHeight="680.0" prefWidth="775.0" style="-fx-background-color: black;"
+<Pane fx:id="rootPane" prefHeight="680.0" prefWidth="710.0" style="-fx-background-color: #0D0000FF;"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.tunesfx.controller.SintetizadorController">
     <children>
@@ -24,12 +24,12 @@
         <Oscilator fx:id="oscilador4" layoutX="15.0" layoutY="205.0" />
         <Oscilator fx:id="oscilador5" layoutX="15.0" layoutY="270.0" />
 
-        <WaveViewer fx:id="waveViewer" layoutX="440.0" layoutY="10.0" />
+        <WaveViewer fx:id="waveViewer" layoutX="370.0" layoutY="10.0" />
 
 
 
         <!-- Panel de Filtro -->
-        <VBox layoutX="210.0" layoutY="335.0" spacing="10" style="-fx-background-color: #000; -fx-border-color: #fff; -fx-border-width: 1; -fx-padding: 10;" prefWidth="220">
+        <VBox layoutX="210.0" layoutY="345.0" spacing="10" style="-fx-background-color: #0D0000FF; -fx-border-color: #fff; -fx-border-width: 1; -fx-padding: 10;" prefWidth="220">
             <Label text="FILTER" textFill="white" style="-fx-font-weight: bold;"/>
 
             <HBox spacing="10" alignment="CENTER_LEFT">
@@ -55,7 +55,7 @@
         </VBox>
 
         <!-- Panel de LFO -->
-        <VBox layoutX="15.0" layoutY="335.0" spacing="10" style="-fx-background-color: #000; -fx-border-color: #fff; -fx-border-width: 1; -fx-padding: 10;" prefWidth="190">
+        <VBox layoutX="15.0" layoutY="335.0" spacing="10" style="-fx-background-color: #0D0000FF; -fx-border-color: #fff; -fx-border-width: 1; -fx-padding: 10;" prefWidth="190">
             <Label text="LFO" textFill="white" style="-fx-font-weight: bold;"/>
 
             <HBox spacing="10" alignment="CENTER_LEFT">
@@ -89,7 +89,7 @@
             </VBox>
         </VBox>
         <!-- Panel de ADSR -->
-        <VBox layoutX="440.0" layoutY="335.0" spacing="10" style="-fx-background-color: #000; -fx-border-color: #fff; -fx-border-width: 1; -fx-padding: 10;" prefWidth="200">
+        <VBox layoutX="440.0" layoutY="345.0" spacing="10" style="-fx-background-color: #0D0000FF; -fx-border-color: #fff; -fx-border-width: 1; -fx-padding: 10;" prefWidth="200">
             <Label text="ENVELOPE (ADSR)" textFill="white" style="-fx-font-weight: bold;"/>
 
             <VBox spacing="2">

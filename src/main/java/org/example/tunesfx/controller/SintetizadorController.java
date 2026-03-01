@@ -270,7 +270,4 @@ public class SintetizadorController {
     public void handleKeyReleased(KeyEvent e) {
         logic.onKeyReleased();
     }
-    public void shutdown() {
-// logic.shutdownAudio();
-    }
 }

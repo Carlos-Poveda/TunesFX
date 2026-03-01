@@ -47,7 +47,7 @@ public class WaveViewer extends StackPane {
         final double height = canvas.getHeight();
 
         // 1. Limpiar el canvas
-        g.setFill(Color.BLACK);
+        g.setFill(Color.rgb(13,0,0));
         g.fillRect(0, 0, width, height);
 
         // 2. Lógica de dibujo (sin cambios de lógica)

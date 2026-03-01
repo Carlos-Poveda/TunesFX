@@ -3,43 +3,41 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<fx:root type="javafx.scene.layout.HBox" spacing="5" alignment="CENTER_LEFT"
-         style="-fx-background-color: black; -fx-border-color: white; -fx-border-width: 1;"
-         xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root alignment="CENTER" minWidth="346.0" prefHeight="52.0" prefWidth="346.0" spacing="5" style="-fx-background-color: #0D0000FF; -fx-border-color: white; -fx-border-width: 1;" type="javafx.scene.layout.HBox" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
     <padding>
-        <Insets top="5" right="10" bottom="5" left="10" />
+        <Insets bottom="5" left="10" right="10" top="5" />
     </padding>
     <children>
-        <VBox spacing="2" alignment="CENTER_LEFT">
-            <Label text="Wave" textFill="#aaaaaa" style="-fx-font-size: 9px;"/>
-            <ComboBox fx:id="waveFormComboBox" focusTraversable="false" prefWidth="80"/>
+        <VBox alignment="CENTER_LEFT" spacing="2">
+            <Label style="-fx-font-size: 9px;" text="Wave" textFill="#aaaaaa" />
+            <ComboBox fx:id="waveFormComboBox" focusTraversable="false" prefWidth="80" />
         </VBox>
 
-        <VBox spacing="2" alignment="CENTER_LEFT">
-            <Label text="Tone" textFill="#aaaaaa" style="-fx-font-size: 9px;"/>
-            <Label fx:id="toneValueLabel" text="x0.00" textFill="WHITE" style="-fx-font-weight: bold;"/>
+        <VBox alignment="CENTER_LEFT" spacing="2">
+            <Label style="-fx-font-size: 9px;" text="Tone" textFill="#aaaaaa" />
+            <Label fx:id="toneValueLabel" style="-fx-font-weight: bold;" text="x0.00" textFill="WHITE" />
         </VBox>
 
-        <VBox spacing="2" alignment="CENTER">
-            <Label text="Unison" textFill="#aaaaaa" style="-fx-font-size: 9px;"/>
-            <Slider fx:id="unisonVoicesSlider" min="1" max="7" value="1" blockIncrement="1" majorTickUnit="1" minorTickCount="0" snapToTicks="true" prefWidth="60"/>
+        <VBox alignment="CENTER" spacing="2">
+            <Label style="-fx-font-size: 9px;" text="Unison" textFill="#aaaaaa" />
+            <Slider fx:id="unisonVoicesSlider" blockIncrement="1" majorTickUnit="1" max="7" min="1" minorTickCount="0" prefWidth="60" snapToTicks="true" value="1" />
         </VBox>
 
-        <VBox spacing="2" alignment="CENTER">
-            <Label text="Detune" textFill="#aaaaaa" style="-fx-font-size: 9px;"/>
-            <Slider fx:id="unisonDetuneSlider" min="0" max="0.5" value="0.1" prefWidth="60"/>
+        <VBox alignment="CENTER" spacing="2">
+            <Label style="-fx-font-size: 9px;" text="Detune" textFill="#aaaaaa" />
+            <Slider fx:id="unisonDetuneSlider" max="0.5" min="0" prefWidth="60" value="0.1" />
         </VBox>
 
-        <VBox spacing="2" alignment="CENTER_LEFT">
-            <Label text="Vol" textFill="#aaaaaa" style="-fx-font-size: 9px;">
-                <VBox.margin><Insets left="10"/></VBox.margin>
+        <VBox alignment="CENTER_LEFT" spacing="2">
+            <Label style="-fx-font-size: 9px;" text="Vol" textFill="#aaaaaa">
+                <VBox.margin><Insets left="10" /></VBox.margin>
             </Label>
             <Label fx:id="volumeParameter" text="100%" textFill="WHITE">
-                <VBox.margin><Insets left="10"/></VBox.margin>
+                <VBox.margin><Insets left="10" /></VBox.margin>
             </Label>
         </VBox>
     </children>
