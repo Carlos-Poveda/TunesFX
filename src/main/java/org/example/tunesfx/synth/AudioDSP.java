@@ -1,4 +1,4 @@
-package org.example.tunesfx.utils; // O tu paquete principal
+package org.example.tunesfx.synth; // O tu paquete principal
 
 public class AudioDSP {
 

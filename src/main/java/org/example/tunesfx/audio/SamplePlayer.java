@@ -1,7 +1,7 @@
 package org.example.tunesfx.audio;
 
 import org.example.tunesfx.synth.Sintetizador;
-import org.example.tunesfx.utils.AudioDSP;
+import org.example.tunesfx.synth.AudioDSP;
 import org.lwjgl.openal.AL10;
 
 import java.util.List;
