@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<fx:root alignment="CENTER" minWidth="346.0" prefHeight="52.0" prefWidth="346.0" spacing="5" style="-fx-background-color: #0D0000FF; -fx-border-color: white; -fx-border-width: 1;" type="javafx.scene.layout.HBox" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root alignment="CENTER" minWidth="370.0" prefHeight="52.0" prefWidth="370.0" spacing="5" style="-fx-background-color: #0D0000FF; -fx-border-color: white; -fx-border-width: 1;" type="javafx.scene.layout.HBox" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <padding>
         <Insets bottom="5" left="10" right="10" top="5" />
     </padding>
@@ -39,6 +40,11 @@
             <Label fx:id="volumeParameter" text="100%" textFill="WHITE">
                 <VBox.margin><Insets left="10" /></VBox.margin>
             </Label>
+        </VBox>
+
+        <VBox alignment="CENTER" spacing="2">
+            <!-- Mute por oscilador individual -->
+            <CheckBox fx:id="muteCheckBox" text="Mute" />
         </VBox>
     </children>
 </fx:root>

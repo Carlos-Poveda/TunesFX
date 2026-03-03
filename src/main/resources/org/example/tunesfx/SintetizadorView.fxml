@@ -13,7 +13,7 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Slider?>
-<Pane fx:id="rootPane" prefHeight="680.0" prefWidth="710.0" style="-fx-background-color: #0D0000FF;"
+<Pane fx:id="rootPane" prefHeight="680.0" prefWidth="750.0" style="-fx-background-color: #0D0000FF;"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.tunesfx.controller.SintetizadorController">
     <children>
@@ -24,7 +24,7 @@
         <Oscilator fx:id="oscilador4" layoutX="15.0" layoutY="205.0" />
         <Oscilator fx:id="oscilador5" layoutX="15.0" layoutY="270.0" />
 
-        <WaveViewer fx:id="waveViewer" layoutX="370.0" layoutY="10.0" />
+        <WaveViewer fx:id="waveViewer" layoutX="410.0" layoutY="10.0" />
 
 
 

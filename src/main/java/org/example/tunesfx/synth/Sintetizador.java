@@ -108,11 +108,15 @@ public class Sintetizador {
         }
 
         double totalSample = 0;
+        int activeOscs = 0;
         for (Oscilator osc : oscillators) {
-            totalSample += osc.getNextSample();
+            if (!osc.isMuted()) {
+                totalSample += osc.getNextSample();
+                activeOscs++;
+            }
         }
 
-        double muestraMezclada = totalSample / NUM_OSCILLATORS;
+        double muestraMezclada = activeOscs > 0 ? totalSample / activeOscs : 0.0;
 
         // APLICAR ADSR
         double envolvente = adsr.getNextEnvelope();

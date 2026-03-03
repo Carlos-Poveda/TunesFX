@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import javafx.scene.Cursor;
+import javafx.scene.control.CheckBox;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -42,6 +43,10 @@ public class Oscilator extends HBox {
     // Nuevos controles FXML
     @FXML private Slider unisonVoicesSlider;
     @FXML private Slider unisonDetuneSlider;
+    @FXML private CheckBox muteCheckBox;
+
+    // Mute flag para silenciar la voz de este oscilador individual
+    private boolean muted = false;
 
     public Oscilator() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/tunesfx/oscilador.fxml"));
@@ -87,6 +92,13 @@ public class Oscilator extends HBox {
             if (volume > 100) volume = 100; else if (volume < 0) volume = 0;
             volumeParameter.setText(" " + volume + "%");
         }, 3);
+        // Mute binding (nuevo) para este Oscillator
+        if (muteCheckBox != null) {
+            muteCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                setMuted(newVal);
+                if (updateCallback != null) updateCallback.run();
+            });
+        }
     }
 
     // Helper para no repetir código de mouse
@@ -112,6 +124,15 @@ public class Oscilator extends HBox {
         recalculateVoices();
     }
 
+    // mute binding handled in main initialize()
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
+    }
+    public boolean isMuted() {
+        return muted;
+    }
+
     public void resetPhase() {
         // Reiniciamos todas las voces a fase 0
         Arrays.fill(voiceIndices, 0.0);
@@ -121,6 +142,8 @@ public class Oscilator extends HBox {
      * EL CORAZÓN DEL UNISON: Suma todas las voces activas
      */
     public double getNextSample() {
+        // Si este oscilador está silenciado, no emite señal
+        if (muted) return 0.0;
         double totalSample = 0;
         float[] table = waveTable.getSamples();
         int tableSize = WaveTable.SIZE;
@@ -141,10 +164,10 @@ public class Oscilator extends HBox {
             }
         }
 
-        // Normalización: Dividimos por la raíz cuadrada de las voces para mantener la energía
-        // constante pero ganando potencia (o simplemente por activeVoices para ser conservadores)
-        // Usaremos activeVoices para evitar saturación (clipping).
-        double normalizedSample = totalSample / activeVoices;
+        // Normalización: Dividimos por la cantidad de voces activas para mantener energía estable
+        // evitando saturación (clipping).
+        double divisor = activeVoices > 0 ? activeVoices : 1;
+        double normalizedSample = totalSample / divisor;
 
         return normalizedSample * getVolumenMultiplier();
     }
