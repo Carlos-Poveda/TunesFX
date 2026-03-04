@@ -24,6 +24,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.example.tunesfx.audio.AudioCoordinator;
+import org.example.tunesfx.audio.AudioSettingsDialog;
 import org.example.tunesfx.audio.PlaylistItem;
 import org.example.tunesfx.utils.AudioExporter;
 import org.example.tunesfx.utils.GlobalState;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrincipalController {
+    @FXML private Button btnAjustes;
     @FXML private TreeView libraryTreeView;
     @FXML private Spinner bpmSpinner;
     @FXML private Button btnStopSong;
@@ -95,6 +98,14 @@ public class PrincipalController {
                     () -> handleOpenChannelRack(null)
             );
         });
+        btnAjustes.setOnAction(event -> {
+            Stage stage = (Stage) btnAjustes.getScene().getWindow();
+            String chosen = AudioSettingsDialog.showDialog(stage);
+            if (chosen != null && !chosen.isEmpty()) {
+                AudioCoordinator.switchToDevice(chosen);
+            }
+        });
+
         setupPlaylist();
         enablePatternPainting();
         initializeSongTimeline();

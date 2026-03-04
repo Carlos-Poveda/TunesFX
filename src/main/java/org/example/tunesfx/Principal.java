@@ -7,21 +7,22 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import org.example.tunesfx.audio.Audio;
+import java.io.InputStream;
 import org.example.tunesfx.audio.AudioEngine;
 
-import java.io.InputStream;
-
 public class Principal extends Application {
+
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // Inicio del motor de audio
         AudioEngine.init();
+
         // Cargar fuente principal
         InputStream fontStream = getClass().getResourceAsStream("/fonts/RobotoMono-VariableFont_wght.ttf");
         if (fontStream != null) {
             Font myFont = Font.loadFont(fontStream, 14);
             if (myFont != null) {
-//                System.out.println("Main Font loaded: " + myFont.getFamily());
+                // System.out.println("Main Font loaded: " + myFont.getFamily());
             } else {
                 System.err.println("Failed to create main font from stream.");
             }
@@ -30,12 +31,11 @@ public class Principal extends Application {
         }
 
         // Cargar fuente para el título
-        // Es necesario cargarla aquí para que el CSS pueda usarla
         InputStream titleFontStream = getClass().getResourceAsStream("/fonts/Sarina-Regular.ttf");
         if (titleFontStream != null) {
-            Font titleFont = Font.loadFont(titleFontStream, 33); 
+            Font titleFont = Font.loadFont(titleFontStream, 33);
             if (titleFont != null) {
-//                System.out.println("Title Font loaded: " + titleFont.getFamily());
+                // System.out.println("Title Font loaded: " + titleFont.getFamily());
             } else {
                 System.err.println("Failed to create title font from stream.");
             }
@@ -44,13 +44,13 @@ public class Principal extends Application {
         }
 
 
-        // 1. Cargar el FXML de la vista principal
+        // 1) Cargar el FXML de la vista principal
         FXMLLoader loader = new FXMLLoader(getClass().getResource("PrincipalView.fxml"));
         Pane root = loader.load();
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
-        // 2. Configurar el Stage
+        // 2) Configurar el Stage
         try {
             Image applicationIcon = new Image(getClass().getResourceAsStream("/images/logo.png"));
             if (applicationIcon.isError()) {
@@ -70,6 +70,7 @@ public class Principal extends Application {
 
     @Override
     public void stop() throws Exception {
+        // Parar motor de audio
         AudioEngine.destroy();
     }
 

@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TreeView?>
 <?import javafx.scene.effect.Glow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -19,8 +20,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.TreeView?>
-<BorderPane prefHeight="902.0" prefWidth="1339.0" style="-fx-background-color: #3D3D3D;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.controller.PrincipalController">
+<BorderPane prefHeight="902.0" prefWidth="1339.0" style="-fx-background-color: #3D3D3D;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.tunesfx.controller.PrincipalController">
 
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="47.0" style="-fx-background-color: #262626; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 1, 1);">
@@ -96,6 +96,15 @@
                         <Insets right="20.0" />
                      </HBox.margin>
                   </Label>
+                  <Button fx:id="btnAjustes" styleClass="synth-button">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/configuraciones.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
                </children>
             </HBox>
 
@@ -138,9 +147,7 @@
          </BorderPane.margin>
          <children>
             <Label text="Library" textFill="#ffffff" />
-            <TreeView fx:id="libraryTreeView"
-                      style="-fx-background-color: #1A1A1A; -fx-control-inner-background: #1A1A1A;"
-                      VBox.vgrow="ALWAYS" />
+            <TreeView fx:id="libraryTreeView" style="-fx-background-color: #1A1A1A; -fx-control-inner-background: #1A1A1A;" VBox.vgrow="ALWAYS" />
          </children>
       </VBox>
    </left>

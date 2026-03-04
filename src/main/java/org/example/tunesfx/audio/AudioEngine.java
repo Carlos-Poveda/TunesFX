@@ -59,6 +59,66 @@ public class AudioEngine {
         System.out.println("Motor de audio OpenAL apagado.");
     }
 
+    public static boolean switchDevice(String deviceName) {
+        try {
+            // Si no está inicializado, inicializamos con el nuevo dispositivo
+            if (!isInitialized) {
+                String target = (deviceName != null && !deviceName.isEmpty()) ? deviceName
+                        : alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER);
+                long newDevice = alcOpenDevice(target);
+                if (newDevice == NULL) {
+                    return false;
+                }
+                ALCCapabilities deviceCaps = ALC.createCapabilities(newDevice);
+                long newContext = alcCreateContext(newDevice, (IntBuffer) null);
+                if (newContext == NULL) {
+                    alcCloseDevice(newDevice);
+                    return false;
+                }
+                alcMakeContextCurrent(newContext);
+                AL.createCapabilities(deviceCaps);
+                device = newDevice;
+                context = newContext;
+                isInitialized = true;
+                System.out.println("AudioEngine: switched to device " + deviceName + " (initializing)");
+                return true;
+            }
+            // Ya está inicializado: cerramos el contexto/dispositivo actual y abrimos el nuevo
+            long oldDevice = device;
+            long oldContext = context;
+            // Desvincular contexto actual
+            alcMakeContextCurrent(NULL);
+            if (oldContext != NULL) alcDestroyContext(oldContext);
+            if (oldDevice != NULL) alcCloseDevice(oldDevice);
+            long newDevice = alcOpenDevice(deviceName);
+            if (newDevice == NULL) {
+                // Intentar restaurar el contexto anterior si es posible
+                if (oldContext != NULL) {
+                    alcMakeContextCurrent(oldContext);
+                }
+                return false;
+            }
+            ALCCapabilities newDeviceCaps = ALC.createCapabilities(newDevice);
+            long newContext = alcCreateContext(newDevice, (IntBuffer) null);
+            if (newContext == NULL) {
+                alcCloseDevice(newDevice);
+                if (oldContext != NULL) {
+                    alcMakeContextCurrent(oldContext);
+                }
+                return false;
+            }
+            alcMakeContextCurrent(newContext);
+            AL.createCapabilities(newDeviceCaps);
+            device = newDevice;
+            context = newContext;
+            System.out.println("AudioEngine: switched device to " + deviceName);
+            return true;
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return false;
+        }
+    }
+
     public static long getDevice() {
         return device;
     }

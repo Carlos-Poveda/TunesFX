@@ -2,9 +2,7 @@ package org.example.tunesfx.audio;
 
 import org.example.tunesfx.synth.Sintetizador;
 import org.example.tunesfx.utils.OpenALException;
-import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.ALC;
 import org.lwjgl.openal.EXTDisconnect;
 import org.example.tunesfx.utils.Utils;
 
@@ -15,6 +13,13 @@ import static org.lwjgl.openal.ALC10.*;
 
 public class Audio extends Thread {
     private volatile boolean initialized = false;
+    // Reconexión automática: bandera para reiniciar desde el hilo de audio
+    private volatile boolean needsReinit = false;
+
+    // API para forzar reinicialización externa si fuera necesario
+    public synchronized void requestReinit() {
+        needsReinit = true;
+    }
 
     public boolean isInitialized() {
         return initialized;
@@ -61,6 +66,17 @@ public class Audio extends Thread {
         initAudio();
 
         while (!closed) {
+            // Detección de reconexión: si AudioCoordinator ha recibido una petición
+            if (AudioCoordinator.pollReconnectionFlag()) {
+                performReinitSequence();
+                continue;
+            }
+            // Si hay una petición local, también la maneja
+            if (needsReinit) {
+                performReinitSequence();
+                continue;
+            }
+
             try {
                 // Bloqueamos solo la condición de espera
                 synchronized (this) {
@@ -72,8 +88,8 @@ public class Audio extends Thread {
 
                 // --- 1. DETECTAR DESCONEXIÓN ACTIVAMENTE ---
                 if (AudioEngine.isInitialized() && !isDeviceConnected()) {
-                    System.out.println("Dispositivo de audio desconectado. Reconectando...");
-                    reconnectAudio();
+                    System.out.println("Dispositivo de audio desconectado. Reconectando automáticamente...");
+                    AudioCoordinator.requestReconnection("Dispositivo desconectado detectado.");
                     continue; // Volvemos al inicio del bucle tras recuperar
                 }
                 // Procesamiento de buffers normal
@@ -100,7 +116,7 @@ public class Audio extends Thread {
                 // Si falla en medio de un proceso por culpa del OS, capturamos el error
                 // para evitar que el Thread muera y forzamos la reconexión.
                 System.err.println("Error del motor de audio (posible cambio de salida): " + e.getMessage());
-                reconnectAudio();
+                AudioCoordinator.requestReconnection("OpenALException: " + e.getMessage());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -119,20 +135,24 @@ public class Audio extends Thread {
         }
     }
 
-    // Realiza un reseteo completo en caliente (Hot Swap)
-    private void reconnectAudio() {
-        initialized = false;
-        cleanupResources();
-        AudioEngine.destroy();
+    // Re-inicialización segura ejecutada desde el hilo de audio
+    private void performReinitSequence() {
+        System.out.println("[Audio] Re-inicialización iniciada (recuperación de dispositivo).");
         try {
-            Thread.sleep(500);
-        } catch (InterruptedException ignored) {}
-        AudioEngine.init();
-
-        initAudio();
-        System.out.println("Audio reconectado mediante AudioEngine.");
+            needsReinit = false;
+            cleanupResources();
+            AudioEngine.destroy();
+            try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+            AudioEngine.init();
+            initAudio();
+            initialized = true;
+            System.out.println("[Audio] Re-inicialización completada (Audio thread).");
+        } catch (Exception e) {
+            System.err.println("[Audio] Error durante la re-inicialización: " + e.getMessage());
+        }
     }
 
+    // Cleanup resources
     private void cleanupResources() {
         if (source != 0) {
             alDeleteSources(source);
