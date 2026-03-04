@@ -8,9 +8,7 @@ import static org.lwjgl.openal.ALC10.alcGetString;
 import static org.lwjgl.openal.ALC11.ALC_ALL_DEVICES_SPECIFIER;
 
 public class AudioDeviceManager {
-    /**
-     * Enumera los dispositivos de salida disponibles (ALC_ALL_DEVICES_SPECIFIER).
-     */
+    // Enumera los dispositivos de salida disponibles (ALC_ALL_DEVICES_SPECIFIER).
     public static List enumerateOutputDevices() {
         List<String> devices = new ArrayList<>();
         try {
@@ -37,9 +35,7 @@ public class AudioDeviceManager {
         return devices;
     }
 
-    /**
-     * Nombre del dispositivo por defecto actual.
-     */
+     // Nombre del dispositivo por defecto actual.
     public static String getCurrentDeviceName() {
         try {
             String current = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER);

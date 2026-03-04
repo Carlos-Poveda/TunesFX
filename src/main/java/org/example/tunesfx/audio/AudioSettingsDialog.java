@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class AudioSettingsDialog {
-    /**
-     * Muestra el diálogo y devuelve el dispositivo seleccionado, o null si se cancela.
-     */
     public static String showDialog(Stage owner) {
         List<String> devices = AudioDeviceManager.enumerateOutputDevices();
         ComboBox<String> combo = new ComboBox<>();

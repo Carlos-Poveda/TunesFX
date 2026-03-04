@@ -71,6 +71,14 @@ public class PrincipalController {
     private double initialLayoutY;
     private boolean isResizing = false;
     private final double RESIZE_MARGIN = 10.0; // Píxeles del borde derecho para redimensionar
+    // Detección de click vs drag en la rejilla de la Playlist
+    private double gridPressedX;
+    private double gridPressedY;
+    private boolean gridPressed = false;
+    private static final double DRAG_TOLERANCE_PX = 5.0;
+    private long lastBlockCreationTime = 0;
+    private int lastBlockCol = -1;
+    private int lastBlockRow = -1;
 
     @FXML
     public void initialize() {
@@ -98,6 +106,7 @@ public class PrincipalController {
                     () -> handleOpenChannelRack(null)
             );
         });
+        // Acción para el botón de cambiar dispositivo
         btnAjustes.setOnAction(event -> {
             Stage stage = (Stage) btnAjustes.getScene().getWindow();
             String chosen = AudioSettingsDialog.showDialog(stage);
@@ -105,7 +114,6 @@ public class PrincipalController {
                 AudioCoordinator.switchToDevice(chosen);
             }
         });
-
         setupPlaylist();
         enablePatternPainting();
         initializeSongTimeline();
@@ -217,7 +225,6 @@ public class PrincipalController {
     }
 
     private void setupPlaylist() {
-        // Limpiamos por si acaso
         timelineHeader.getChildren().clear();
         trackHeadersContainer.getChildren().clear();
         playlistGridContent.getChildren().clear();
@@ -303,20 +310,39 @@ public class PrincipalController {
     }
 
     private void enablePatternPainting() {
-        playlistGridContent.setOnMouseClicked(event -> {
-            if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
+        // Distinguir click vs drag para evitar bloques duplicados
+        playlistGridContent.setOnMousePressed(event -> {
+            if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) return;
+            gridPressedX = event.getX();
+            gridPressedY = event.getY();
+            gridPressed = true;
+        });
+        playlistGridContent.setOnMouseReleased(event -> {
+            if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) return;
+            if (!gridPressed) return;
+            double dx = Math.abs(event.getX() - gridPressedX);
+            double dy = Math.abs(event.getY() - gridPressedY);
+            if (dx < DRAG_TOLERANCE_PX && dy < DRAG_TOLERANCE_PX) {
                 String selectedPattern = (String) patternListView.getSelectionModel().getSelectedItem();
-                if (selectedPattern == null) return;
-
-                // Snap a compás completo (4 celdas)
-                int colIndex = (int) (event.getX() / (CELL_WIDTH * 4));
-                int rowIndex = (int) (event.getY() / TRACK_HEIGHT);
-
-                double snapX = colIndex * (CELL_WIDTH * 4);
-                double snapY = rowIndex * TRACK_HEIGHT;
-
-                createClip(selectedPattern, snapX, snapY);
+                if (selectedPattern != null) {
+                    int colIndex = (int) (gridPressedX / (CELL_WIDTH * 4));
+                    int rowIndex = (int) (gridPressedY / TRACK_HEIGHT);
+                    // Debounce para evitar duplicados
+                    long now = System.currentTimeMillis();
+                    if (colIndex == lastBlockCol && rowIndex == lastBlockRow
+                            && (now - lastBlockCreationTime) < 150) {
+                        gridPressed = false;
+                        return;
+                    }
+                    lastBlockCol = colIndex;
+                    lastBlockRow = rowIndex;
+                    lastBlockCreationTime = now;
+                    double snapX = colIndex * (CELL_WIDTH * 4);
+                    double snapY = rowIndex * TRACK_HEIGHT;
+                    createClip(selectedPattern, snapX, snapY);
+                }
             }
+            gridPressed = false;
         });
     }
 
@@ -656,9 +682,8 @@ public class PrincipalController {
                     setGraphic(null);
                 } else {
                     setText(item.getName()); // Mostramos solo el nombre (ej: "kick.wav")
-
                     // Opcional: Añadir iconos simples si es carpeta o archivo
-                    // Si tienes imágenes, puedes usar: setGraphic(new ImageView(...));
+                    // setGraphic(new ImageView(...));
                     if (item.isDirectory()) {
                         setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;"); // Carpetas en blanco negrita
                     } else {
@@ -667,7 +692,6 @@ public class PrincipalController {
                 }
             }
         });
-
         // 6. Evento de Doble Clic
         libraryTreeView.setOnMouseClicked(this::handleLibraryClick);
     }
