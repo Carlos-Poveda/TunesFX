@@ -12,11 +12,10 @@ public class PlaylistItem {
         this.trackIndex = trackIndex;
     }
 
-    // Getters
     public String getPatternName() { return patternName; }
     public int getStartBar() { return startBar; }
     public int getTrackIndex() { return trackIndex; }
-    // Setters (necesarios para el Drag & Drop)
+
     public void setStartBar(int startBar) { this.startBar = startBar; }
     public void setTrackIndex(int trackIndex) { this.trackIndex = trackIndex; }
     public double getDurationBars() { return durationBars; }

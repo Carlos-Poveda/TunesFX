@@ -124,8 +124,6 @@ public class Oscilator extends HBox {
         recalculateVoices();
     }
 
-    // mute binding handled in main initialize()
-
     public void setMuted(boolean muted) {
         this.muted = muted;
     }
@@ -138,9 +136,6 @@ public class Oscilator extends HBox {
         Arrays.fill(voiceIndices, 0.0);
     }
 
-    /**
-     * EL CORAZÓN DEL UNISON: Suma todas las voces activas
-     */
     public double getNextSample() {
         // Si este oscilador está silenciado, no emite señal
         if (muted) return 0.0;

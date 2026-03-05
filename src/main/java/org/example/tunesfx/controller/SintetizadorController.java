@@ -21,26 +21,21 @@ public class SintetizadorController {
     @FXML private Slider adsrDecaySlider;
     @FXML private Slider adsrSustainSlider;
     @FXML private Slider adsrReleaseSlider;
-    @FXML
-    private Pane rootPane; // El panel de fondo
-    @FXML
-    private Spinner<Double> sampleLengthSpinner;
-    public Button guardarSample;
-// --- Componentes de UI inyectados por el FXML ---
+    @FXML private Pane rootPane;
+    @FXML private Spinner<Double> sampleLengthSpinner;
+    @FXML private Button guardarSample;
     @FXML private Oscilator oscilador1;
     @FXML private Oscilator oscilador2;
     @FXML private Oscilator oscilador3;
     @FXML private Oscilator oscilador4;
     @FXML private Oscilator oscilador5;
     @FXML private WaveViewer waveViewer;
-// --- NUEVOS CAMPOS FXML PARA FILTRO ---
     @FXML private ComboBox<Filter.Tipo> filterTypeCombo;
     @FXML private Slider filterCutoffSlider;
     @FXML private Slider filterResonanceSlider;
     @FXML private ToggleButton filterToggleButton;
     @FXML private Label filterCutoffLabel;
     @FXML private Label filterResonanceLabel;
-// --- NUEVOS COMPONENTES PARA LFO ---
     @FXML private ComboBox<LFO.Waveform> lfoWaveformCombo;
     @FXML private ComboBox<LFO.Target> lfoTargetCombo;
     @FXML private Slider lfoRateSlider;
@@ -55,7 +50,6 @@ public class SintetizadorController {
     public void initialize() {
         guardarSample.setText("Save sample");
         guardarSample.setOnAction(e -> handleSaveSample());
-// Agrupar los osciladores
         oscillators = new Oscilator[] {
                 oscilador1, oscilador2, oscilador3, oscilador4, oscilador5
         };
@@ -242,8 +236,6 @@ public class SintetizadorController {
         int releaseStartSample = (int) (sampleLength * 0.8);
 
         short[] sampleData = logic.generateSample(sampleLength);
-        // Nota: Asegúrate de que logic.generateSample llama internamente a
-        // adsr.getNextEnvelope() en cada iteración.
 
         Sample newSample = new Sample(sampleData);
         SampleBank.getInstance().setCurrentSample(newSample);

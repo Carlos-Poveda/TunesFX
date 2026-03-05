@@ -732,13 +732,10 @@ public class PrincipalController {
 
     private void loadSampleToRack(File sampleFile) {
         ChannelRackController rack = GlobalState.getChannelRackController();
-
         if (rack != null) {
             String fileName = sampleFile.getName();
             String trackName = fileName.replace(".wav", "");
-
             rack.addTrackFromLibrary(trackName, sampleFile);
-//            System.out.println("Sample añadido: " + trackName);
         } else {
             openChannelRackButton.fire();
             loadSampleToRack(sampleFile);

@@ -110,7 +110,7 @@ public class AudioExporter {
         // El salto es de 2 en 2 porque el buffer final es Estéreo (i = Izquierda, i+1 = Derecha)
         for (int i = startIndex; i < mixBuffer.length; i += 2) {
 
-            // NUEVO: Guillotina. Si el índice actual supera el final del bloque visual, paramos de escribir.
+            // Si el índice actual supera el final del bloque visual, paramos de escribir.
             if (i >= blockEndFrameIndex) {
                 break;
             }

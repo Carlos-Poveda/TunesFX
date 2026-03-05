@@ -112,7 +112,6 @@ public class Audio extends Thread {
                 catchInternalException();
 
             } catch (OpenALException e) {
-                // --- 2. RECUPERAR HILO SI HAY ERROR FATAL ---
                 // Si falla en medio de un proceso por culpa del OS, capturamos el error
                 // para evitar que el Thread muera y forzamos la reconexión.
                 System.err.println("Error del motor de audio (posible cambio de salida): " + e.getMessage());
@@ -152,7 +151,6 @@ public class Audio extends Thread {
         }
     }
 
-    // Cleanup resources
     private void cleanupResources() {
         if (source != 0) {
             alDeleteSources(source);
